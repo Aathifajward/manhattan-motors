@@ -2,5 +2,15 @@
   "HomePage": {
     "title": "マンハッタンモータース",
     "subtitle": "日本からの高品質車両輸出"
+  },
+  "VehiclesPage": {
+    "title": "販売中の車両",
+    "empty": "現在、登録されている車両はありません。"
+  },
+  "VehicleLabels": {
+    "transmission": { "automatic": "オートマチック", "manual": "マニュアル" },
+    "fuelType": { "petrol": "ガソリン", "diesel": "ディーゼル", "hybrid": "ハイブリッド", "electric": "電気" },
+    "condition": { "excellent": "優良", "good": "良好", "fair": "普通" },
+    "status": { "available": "販売中", "reserved": "商談中", "sold": "売約済み" }
   }
 }

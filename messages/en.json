@@ -2,5 +2,15 @@
   "HomePage": {
     "title": "Manhattan Motos",
     "subtitle": "Quality vehicles exported from Japan"
+  },
+  "VehiclesPage": {
+    "title": "Vehicles for Sale",
+    "empty": "No vehicles listed yet."
+  },
+  "VehicleLabels": {
+    "transmission": { "automatic": "Automatic", "manual": "Manual" },
+    "fuelType": { "petrol": "Petrol", "diesel": "Diesel", "hybrid": "Hybrid", "electric": "Electric" },
+    "condition": { "excellent": "Excellent", "good": "Good", "fair": "Fair" },
+    "status": { "available": "Available", "reserved": "Reserved", "sold": "Sold" }
   }
 }
