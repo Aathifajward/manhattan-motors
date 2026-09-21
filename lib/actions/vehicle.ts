@@ -2,8 +2,9 @@
 
 import { prisma } from "@/lib/prisma";
 import cloudinary from "@/lib/cloudinary";
-import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export async function createVehicle(formData: FormData) {
   const session = await auth();
@@ -72,4 +73,23 @@ export async function createVehicle(formData: FormData) {
   }
 
   redirect("/en/admin");
+}
+
+export async function updateVehicleStatus(vehicleId: string, formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const status = formData.get("status") as string;
+
+  await prisma.vehicle.update({
+    where: { id: vehicleId },
+    data: { status },
+  });
+
+  revalidatePath("/en/admin");
+  revalidatePath("/ja/admin");
+  revalidatePath("/en/vehicles");
+  revalidatePath("/ja/vehicles");
 }
