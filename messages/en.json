@@ -5,7 +5,13 @@
   },
   "VehiclesPage": {
     "title": "Vehicles for Sale",
-    "empty": "No vehicles listed yet."
+    "empty": "No vehicles listed yet.",
+    "filterAllMakes": "All Makes",
+    "filterMinYear": "Min Year",
+    "filterMaxYear": "Max Year",
+    "filterMinPrice": "Min Price (¥)",
+    "filterMaxPrice": "Max Price (¥)",
+    "filterApply": "Apply Filters"
   },
   "VehicleLabels": {
     "transmission": { "automatic": "Automatic", "manual": "Manual" },

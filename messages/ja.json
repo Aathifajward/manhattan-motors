@@ -5,7 +5,13 @@
   },
   "VehiclesPage": {
     "title": "販売中の車両",
-    "empty": "現在、登録されている車両はありません。"
+    "empty": "現在、登録されている車両はありません。",
+    "filterAllMakes": "すべてのメーカー",
+    "filterMinYear": "年式（下限）",
+    "filterMaxYear": "年式（上限）",
+    "filterMinPrice": "価格（下限）",
+    "filterMaxPrice": "価格（上限）",
+    "filterApply": "絞り込む"
   },
   "VehicleLabels": {
     "transmission": { "automatic": "オートマチック", "manual": "マニュアル" },
