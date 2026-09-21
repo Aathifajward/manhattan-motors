@@ -12,5 +12,25 @@
     "fuelType": { "petrol": "Petrol", "diesel": "Diesel", "hybrid": "Hybrid", "electric": "Electric" },
     "condition": { "excellent": "Excellent", "good": "Good", "fair": "Fair" },
     "status": { "available": "Available", "reserved": "Reserved", "sold": "Sold" }
+  },
+  "VehicleDetailPage": {
+    "specs": "Specifications",
+    "mileage": "Mileage",
+    "transmission": "Transmission",
+    "fuelType": "Fuel Type",
+    "condition": "Condition",
+    "description": "Description",
+    "descriptionFallbackNote": "Japanese description not yet available — showing English.",
+    "contactUs": "Contact Us About This Vehicle",
+    "whatsapp": "Chat on WhatsApp"
+  },
+  "InquiryForm": {
+    "name": "Your Name",
+    "email": "Email",
+    "phone": "Phone (optional)",
+    "message": "Message",
+    "preferredContact": "Preferred Contact Method",
+    "submit": "Send Inquiry",
+    "success": "Thank you! Your inquiry has been sent."
   }
 }
