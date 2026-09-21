@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,7 @@ export default async function VehiclesPage({
 
   const vehicles = await prisma.vehicle.findMany({
     orderBy: { createdAt: "desc" },
+    include: { images: { where: { isCover: true }, take: 1 } },
   });
 
   const priceFormatter = new Intl.NumberFormat(
@@ -34,6 +36,13 @@ export default async function VehiclesPage({
               key={vehicle.id}
               className="flex flex-col gap-2 rounded-lg border border-black/[.08] p-4 dark:border-white/[.145]"
             >
+              {vehicle.images[0] && (
+                <img
+                  src={vehicle.images[0].url}
+                  alt={`${vehicle.make} ${vehicle.model}`}
+                  className="h-40 w-full rounded object-cover"
+                />
+              )}
               <h2 className="text-lg font-semibold">
                 {vehicle.year} {vehicle.make} {vehicle.model}
               </h2>

@@ -4,7 +4,7 @@ export default function NewVehiclePage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
       <h1 className="mb-8 text-2xl font-semibold">Add Vehicle</h1>
-      <form action={createVehicle} className="flex flex-col gap-4">
+      <form action={createVehicle} encType="multipart/form-data" className="flex flex-col gap-4">
         <input name="make" placeholder="Make (e.g. Toyota)" required className="rounded border px-3 py-2" />
         <input name="model" placeholder="Model (e.g. Aqua)" required className="rounded border px-3 py-2" />
         <input name="year" type="number" placeholder="Year" required className="rounded border px-3 py-2" />
@@ -29,6 +29,13 @@ export default function NewVehiclePage() {
         </select>
         <textarea name="descriptionEn" placeholder="Description (English)" required className="rounded border px-3 py-2 min-h-[100px]" />
         <textarea name="descriptionJa" placeholder="Description (Japanese, optional)" className="rounded border px-3 py-2 min-h-[100px]" />
+        <input
+          type="file"
+          name="images"
+          accept="image/*"
+          multiple
+          className="rounded border px-3 py-2"
+        />
         <button type="submit" className="rounded-full bg-black py-2.5 text-white dark:bg-white dark:text-black">
           Save Vehicle
         </button>

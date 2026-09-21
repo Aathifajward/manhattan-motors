@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import cloudinary from "@/lib/cloudinary";
 import { redirect } from "next/navigation";
 
 export async function createVehicle(formData: FormData) {
@@ -22,7 +23,7 @@ export async function createVehicle(formData: FormData) {
     .replace(/(^-|-$)/g, "");
   const slug = `${slugBase}-${Math.random().toString(36).slice(2, 8)}`;
 
-  await prisma.vehicle.create({
+  const vehicle = await prisma.vehicle.create({
     data: {
       slug,
       make,
@@ -37,6 +38,32 @@ export async function createVehicle(formData: FormData) {
       descriptionJa,
     },
   });
+
+  const imageFiles = formData.getAll("images") as File[];
+  let order = 0;
+
+  for (const file of imageFiles) {
+    if (!file || file.size === 0) continue;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+    const dataUri = `data:${file.type};base64,${base64}`;
+
+    const result = await cloudinary.uploader.upload(dataUri, {
+      folder: "manhattan-motos",
+    });
+
+    await prisma.vehicleImage.create({
+      data: {
+        vehicleId: vehicle.id,
+        url: result.secure_url,
+        order,
+        isCover: order === 0,
+      },
+    });
+
+    order++;
+  }
 
   redirect("/en/admin");
 }
