@@ -3,8 +3,14 @@
 import { prisma } from "@/lib/prisma";
 import cloudinary from "@/lib/cloudinary";
 import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 
 export async function createVehicle(formData: FormData) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
   const make = formData.get("make") as string;
   const model = formData.get("model") as string;
   const year = Number(formData.get("year"));

@@ -1,6 +1,13 @@
 import { createVehicle } from "@/lib/actions/vehicle";
+import { auth } from "@/auth";
+import { redirect } from "@/i18n/navigation";
 
-export default function NewVehiclePage() {
+export default async function NewVehiclePage() {
+  const session = await auth();
+  if (!session) {
+    redirect({ href: "/admin/login", locale: "en" });
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
       <h1 className="mb-8 text-2xl font-semibold">Add Vehicle</h1>
