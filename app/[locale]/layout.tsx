@@ -4,6 +4,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Manhattan Motos",
+  title: "Manhattan Motors",
   description: "Quality vehicles exported from Japan",
 };
 
@@ -47,7 +49,9 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <Navbar />
+          <main className="flex flex-1 flex-col">{children}</main>
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

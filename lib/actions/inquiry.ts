@@ -24,5 +24,9 @@ export async function createInquiry(formData: FormData) {
     },
   });
 
-  redirect(`/${locale}/vehicles/${slug}?sent=true`);
+  if (slug) {
+    redirect(`/${locale}/vehicles/${slug}?sent=true`);
+  } else {
+    redirect(`/${locale}?sent=true#contact`);
+  }
 }

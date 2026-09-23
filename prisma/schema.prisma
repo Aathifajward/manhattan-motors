@@ -12,9 +12,18 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+enum VehicleCategory {
+  CAR
+  TRUCK
+  VAN
+  MOTORCYCLE
+  MACHINERY
+}
+
 model Vehicle {
-  id            String   @id @default(cuid())
-  slug          String   @unique
+  id            String          @id @default(cuid())
+  slug          String          @unique
+  category      VehicleCategory @default(CAR)
   make          String
   model         String
   year          Int
@@ -23,9 +32,9 @@ model Vehicle {
   transmission  String
   fuelType      String
   condition     String
-  descriptionEn String   @db.Text
-  descriptionJa String?  @db.Text
-  status        String   @default("available") // available | reserved | sold
+  descriptionEn String          @db.Text
+  descriptionJa String?         @db.Text
+  status        String          @default("available") // available | reserved | sold
   images        VehicleImage[]
   inquiries     Inquiry[]
   createdAt     DateTime @default(now())
