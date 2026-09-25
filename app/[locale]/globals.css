@@ -1,26 +1,85 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Manhattan Motors signature palette — v3 Navy/Electric Blue */
+  --mm-navy: #0A0E14;
+  --mm-navy-card: #141820;
+  --mm-blue: #2D7FF9;
+  --mm-blue-dim: rgba(45,127,249,0.15);
+  --mm-blue-glow: rgba(45,127,249,0.35);
+  --mm-cool-gray: #F0F2F5;
+  --background: #0A0E14;
+  --foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-mm-navy: var(--mm-navy);
+  --color-mm-blue: var(--mm-blue);
+  --color-mm-cool-gray: var(--mm-cool-gray);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0A0E14;
+    --foreground: #ffffff;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Electric blue eyebrow label */
+.mm-label {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--mm-blue);
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid rgba(45,127,249,0.5);
+}
+
+/* Glassmorphic glow card base */
+.mm-glass-card {
+  background: rgba(20, 24, 32, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(45,127,249,0.18);
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(45,127,249,0.06), 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mm-glass-card:hover {
+  border-color: rgba(45,127,249,0.4);
+  box-shadow: 0 0 0 1px rgba(45,127,249,0.15), 0 0 28px rgba(45,127,249,0.14), 0 16px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Asymmetric radius variants for vehicle cards */
+.mm-card-large {
+  border-radius: 6px 20px 6px 6px;
+}
+.mm-card-small {
+  border-radius: 20px 6px 20px 6px;
+}
+
+
