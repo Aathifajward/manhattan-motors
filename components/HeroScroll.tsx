@@ -36,20 +36,21 @@ export default function HeroScroll({
       const img = new Image();
       const paddedIndex = i.toString().padStart(6, "0");
       img.src = `/images/frames/frame_${paddedIndex}.jpg`;
-      img.onload = () => {
+      
+      img.decode().then(() => {
         loadedCount++;
         if (loadedCount === FRAME_COUNT) {
           imagesRef.current = images;
           setImagesLoaded(true);
         }
-      };
-      img.onerror = () => {
+      }).catch((e) => {
+        // Fallback on error so it doesn't hang forever
         loadedCount++;
         if (loadedCount === FRAME_COUNT) {
           imagesRef.current = images;
           setImagesLoaded(true);
         }
-      };
+      });
       images.push(img);
     }
   }, []);
@@ -121,7 +122,13 @@ export default function HeroScroll({
         const scrollableHeight = rect.height - window.innerHeight;
         let progress = scrollDistance / scrollableHeight;
         progress = Math.max(0, Math.min(1, progress));
-        const frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
+        
+        let frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
+        // On mobile, skip every other frame to halve the JPEG decoding cost during scroll
+        if (window.innerWidth < 768) {
+          frameIndex = Math.floor(frameIndex / 2) * 2;
+        }
+        
         renderFrame(frameIndex, progress);
 
         if (textContainerRef.current) {

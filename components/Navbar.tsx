@@ -64,7 +64,7 @@ export default function Navbar() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
             <img
-              src="/images/logo.png"
+              src="/images/manhattan-logo.png"
               alt="Manhattan Motors"
               className="transition-all duration-500 h-8 md:h-10 w-auto"
               style={{ filter: 'brightness(0) invert(1)' }} 
@@ -100,7 +100,7 @@ export default function Navbar() {
           <div className="flex justify-between items-center mb-12">
             <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
               <img
-                src="/images/logo.png"
+                src="/images/manhattan-logo.png"
                 alt="Manhattan Motors"
                 className="h-8 w-auto"
                 style={{ filter: 'brightness(0) invert(1)' }} 

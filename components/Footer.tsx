@@ -22,7 +22,7 @@ export default async function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="inline-block mb-5">
               <img
-                src="/images/logo.png"
+                src="/images/manhattan-logo.png"
                 alt="Manhattan Motors"
                 className="h-9 w-auto"
                 style={{ filter: 'brightness(0) invert(1)' }}
