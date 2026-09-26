@@ -71,10 +71,10 @@ export default async function AdminPage() {
               
               <div className="flex flex-wrap items-center gap-3">
                 <form action={updateVehicleStatus.bind(null, vehicle.id)} className="flex items-center gap-2">
-                  <select name="status" defaultValue={vehicle.status} className="rounded-lg border border-zinc-200 bg-transparent px-3 py-1.5 text-sm dark:border-zinc-700">
-                    <option value="available">Available</option>
-                    <option value="reserved">Reserved</option>
-                    <option value="sold">Sold</option>
+                  <select name="status" defaultValue={vehicle.status} className="rounded-lg border border-zinc-200 bg-transparent px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:[color-scheme:dark]">
+                    <option value="available" className="dark:bg-zinc-900 dark:text-white">Available</option>
+                    <option value="reserved" className="dark:bg-zinc-900 dark:text-white">Reserved</option>
+                    <option value="sold" className="dark:bg-zinc-900 dark:text-white">Sold</option>
                   </select>
                   <button type="submit" className="rounded-lg bg-zinc-100 px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">
                     Update

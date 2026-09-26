@@ -116,7 +116,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
     <div className="flex flex-col gap-5">
       {/* ── Categories (always visible) ── */}
       <div>
-        <h3 className="text-[11px] font-bold text-[#2D7FF9] mb-2.5 uppercase tracking-[0.2em]">Category</h3>
+        <h3 className="text-[11px] font-bold text-[#2D7FF9] mb-2.5 uppercase tracking-[0.2em]">{t("category")}</h3>
         <div className="flex flex-col gap-0.5">
           {["CAR", "TRUCK", "VAN", "MOTORCYCLE", "MACHINERY"].map(cat => {
             const isActive = categories.includes(cat);
@@ -154,7 +154,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           onClick={() => setMakesOpen(!makesOpen)}
           className="flex items-center justify-between w-full group"
         >
-          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">Make / Brand</h3>
+          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">{t("makeBrand")}</h3>
           <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-200 ${makesOpen ? 'rotate-180' : ''}`} />
         </button>
         {makesOpen && (
@@ -189,7 +189,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
                 className="mt-1 ml-2 text-[11px] font-semibold tracking-wide transition-colors"
                 style={{ color: '#2D7FF9' }}
               >
-                {makesExpanded ? "▲ Show Less" : `+ ${makes.length - 5} More`}
+                {makesExpanded ? t("showLess") : t("showMore", { count: makes.length - 5 })}
               </button>
             )}
           </div>
@@ -202,7 +202,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
       {/* ── Price Range (always visible) ── */}
       <div>
         <div className="flex justify-between items-baseline mb-1">
-          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">Price</h3>
+          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">{t("price")}</h3>
           <span className="text-[11px] font-medium text-zinc-500">{priceFormatter.format(priceRange[0])} — {priceFormatter.format(priceRange[1])}</span>
         </div>
         <div className="relative w-full h-7 flex items-center">
@@ -246,14 +246,14 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           onClick={() => setYearOpen(!yearOpen)}
           className="flex items-center justify-between w-full group"
         >
-          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">Year</h3>
+          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">{t("year")}</h3>
           <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-200 ${yearOpen ? 'rotate-180' : ''}`} />
         </button>
         {yearOpen && (
           <div className="mt-2 flex items-center gap-2">
-            <input type="number" placeholder="Min" value={minYear} onChange={e => setMinYear(e.target.value)} className="mm-glass-input !py-1.5 !text-[12px]" />
+            <input type="number" placeholder={t("min")} value={minYear} onChange={e => setMinYear(e.target.value)} className="mm-glass-input !py-1.5 !text-[12px]" />
             <span className="text-zinc-600 text-[10px]">—</span>
-            <input type="number" placeholder="Max" value={maxYear} onChange={e => setMaxYear(e.target.value)} className="mm-glass-input !py-1.5 !text-[12px]" />
+            <input type="number" placeholder={t("max")} value={maxYear} onChange={e => setMaxYear(e.target.value)} className="mm-glass-input !py-1.5 !text-[12px]" />
           </div>
         )}
       </div>
@@ -279,7 +279,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           }}
         >
           <Filter size={15} />
-          Filters
+          {t("filters")}
           {hasActiveFilters && (
             <span className="ml-1 w-5 h-5 rounded-full bg-[#2D7FF9] text-[10px] font-bold flex items-center justify-center">
               {categories.length + selectedMakes.length + (minYear || maxYear ? 1 : 0) + (priceRange[0] > minDbPrice || priceRange[1] < maxDbPrice ? 1 : 0)}
@@ -304,9 +304,9 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>Filters</h2>
+            <h2 className="text-lg font-bold tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>{t("filters")}</h2>
             <div className="flex items-center gap-4">
-              <button onClick={clearFilters} className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors">Reset</button>
+              <button onClick={clearFilters} className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors">{t("reset")}</button>
               <button className="text-zinc-500 hover:text-white transition-colors" onClick={() => setShowMobileFilters(false)}>
                 <X size={20} />
               </button>
@@ -318,7 +318,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
             style={{ background: '#2D7FF9', borderRadius: '10px', boxShadow: '0 0 20px rgba(45,127,249,0.25)' }}
             onClick={() => setShowMobileFilters(false)}
           >
-            Apply Filters
+            {t("applyFilters")}
           </button>
         </div>
       </div>
@@ -338,12 +338,12 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           }}
         >
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-bold tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>Filters</h2>
+            <h2 className="text-sm font-bold tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>{t("filters")}</h2>
             <button
               onClick={clearFilters}
               className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors"
             >
-              Reset
+              {t("reset")}
             </button>
           </div>
           {filterContent}
@@ -376,7 +376,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2" size={16} style={{ color: 'rgba(45,127,249,0.5)' }} />
             <input
               type="text"
-              placeholder="Find vehicle here..."
+              placeholder={t("findPlaceholder")}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="mm-glass-input !pl-10 !w-full !rounded-xl !py-2.5"
@@ -384,7 +384,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           </div>
           <div className="flex items-center gap-5 w-full sm:w-auto justify-between sm:justify-end">
             <span className="text-[12px] font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              {filteredVehicles.length} {filteredVehicles.length === 1 ? 'Vehicle' : 'Vehicles'} Found
+              {t("vehiclesFound", { count: filteredVehicles.length })}
             </span>
             <select
               value={sortOption}
@@ -395,10 +395,10 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
                 border: '1px solid rgba(255,255,255,0.1)',
               }}
             >
-              <option value="newest" style={{ background: '#141820' }}>Newest</option>
-              <option value="recommended" style={{ background: '#141820' }}>Recommended</option>
-              <option value="price-asc" style={{ background: '#141820' }}>Price: Low → High</option>
-              <option value="price-desc" style={{ background: '#141820' }}>Price: High → Low</option>
+              <option value="newest" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortNewest")}</option>
+              <option value="recommended" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortRecommended")}</option>
+              <option value="price-asc" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortPriceAsc")}</option>
+              <option value="price-desc" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortPriceDesc")}</option>
             </select>
           </div>
         </div>
@@ -432,7 +432,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
             )}
             {(minYear || maxYear) && (
               <span className="mm-filter-chip">
-                {minYear || 'Any'} — {maxYear || 'Any'}
+                {minYear || t("any")} — {maxYear || t("any")}
                 <button onClick={() => removeFilter("year")} className="ml-1.5 hover:text-white transition-colors"><X size={11} /></button>
               </span>
             )}
@@ -440,7 +440,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
               onClick={clearFilters}
               className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors ml-2"
             >
-              Clear All
+              {t("clearAll")}
             </button>
           </div>
         )}
@@ -454,8 +454,8 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
               border: '1px dashed rgba(45,127,249,0.15)',
             }}
           >
-            <p className="text-zinc-500 text-sm">{t("empty") || "No vehicles found matching your criteria."}</p>
-            <button onClick={clearFilters} className="mt-4 text-[#2D7FF9] hover:underline font-semibold text-sm">Clear all filters</button>
+            <p className="text-zinc-500 text-sm">{t("empty") || t("emptyFallback")}</p>
+            <button onClick={clearFilters} className="mt-4 text-[#2D7FF9] hover:underline font-semibold text-sm">{t("clearAllFilters")}</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -512,7 +512,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
                         <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,14,20,0.88) 0%, rgba(10,14,20,0.1) 45%, transparent 100%)' }} />
                       </>
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>No image</div>
+                      <div className="flex h-full w-full items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>{t("noImage")}</div>
                     )}
                     <div
                       className="absolute top-4 left-4 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest rounded"

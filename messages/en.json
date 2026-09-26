@@ -40,7 +40,25 @@
     "formPhone": "Phone Number",
     "formVehicleType": "Vehicle Type",
     "formMessage": "Message",
-    "formSubmit": "Send Inquiry"
+    "formSubmit": "Send Inquiry",
+    "stock": "Stock",
+    "basedInJapan": "Based in Japan",
+    "openInMaps": "Open in Maps",
+    "noImage": "No image",
+    "badgeAvailable": "Available",
+    "inquirySent": "Thank you — your inquiry has been sent.",
+    "formTypeAny": "Any / General Inquiry",
+    "formTypeCar": "Passenger Car",
+    "formTypeTruck": "Truck / Van",
+    "formTypeMachinery": "Machinery / Parts",
+    "formTypeMotorcycle": "Motorcycle",
+    "formTypeMotorcycle": "Motorcycle",
+    "addressValueMap": "3-12-5 Hitotsugi-cho\nKariya City, Aichi 448-0003\nJapan",
+    "reachUs": "Reach Us",
+    "phone": "Phone",
+    "email": "Email",
+    "line": "LINE",
+    "loading": "Loading..."
   },
   "Nav": {
     "vehicles": "Vehicles",
@@ -55,7 +73,13 @@
     "linkVehicles": "Vehicles",
     "linkAbout": "About Us",
     "linkContact": "Contact",
-    "contactInfo": "Contact Info"
+    "contactInfo": "Contact Info",
+    "phone": "Phone",
+    "email": "Email",
+    "line": "LINE",
+    "address": "Address",
+    "addressValue": "3-12-5 Hitotsugi-cho\nKariya City, Aichi 448-0003\nJapan",
+    "admin": "Admin"
   },
   "AboutPage": {
     "title": "About Manhattan Motors",
@@ -98,7 +122,29 @@
     "filterMaxYear": "Max Year",
     "filterMinPrice": "Min Price (¥)",
     "filterMaxPrice": "Max Price (¥)",
-    "filterApply": "Apply Filters"
+    "filterApply": "Apply Filters",
+    "category": "Category",
+    "makeBrand": "Make / Brand",
+    "price": "Price",
+    "year": "Year",
+    "reset": "Reset",
+    "filters": "Filters",
+    "applyFilters": "Apply Filters",
+    "findPlaceholder": "Find vehicle here...",
+    "vehiclesFound": "{count, plural, =1 {1 Vehicle Found} other {# Vehicles Found}}",
+    "sortNewest": "Newest",
+    "sortRecommended": "Recommended",
+    "sortPriceAsc": "Price: Low → High",
+    "sortPriceDesc": "Price: High → Low",
+    "clearAll": "Clear All",
+    "clearAllFilters": "Clear all filters",
+    "emptyFallback": "No vehicles found matching your criteria.",
+    "noImage": "No image",
+    "showLess": "▲ Show Less",
+    "showMore": "+ {count} More",
+    "min": "Min",
+    "max": "Max",
+    "any": "Any"
   },
   "VehicleLabels": {
     "category": {
@@ -131,7 +177,9 @@
     "location": "Find Us",
     "descriptionFallbackNote": "Japanese description not yet available — showing English.",
     "contactUs": "Contact Us",
-    "messageLine": "Message on LINE"
+    "messageLine": "Message on LINE",
+    "openInMaps": "Open in Maps",
+    "noImage": "No image"
   },
   "InquiryForm": {
     "name": "Your Name",
@@ -141,5 +189,8 @@
     "preferredContact": "Preferred Contact Method",
     "submit": "Send Inquiry",
     "success": "Thank you! Your inquiry has been sent."
+  },
+  "hero": {
+    "heading": "TRUSTED VEHICLES. FAIR PRICES."
   }
 }

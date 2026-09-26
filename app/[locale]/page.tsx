@@ -156,7 +156,7 @@ export default async function Home({
           <div className="mx-auto w-full max-w-7xl relative">
             <div className="mb-14 flex flex-col items-start justify-between gap-4 px-6 sm:flex-row sm:items-end">
               <div>
-                <span className="mm-label mb-4 block">Stock</span>
+                <span className="mm-label mb-4 block">{t("stock")}</span>
                 <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">{t("featured")}</h2>
               </div>
               <Link href="/vehicles" className="group flex items-center gap-2 text-sm font-semibold" style={{ color: "rgba(255,255,255,0.35)" }}>
@@ -189,12 +189,12 @@ export default async function Home({
                           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(10,14,20,0.88) 0%, rgba(10,14,20,0.1) 45%, transparent 100%)" }} />
                           {/* Available badge */}
                           <div className="absolute top-4 left-4 px-2 py-0.5 text-xs font-bold uppercase tracking-widest" style={{ border: `1px solid ${BLUE}`, color: BLUE, borderRadius: "4px", background: BLUE_DIM }}>
-                            Available
+                            {t("badgeAvailable")}
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-center justify-center text-xs" style={{ aspectRatio: "4/3", background: "rgba(255,255,255,0.02)", color: "rgba(255,255,255,0.15)" }}>
-                          No image
+                          {t("noImage")}
                         </div>
                       )}
                       <div className="flex flex-col p-6 gap-2">
@@ -224,7 +224,7 @@ export default async function Home({
       <section className="w-full py-28 relative overflow-hidden">
         <div className="mx-auto w-full max-w-7xl px-6">
           <FadeInSection className="mb-14">
-            <span className="mm-label mb-4 block">Based in Japan</span>
+            <span className="mm-label mb-4 block">{t("basedInJapan")}</span>
             <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">{t("location")}</h2>
             <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>{t("visitOffice")}</p>
           </FadeInSection>
@@ -232,11 +232,11 @@ export default async function Home({
             <div className="flex flex-col md:flex-row">
               <div className="flex flex-col justify-center p-10 md:w-80 shrink-0">
                 <div className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>{t("addressLabel")}</div>
-                <p className="mb-8 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>3-12-5 Hitotsugi-cho<br />Kariya City, Aichi 448-0003<br />Japan</p>
+                <p className="mb-8 text-sm leading-relaxed whitespace-pre-line" style={{ color: "rgba(255,255,255,0.65)" }}>{t("addressValueMap")}</p>
                 <div className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>{t("businessHours")}</div>
                 <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{t("businessHoursValue")}</p>
                 <a href="https://maps.app.goo.gl/FmmMz14kUWkGk1HcA" target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#2D7FF9] hover:text-white transition-colors">
-                  Open in Maps
+                  {t("openInMaps")}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </a>
               </div>
@@ -281,25 +281,25 @@ export default async function Home({
         <div className="mx-auto w-full max-w-6xl px-6">
           <div className="grid gap-16 lg:grid-cols-2">
             <FadeInSection>
-              <span className="mm-label mb-4 block">Reach Us</span>
+              <span className="mm-label mb-4 block">{t("reachUs")}</span>
               <h2 className="mb-10 text-4xl font-bold tracking-tight text-white sm:text-5xl">{t("contactUs")}</h2>
               <div
                 className="flex flex-col gap-8 p-8"
                 style={{ background: "rgba(10,14,20,0.92)", border: "1px solid rgba(45,127,249,0.18)", borderRadius: "6px 20px 6px 6px", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}
               >
                 <div>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>LINE</p>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>{t("line")}</p>
                   <MotionExternalLink href="https://line.me/ti/p/~Maz615" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white hover:opacity-80 transition-opacity" style={{ background: "#06C755", borderRadius: "4px", display: "inline-flex" }}>
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.905 8.91 9.489 9.613.393.076.924.232 1.062.535.125.275.081.71.039.998l-.206 1.258c-.063.385-.297 1.455 1.272.793 1.57-.661 8.468-4.992 10.73-7.925 1.092-1.42 1.614-2.81 1.614-4.272z" /></svg>
                     Maz615
                   </MotionExternalLink>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>Phone</p>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>{t("phone")}</p>
                   <a href="tel:090-3959-3883" className="text-xl font-bold text-white hover:opacity-70 transition-opacity">090-3959-3883</a>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>Email</p>
+                  <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>{t("email")}</p>
                   <a href="mailto:manhattanmotors.726@gmail.com" className="text-base font-bold text-white hover:opacity-70 transition-opacity break-all">manhattanmotors.726@gmail.com</a>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default async function Home({
             >
               {sent === "true" && (
                 <div className="mb-6 p-4 text-sm font-semibold" style={{ background: BLUE_DIM, border: `1px solid rgba(45,127,249,0.4)`, color: BLUE, borderRadius: "4px" }}>
-                  Thank you — your inquiry has been sent.
+                  {t("inquirySent")}
                 </div>
               )}
               <form action={createInquiry} className="flex flex-col gap-5">
@@ -322,32 +322,32 @@ export default async function Home({
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formName")}</label>
-                    <input name="name" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                    <input name="name" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formEmail")}</label>
-                    <input name="email" type="email" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                    <input name="email" type="email" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                   </div>
                 </div>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formPhone")}</label>
-                    <input name="phone" className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                    <input name="phone" className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formVehicleType")}</label>
-                    <select name="preferredContact" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0, background: "rgba(10,14,20,0.92)" }}>
-                      <option value="Any">Any / General Inquiry</option>
-                      <option value="Car">Passenger Car</option>
-                      <option value="Truck/Van">Truck / Van</option>
-                      <option value="Machinery">Machinery / Parts</option>
-                      <option value="Motorcycle">Motorcycle</option>
+                    <select name="preferredContact" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer dark:bg-zinc-900 dark:text-white dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0, background: "rgba(10,14,20,0.92)" }}>
+                      <option value="Any" className="dark:bg-zinc-900 dark:text-white">{t("formTypeAny")}</option>
+                      <option value="Car" className="dark:bg-zinc-900 dark:text-white">{t("formTypeCar")}</option>
+                      <option value="Truck/Van" className="dark:bg-zinc-900 dark:text-white">{t("formTypeTruck")}</option>
+                      <option value="Machinery" className="dark:bg-zinc-900 dark:text-white">{t("formTypeMachinery")}</option>
+                      <option value="Motorcycle" className="dark:bg-zinc-900 dark:text-white">{t("formTypeMotorcycle")}</option>
                     </select>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formMessage")}</label>
-                  <textarea name="message" required rows={4} className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none resize-none" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                  <textarea name="message" required rows={4} className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none resize-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                 </div>
                 <MotionButton
                   type="submit"

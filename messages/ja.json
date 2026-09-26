@@ -40,7 +40,25 @@
     "formPhone": "電話番号",
     "formVehicleType": "車両タイプ",
     "formMessage": "メッセージ",
-    "formSubmit": "送信する"
+    "formSubmit": "送信する",
+    "stock": "在庫",
+    "basedInJapan": "日本国内拠点",
+    "openInMaps": "マップで開く",
+    "noImage": "画像なし",
+    "badgeAvailable": "在庫あり",
+    "inquirySent": "お問い合わせを受け付けました。",
+    "formTypeAny": "その他・一般的なお問い合わせ",
+    "formTypeCar": "乗用車",
+    "formTypeTruck": "トラック・バン",
+    "formTypeMachinery": "機械・パーツ",
+    "formTypeMotorcycle": "バイク",
+    "formTypeMotorcycle": "バイク",
+    "addressValueMap": "〒448-0003\n愛知県刈谷市一ツ木町3-12-5",
+    "reachUs": "お問い合わせ窓口",
+    "phone": "電話番号",
+    "email": "メール",
+    "line": "LINE",
+    "loading": "読み込み中..."
   },
 
   "Nav": {
@@ -56,7 +74,13 @@
     "linkVehicles": "車両一覧",
     "linkAbout": "会社概要",
     "linkContact": "お問い合わせ",
-    "contactInfo": "連絡先"
+    "contactInfo": "連絡先",
+    "phone": "電話番号",
+    "email": "メール",
+    "line": "LINE",
+    "address": "住所",
+    "addressValue": "〒448-0003\n愛知県刈谷市一ツ木町3-12-5",
+    "admin": "管理画面"
   },
   "AboutPage": {
     "title": "マンハッタンモータースについて",
@@ -100,7 +124,29 @@
     "filterMaxYear": "年式（上限）",
     "filterMinPrice": "価格（下限）",
     "filterMaxPrice": "価格（上限）",
-    "filterApply": "絞り込む"
+    "filterApply": "絞り込む",
+    "category": "カテゴリ",
+    "makeBrand": "メーカー",
+    "price": "価格",
+    "year": "年式",
+    "reset": "リセット",
+    "filters": "絞り込み",
+    "applyFilters": "絞り込みを適用",
+    "findPlaceholder": "車両を検索...",
+    "vehiclesFound": "{count}件の車両が見つかりました",
+    "sortNewest": "新着順",
+    "sortRecommended": "おすすめ順",
+    "sortPriceAsc": "価格の低い順",
+    "sortPriceDesc": "価格の高い順",
+    "clearAll": "すべてクリア",
+    "clearAllFilters": "すべてのフィルターをクリア",
+    "emptyFallback": "条件に一致する車両が見つかりません。",
+    "noImage": "画像なし",
+    "showLess": "▲ 閉じる",
+    "showMore": "+ 他 {count} 件",
+    "min": "下限",
+    "max": "上限",
+    "any": "指定なし"
   },
   "VehicleLabels": {
     "category": {
@@ -133,7 +179,9 @@
     "location": "所在地",
     "descriptionFallbackNote": "日本語の説明はまだありません。英語表示です。",
     "contactUs": "お問い合わせ",
-    "messageLine": "LINEでメッセージ"
+    "messageLine": "LINEでメッセージ",
+    "openInMaps": "マップで開く",
+    "noImage": "画像なし"
   },
   "InquiryForm": {
     "name": "お名前",
@@ -143,5 +191,8 @@
     "preferredContact": "希望の連絡方法",
     "submit": "問い合わせを送信",
     "success": "ありがとうございます。お問い合わせを送信しました。"
+  },
+  "hero": {
+    "heading": "信頼の車両。公正な価格。"
   }
 }

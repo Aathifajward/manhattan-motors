@@ -91,7 +91,7 @@ export default function VehicleDetailClient({
             {mainImage ? (
               <img src={mainImage} alt={`${vehicle.make} ${vehicle.model}`} className="absolute inset-0 h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-sm" style={{ color: 'rgba(255,255,255,0.2)' }}>No image</div>
+              <div className="flex h-full w-full items-center justify-center text-sm" style={{ color: 'rgba(255,255,255,0.2)' }}>{t("noImage")}</div>
             )}
           </div>
           
@@ -283,11 +283,11 @@ export default function VehicleDetailClient({
             <div className="flex flex-col md:flex-row">
               <div className="flex flex-col justify-center p-8 md:w-80 shrink-0" style={{ background: 'rgba(10,14,20,0.6)' }}>
                 <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BLUE }}>{tHome("addressLabel")}</div>
-                <p className="mb-8 text-[14px] leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>3-12-5 Hitotsugi-cho<br />Kariya City, Aichi<br />448-0003 Japan</p>
+                <p className="mb-8 text-[14px] leading-relaxed whitespace-pre-line" style={{ color: "rgba(255,255,255,0.65)" }}>{tHome("addressValueMap")}</p>
                 <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BLUE }}>{tHome("businessHours")}</div>
                 <p className="text-[14px]" style={{ color: "rgba(255,255,255,0.65)" }}>{tHome("businessHoursValue")}</p>
                 <a href="https://maps.app.goo.gl/FmmMz14kUWkGk1HcA" target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#2D7FF9] hover:text-white transition-colors">
-                  Open in Maps
+                  {t("openInMaps")}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </a>
               </div>

@@ -65,26 +65,26 @@ export default async function Footer() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="flex flex-col gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>Phone</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>{t("phone")}</p>
                   <a href="tel:090-3959-3883" className="text-[13px] font-medium text-white hover:opacity-70 transition-opacity">090-3959-3883</a>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>Email</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>{t("email")}</p>
                   <a href="mailto:manhattanmotors.726@gmail.com" className="text-[13px] font-medium text-white hover:opacity-70 transition-opacity break-all">manhattanmotors.726@gmail.com</a>
                 </div>
               </div>
               <div className="flex flex-col gap-4">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>LINE</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>{t("line")}</p>
                   <a href="https://line.me/ti/p/~Maz615" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white hover:opacity-70 transition-opacity">
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-3.5 w-3.5" style={{ color: '#06C755' }}><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.905 8.91 9.489 9.613.393.076.924.232 1.062.535.125.275.081.71.039.998l-.206 1.258c-.063.385-.297 1.455 1.272.793 1.57-.661 8.468-4.992 10.73-7.925 1.092-1.42 1.614-2.81 1.614-4.272z" /></svg>
                     Maz615
                   </a>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>Address</p>
-                  <p className="text-[13px] font-medium leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    3-12-5 Hitotsugi-cho<br />Kariya City, Aichi 448-0003<br />Japan
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'rgba(255,255,255,0.25)' }}>{t("address")}</p>
+                  <p className="text-[13px] font-medium leading-relaxed whitespace-pre-line" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    {t("addressValue")}
                   </p>
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default async function Footer() {
             <span>{t("license")}</span>
           </div>
           <Link href="/admin" className="text-[11px] font-medium transition-colors hover:text-white" style={{ color: 'rgba(255,255,255,0.2)' }}>
-            Admin
+            {t("admin")}
           </Link>
         </div>
       </div>

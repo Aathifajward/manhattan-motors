@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface HeroScrollProps {
   title: string;
@@ -20,9 +21,12 @@ export default function HeroScroll({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const textMaskRef = useRef<HTMLSpanElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const ctaBtnRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const imagesRef = useRef<HTMLImageElement[]>([]);
+  const t = useTranslations("HomePage");
+  const tHero = useTranslations("hero");
 
   useEffect(() => {
     let loadedCount = 0;
@@ -116,6 +120,11 @@ export default function HeroScroll({
           textContainerRef.current.style.transform = `translateY(${progress * 60}px)`;
         }
 
+        if (headingRef.current) {
+          const scaleValue = 1 + (progress * 0.20); // Scale up to 1.20
+          headingRef.current.style.transform = `scale(${scaleValue})`;
+        }
+
         if (ctaBtnRef.current) {
           if (frameIndex >= 48) {
             ctaBtnRef.current.style.opacity = "1";
@@ -188,7 +197,7 @@ export default function HeroScroll({
               style={{ borderColor: "rgba(45,127,249,0.15)", borderTopColor: "#2D7FF9" }}
             />
             <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>
-              Loading
+              {t("loading")}
             </span>
           </div>
         </div>
@@ -202,10 +211,13 @@ export default function HeroScroll({
         >
           <span className="mm-label mb-4">Manhattan Motors</span>
           <h1
+            ref={headingRef}
             className="text-center font-black tracking-tight leading-none relative"
             style={{
               fontSize: "clamp(1.9rem, 5vw, 3.8rem)",
               letterSpacing: "-0.02em",
+              transformOrigin: "top center",
+              willChange: "transform"
             }}
           >
             {/* Blurred image mask (the "frosted glass") */}
@@ -224,7 +236,7 @@ export default function HeroScroll({
                 zIndex: 1,
               }}
             >
-              TRUSTED VEHICLES. FAIR PRICES.
+              {tHero("heading")}
             </span>
             {/* Stroke/silhouette for readability */}
             <span
@@ -236,7 +248,7 @@ export default function HeroScroll({
                 zIndex: 2,
               }}
             >
-              TRUSTED VEHICLES. FAIR PRICES.
+              {tHero("heading")}
             </span>
           </h1>
         </div>
