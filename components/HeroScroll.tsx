@@ -162,7 +162,7 @@ export default function HeroScroll({
         return;
       }
 
-      currentProgress += diff * 0.15;
+      currentProgress += diff * 0.25;
       renderFrame(currentProgress);
       rafId = requestAnimationFrame(animationLoop);
     };
