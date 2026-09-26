@@ -142,15 +142,32 @@ export default function HeroScroll({
     let targetProgress = 0;
     let currentProgress = 0;
     let lastRenderedFrame = -1;
+    let lastVideoFrame = -1;
+    let isSeeking = false;
     let isLoopRunning = false;
 
     const renderFrame = (progress: number) => {
       // We calculate a simulated frameIndex so UI elements (fade, etc) still sync perfectly
       const frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
 
-      // Scrub video to exact time
+      // Scrub video with frame deduplication and backpressure
       if (video.readyState >= 1) {
-        video.currentTime = progress * video.duration;
+        if (frameIndex !== lastVideoFrame) {
+          if ('requestVideoFrameCallback' in video) {
+            if (!isSeeking) {
+              isSeeking = true;
+              lastVideoFrame = frameIndex;
+              video.currentTime = (frameIndex / FRAME_COUNT) * video.duration;
+              (video as any).requestVideoFrameCallback(() => {
+                isSeeking = false;
+              });
+            }
+          } else {
+            // Fallback for older Safari: just de-duplicate by frame index
+            lastVideoFrame = frameIndex;
+            video.currentTime = (frameIndex / FRAME_COUNT) * video.duration;
+          }
+        }
       }
 
       if (frameIndex !== lastRenderedFrame) {
