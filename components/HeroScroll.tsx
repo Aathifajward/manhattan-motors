@@ -67,15 +67,23 @@ export default function HeroScroll({
     let cssHeight = 0;
     let lastScrollTop = 0;
 
-    const renderFrame = (frameIndex: number) => {
+    const renderFrame = (frameIndex: number, progress: number) => {
       if (frameIndex === currentFrameIndex) return;
       currentFrameIndex = frameIndex;
 
       if (imagesRef.current[frameIndex]) {
         const img = imagesRef.current[frameIndex];
         const scale = Math.max(cssWidth / img.width, cssHeight / img.height);
-        const x = (cssWidth / 2) - (img.width / 2) * scale;
+        let x = (cssWidth / 2) - (img.width / 2) * scale;
         const y = (cssHeight / 2) - (img.height / 2) * scale;
+
+        // On mobile/narrow screens, bias the crop horizontally to keep the front of the car in view,
+        // and gradually center it (0.3 -> 0.5) as scroll progress increases.
+        if (cssWidth < 768 && cssWidth / cssHeight < img.width / img.height) {
+          const cropBias = 0.3 + (progress * 0.2);
+          x = (cssWidth - img.width * scale) * cropBias;
+        }
+
         context.clearRect(0, 0, cssWidth, cssHeight);
         context.drawImage(img, x, y, img.width * scale, img.height * scale);
 
@@ -114,7 +122,7 @@ export default function HeroScroll({
         let progress = scrollDistance / scrollableHeight;
         progress = Math.max(0, Math.min(1, progress));
         const frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
-        renderFrame(frameIndex);
+        renderFrame(frameIndex, progress);
 
         if (textContainerRef.current) {
           textContainerRef.current.style.transform = `translateY(${progress * 60}px)`;
@@ -207,14 +215,13 @@ export default function HeroScroll({
         <div
           ref={textContainerRef}
           className="absolute left-0 right-0 flex flex-col items-center pointer-events-none z-20"
-          style={{ top: "12vh", paddingLeft: "1.5rem", paddingRight: "1.5rem", willChange: "transform" }}
+          style={{ top: "clamp(100px, 15vh, 200px)", paddingLeft: "1.5rem", paddingRight: "1.5rem", willChange: "transform" }}
         >
           <span className="mm-label mb-4">Manhattan Motors</span>
           <h1
             ref={headingRef}
-            className="text-center font-black tracking-tight leading-none relative"
+            className="text-center font-black tracking-tight leading-none relative text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl"
             style={{
-              fontSize: "clamp(1.9rem, 5vw, 3.8rem)",
               letterSpacing: "-0.02em",
               transformOrigin: "top center",
               willChange: "transform"
@@ -256,7 +263,7 @@ export default function HeroScroll({
         {/* CTA Button — centered, fades in at frame 48 */}
         <div 
           ref={ctaBtnRef}
-          className="absolute left-1/2 top-[45%] z-30"
+          className="absolute left-1/2 top-[60%] sm:top-[55%] md:top-[45%] z-30"
           style={{ 
             transform: "translate(-50%, -50%) scale(0.9)", 
             opacity: 0, 
