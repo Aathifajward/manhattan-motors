@@ -1,15 +1,18 @@
 import { getTranslations } from "next-intl/server";
+import FadeInSection from "@/components/FadeInSection";
 
 export default async function AboutPage() {
   const t = await getTranslations("AboutPage");
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-4 text-3xl font-semibold">{t("title")}</h1>
-      <p className="mb-12 text-lg text-zinc-600 dark:text-zinc-400">{t("body")}</p>
+      <FadeInSection>
+        <h1 className="mb-4 text-3xl font-semibold">{t("title")}</h1>
+        <p className="mb-12 text-lg text-zinc-600 dark:text-zinc-400">{t("body")}</p>
+      </FadeInSection>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <div className="rounded-xl border border-black/[.08] bg-white p-6 shadow-sm dark:border-white/[.145] dark:bg-zinc-900/50">
+        <FadeInSection delay={0.1} className="mm-glass-card p-6">
           <h2 className="mb-6 text-xl font-bold">{t("companyInfo")}</h2>
           <dl className="flex flex-col gap-4">
             <div>
@@ -29,9 +32,9 @@ export default async function AboutPage() {
               <dd className="font-medium text-zinc-900 dark:text-zinc-100">{t("addressValue")}</dd>
             </div>
           </dl>
-        </div>
+        </FadeInSection>
 
-        <div className="rounded-xl border border-black/[.08] bg-white p-6 shadow-sm dark:border-white/[.145] dark:bg-zinc-900/50">
+        <FadeInSection delay={0.2} className="mm-glass-card p-6">
           <h2 className="mb-6 text-xl font-bold">{t("contact")}</h2>
           <dl className="flex flex-col gap-4">
             <div>
@@ -71,7 +74,7 @@ export default async function AboutPage() {
               </dd>
             </div>
           </dl>
-        </div>
+        </FadeInSection>
       </div>
     </div>
   );

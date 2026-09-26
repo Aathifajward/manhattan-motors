@@ -45,14 +45,18 @@
 
   "Nav": {
     "vehicles": "車両一覧",
-    "services": "サービス内容",
     "about": "会社概要",
-    "admin": "管理者"
+    "contact": "お問い合わせ"
   },
   "Footer": {
     "tagline": "日本国内の信頼できる中古車販売",
     "rights": "無断転載を禁じます。",
-    "license": "古物商許可番号: 第543811802000号"
+    "license": "古物商許可番号: 第543811802000号",
+    "quickLinks": "リンク",
+    "linkVehicles": "車両一覧",
+    "linkAbout": "会社概要",
+    "linkContact": "お問い合わせ",
+    "contactInfo": "連絡先"
   },
   "AboutPage": {
     "title": "マンハッタンモータースについて",
@@ -112,15 +116,24 @@
     "status": { "available": "販売中", "reserved": "商談中", "sold": "売約済み" }
   },
   "VehicleDetailPage": {
+    "home": "ホーム",
+    "vehicles": "車両一覧",
     "specs": "仕様",
+    "overview": "車両概要",
     "mileage": "走行距離",
     "transmission": "トランスミッション",
     "fuelType": "燃料タイプ",
     "condition": "状態",
+    "status": "ステータス",
+    "year": "年式",
+    "category": "カテゴリ",
+    "color": "カラー",
+    "price": "価格",
     "description": "説明",
+    "location": "所在地",
     "descriptionFallbackNote": "日本語の説明はまだありません。英語表示です。",
-    "contactUs": "この車両についてお問い合わせ",
-    "whatsapp": "WhatsAppでチャット"
+    "contactUs": "お問い合わせ",
+    "messageLine": "LINEでメッセージ"
   },
   "InquiryForm": {
     "name": "お名前",

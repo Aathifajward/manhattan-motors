@@ -2,7 +2,7 @@
   "HomePage": {
     "title": "Buy Smart.\nSell Fair.\nAll in Japan.",
     "subtitle": "We buy and sell quality used vehicles across Japan — straightforward pricing, no auctions, no middlemen.",
-    "browseVehicles": "Browse Inventory",
+    "browseVehicles": "Browse Vehicles",
     "contactUs": "Get in Touch",
     "featured": "Available Now",
     "viewAll": "Full Inventory",
@@ -44,14 +44,18 @@
   },
   "Nav": {
     "vehicles": "Vehicles",
-    "services": "Services",
     "about": "About",
-    "admin": "Admin"
+    "contact": "Contact"
   },
   "Footer": {
     "tagline": "Trusted vehicle sales in Japan",
     "rights": "All rights reserved.",
-    "license": "Used Goods Dealer License #: 543811802000"
+    "license": "Used Goods Dealer License #: 543811802000",
+    "quickLinks": "Quick Links",
+    "linkVehicles": "Vehicles",
+    "linkAbout": "About Us",
+    "linkContact": "Contact",
+    "contactInfo": "Contact Info"
   },
   "AboutPage": {
     "title": "About Manhattan Motors",
@@ -110,15 +114,24 @@
     "status": { "available": "Available", "reserved": "Reserved", "sold": "Sold" }
   },
   "VehicleDetailPage": {
+    "home": "Home",
+    "vehicles": "Vehicles",
     "specs": "Specifications",
+    "overview": "Vehicle Overview",
     "mileage": "Mileage",
     "transmission": "Transmission",
     "fuelType": "Fuel Type",
     "condition": "Condition",
+    "status": "Status",
+    "year": "Year",
+    "category": "Category",
+    "color": "Color",
+    "price": "Price",
     "description": "Description",
+    "location": "Find Us",
     "descriptionFallbackNote": "Japanese description not yet available — showing English.",
-    "contactUs": "Contact Us About This Vehicle",
-    "whatsapp": "Chat on WhatsApp"
+    "contactUs": "Contact Us",
+    "messageLine": "Message on LINE"
   },
   "InquiryForm": {
     "name": "Your Name",

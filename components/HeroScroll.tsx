@@ -166,11 +166,11 @@ export default function HeroScroll({
           style={{ willChange: "transform", zIndex: 1 }}
         />
 
-        {/* Subtle vignette — darkens screen edges so car pops */}
+        {/* Strong vignette — darkens screen edges so car pops */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(10,14,20,0.7) 100%)",
+            background: "radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0,0,0,0.95) 100%)",
             zIndex: 2,
           }}
         />
@@ -198,7 +198,7 @@ export default function HeroScroll({
         <div
           ref={textContainerRef}
           className="absolute left-0 right-0 flex flex-col items-center pointer-events-none z-20"
-          style={{ top: "7vh", paddingLeft: "1.5rem", paddingRight: "1.5rem", willChange: "transform" }}
+          style={{ top: "12vh", paddingLeft: "1.5rem", paddingRight: "1.5rem", willChange: "transform" }}
         >
           <span className="mm-label mb-4">Manhattan Motors</span>
           <h1
@@ -244,7 +244,7 @@ export default function HeroScroll({
         {/* CTA Button — centered, fades in at frame 48 */}
         <div 
           ref={ctaBtnRef}
-          className="absolute left-1/2 top-1/2 z-30"
+          className="absolute left-1/2 top-[45%] z-30"
           style={{ 
             transform: "translate(-50%, -50%) scale(0.9)", 
             opacity: 0, 
@@ -254,12 +254,8 @@ export default function HeroScroll({
         >
           <Link
             href="/vehicles"
-            className="inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:opacity-80"
+            className="hero-btn inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
             style={{
-              background: "rgba(255,255,255,0.08)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
-              border: "1px solid rgba(255,255,255,0.25)",
               padding: "0.65rem 1.75rem",
               borderRadius: "6px",
               boxShadow: "0 4px 24px rgba(0,0,0,0.2)",

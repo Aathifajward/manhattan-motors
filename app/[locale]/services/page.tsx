@@ -34,7 +34,7 @@ export default async function ServicesPage() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col items-center bg-zinc-50 dark:bg-zinc-900/50 min-h-screen">
+    <div className="flex flex-1 flex-col items-center min-h-screen">
       <div className="mx-auto w-full max-w-5xl px-6 py-24">
         <div className="mb-16 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-black dark:text-white sm:text-5xl">{t("title")}</h1>
@@ -47,9 +47,9 @@ export default async function ServicesPage() {
           {services.map((service, idx) => (
             <div
               key={idx}
-              className="flex flex-col rounded-2xl bg-white p-8 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:bg-zinc-900/50"
+              className="mm-glass-card flex flex-col p-8 transition-all duration-300 hover:-translate-y-1"
             >
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-zinc-50 text-3xl dark:bg-zinc-800/50">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl text-3xl" style={{ background: "rgba(255,255,255,0.05)" }}>
                 {service.icon}
               </div>
               <h2 className="mb-3 text-2xl font-bold text-black dark:text-white">{service.title}</h2>

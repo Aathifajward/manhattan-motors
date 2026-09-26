@@ -4,6 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { createInquiry } from "@/lib/actions/inquiry";
 import HeroScroll from "@/components/HeroScroll";
 import { Car, Truck, Bus, Tractor, Bike } from "lucide-react";
+import FadeInSection from "@/components/FadeInSection";
+import { MotionCard, MotionLink, MotionExternalLink, MotionButton } from "@/components/MotionElements";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +59,7 @@ export default async function Home({
   const BLUE_GLOW = "rgba(45,127,249,0.35)";
 
   return (
-    <div className="flex flex-1 flex-col" style={{ backgroundColor: "#0A0E14", color: "#fff" }}>
+    <div className="flex flex-1 flex-col -mt-[88px]">
 
       {/* 1. Hero — frame sequence */}
       <HeroScroll
@@ -66,18 +68,6 @@ export default async function Home({
         browseVehicles={t("browseVehicles")}
         contactUs={t("contactUs")}
       />
-
-      {/* Continuous post-hero wrapper */}
-      <div 
-        className="relative flex flex-col" 
-        style={{ 
-          background: "linear-gradient(180deg, #0A0E14 0%, #0F1420 25%, #0A0E14 50%, #0D1118 75%, #0A0E14 100%)" 
-        }}
-      >
-        {/* Ambient continuous glows placed throughout the long scrolling container */}
-        <div className="absolute pointer-events-none" style={{ top: '5%', left: '10%', width: '800px', height: '800px', background: 'radial-gradient(circle, rgba(45,127,249,0.08) 0%, transparent 60%)', filter: 'blur(80px)' }} />
-        <div className="absolute pointer-events-none" style={{ top: '40%', right: '5%', width: '900px', height: '900px', background: 'radial-gradient(circle, rgba(45,127,249,0.06) 0%, transparent 60%)', filter: 'blur(100px)' }} />
-        <div className="absolute pointer-events-none" style={{ bottom: '10%', left: '20%', width: '1000px', height: '1000px', background: 'radial-gradient(circle, rgba(45,127,249,0.07) 0%, transparent 60%)', filter: 'blur(90px)' }} />
 
       {/* Blue accent divider */}
       <div style={{ height: "1px", background: `linear-gradient(to right, transparent, ${BLUE_GLOW}, transparent)` }} />
@@ -97,9 +87,10 @@ export default async function Home({
               { step: "02", title: t("serviceDoc"), desc: t("serviceDocDesc") },
               { step: "03", title: t("servicePricing"), desc: t("servicePricingDesc") },
               { step: "04", title: t("serviceShipping"), desc: t("serviceShippingDesc") },
-            ].map((s) => (
-              <div key={s.step} className="mm-glass-card group flex flex-col p-7">
-                <span
+            ].map((s, idx) => (
+              <FadeInSection key={s.step} delay={idx * 0.1}>
+                <div className="mm-glass-card group flex flex-col p-7 h-full">
+                  <span
                   className="mb-5 block font-mono text-5xl font-black leading-none transition-colors duration-300"
                   style={{ color: BLUE_DIM }}
                 >
@@ -113,7 +104,8 @@ export default async function Home({
                     style={{ background: BLUE }}
                   />
                 </div>
-              </div>
+                </div>
+              </FadeInSection>
             ))}
           </div>
         </div>
@@ -136,17 +128,19 @@ export default async function Home({
               { title: t("catVans"), link: "/vehicles?category=VAN", icon: <Bus size={40} strokeWidth={1.5} /> },
               { title: t("catMachinery"), link: "/vehicles?category=MACHINERY", icon: <Tractor size={40} strokeWidth={1.5} /> },
               { title: t("catMotorcycles"), link: "/vehicles?category=MOTORCYCLE", icon: <Bike size={40} strokeWidth={1.5} /> },
-            ].map((cat) => (
-              <Link
-                href={cat.link}
-                key={cat.title}
-                className="mm-glass-card group flex flex-col items-center justify-center p-8 transition-all duration-300"
-              >
+            ].map((cat, idx) => (
+              <FadeInSection key={cat.title} delay={idx * 0.1}>
+                <MotionLink
+                  href={cat.link}
+                  className="mm-glass-card group flex flex-col items-center justify-center p-8 transition-all duration-300 w-full"
+                  fullWidth={true}
+                >
                 <div className="mb-5 transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
                   {cat.icon}
                 </div>
                 <h3 className="text-sm font-bold text-white text-center uppercase tracking-widest">{cat.title}</h3>
-              </Link>
+              </MotionLink>
+              </FadeInSection>
             ))}
           </div>
           {/* Fade edge */}
@@ -175,9 +169,14 @@ export default async function Home({
               {featuredVehicles.map((vehicle, i) => {
                 const isLarge = i % 3 === 0;
                 return (
-                  <Link href={`/vehicles/${vehicle.slug}`} key={vehicle.id} className={`snap-start shrink-0 group block w-[80vw] ${cardWidths[i] ?? "sm:w-[380px]"}`}>
+                  <MotionCard
+                    key={vehicle.id}
+                    href={`/vehicles/${vehicle.slug}`} 
+                    className={`snap-start shrink-0 group block w-[80vw] ${cardWidths[i] ?? "sm:w-[380px]"}`}
+                    delay={i * 0.05}
+                  >
                     <div
-                      className={`mm-glass-card flex flex-col overflow-hidden ${isLarge ? "mm-card-large" : "mm-card-small"}`}
+                      className={`mm-glass-card flex flex-col overflow-hidden h-full ${isLarge ? "mm-card-large" : "mm-card-small"}`}
                     >
                       {vehicle.images[0] ? (
                         <div className="relative overflow-hidden" style={{ aspectRatio: cardRatios[i] ?? "4/3" }}>
@@ -209,7 +208,7 @@ export default async function Home({
                         )}
                       </div>
                     </div>
-                  </Link>
+                  </MotionCard>
                 );
               })}
             </div>
@@ -224,29 +223,33 @@ export default async function Home({
       {/* 5. Location — dark navy */}
       <section className="w-full py-28 relative overflow-hidden">
         <div className="mx-auto w-full max-w-7xl px-6">
-          <div className="mb-14">
+          <FadeInSection className="mb-14">
             <span className="mm-label mb-4 block">Based in Japan</span>
             <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">{t("location")}</h2>
             <p className="mt-3 text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>{t("visitOffice")}</p>
-          </div>
-          <div className="overflow-hidden" style={{ borderRadius: "6px 20px 6px 6px", background: "rgba(10,14,20,0.92)", border: "1px solid rgba(45,127,249,0.18)", boxShadow: "0 8px 40px rgba(0,0,0,0.35)" }}>
+          </FadeInSection>
+          <FadeInSection delay={0.2} className="overflow-hidden" style={{ borderRadius: "6px 20px 6px 6px", background: "rgba(10,14,20,0.92)", border: "1px solid rgba(45,127,249,0.18)", boxShadow: "0 8px 40px rgba(0,0,0,0.35)" }}>
             <div className="flex flex-col md:flex-row">
               <div className="flex flex-col justify-center p-10 md:w-80 shrink-0">
                 <div className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>{t("addressLabel")}</div>
                 <p className="mb-8 text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.65)" }}>3-12-5 Hitotsugi-cho<br />Kariya City, Aichi 448-0003<br />Japan</p>
                 <div className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>{t("businessHours")}</div>
                 <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{t("businessHoursValue")}</p>
+                <a href="https://maps.app.goo.gl/FmmMz14kUWkGk1HcA" target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#2D7FF9] hover:text-white transition-colors">
+                  Open in Maps
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
               </div>
               <div className="flex-1 h-72 md:h-auto">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3265.184323758064!2d137.0180295!3d35.027063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x60049e6f3eb3d22b%3A0xc3194a2fa35b3!2s3-ch%C5%8Dme-12-5%20Hitotsugich%C5%8D%2C%20Kariya%2C%20Aichi%20448-0003!5e0!3m2!1sen!2sjp!4v1700000000000!5m2!1sen!2sjp"
+                  src="https://maps.google.com/maps?q=35.0089697,137.0262555&hl=en&z=16&output=embed"
                   width="100%" height="100%"
                   style={{ border: 0, minHeight: "280px", filter: "invert(90%) hue-rotate(180deg)" }}
                   allowFullScreen loading="lazy" referrerPolicy="no-referrer-when-downgrade"
                 />
               </div>
             </div>
-          </div>
+          </FadeInSection>
         </div>
       </section>
 
@@ -259,25 +262,25 @@ export default async function Home({
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div style={{ width: "500px", height: "300px", background: "radial-gradient(ellipse, rgba(45,127,249,0.08) 0%, transparent 70%)", borderRadius: "50%" }} />
         </div>
-        <div className="mx-auto max-w-4xl px-6 text-center relative z-10">
+        <FadeInSection className="mx-auto max-w-4xl px-6 text-center relative z-10">
           <span className="mm-label mb-6 inline-block">Ready?</span>
           <h2 className="mb-10 text-4xl font-black tracking-tight text-white sm:text-5xl leading-tight">{t("sellBannerTitle")}</h2>
-          <a
+          <MotionExternalLink
             href="#contact"
             className="inline-flex items-center gap-2 px-10 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
             style={{ background: BLUE, borderRadius: "6px", boxShadow: `0 0 32px ${BLUE_GLOW}, 0 4px 16px rgba(0,0,0,0.4)` }}
           >
             {t("contactUsNow")}
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </a>
-        </div>
+          </MotionExternalLink>
+        </FadeInSection>
       </section>
 
       {/* 7. Contact — dark navy */}
       <section id="contact" className="w-full py-28 relative overflow-hidden">
         <div className="mx-auto w-full max-w-6xl px-6">
           <div className="grid gap-16 lg:grid-cols-2">
-            <div>
+            <FadeInSection>
               <span className="mm-label mb-4 block">Reach Us</span>
               <h2 className="mb-10 text-4xl font-bold tracking-tight text-white sm:text-5xl">{t("contactUs")}</h2>
               <div
@@ -286,10 +289,10 @@ export default async function Home({
               >
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>LINE</p>
-                  <a href="https://line.me/ti/p/~Maz615" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white hover:opacity-80 transition-opacity" style={{ background: "#06C755", borderRadius: "4px" }}>
+                  <MotionExternalLink href="https://line.me/ti/p/~Maz615" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white hover:opacity-80 transition-opacity" style={{ background: "#06C755", borderRadius: "4px", display: "inline-flex" }}>
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4"><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.905 8.91 9.489 9.613.393.076.924.232 1.062.535.125.275.081.71.039.998l-.206 1.258c-.063.385-.297 1.455 1.272.793 1.57-.661 8.468-4.992 10.73-7.925 1.092-1.42 1.614-2.81 1.614-4.272z" /></svg>
                     Maz615
-                  </a>
+                  </MotionExternalLink>
                 </div>
                 <div>
                   <p className="mb-2 text-xs font-bold uppercase tracking-widest" style={{ color: BLUE }}>Phone</p>
@@ -300,9 +303,10 @@ export default async function Home({
                   <a href="mailto:manhattanmotors.726@gmail.com" className="text-base font-bold text-white hover:opacity-70 transition-opacity break-all">manhattanmotors.726@gmail.com</a>
                 </div>
               </div>
-            </div>
+            </FadeInSection>
 
-            <div
+            <FadeInSection
+              delay={0.2}
               className="p-8"
               style={{ background: "rgba(10,14,20,0.92)", border: "1px solid rgba(45,127,249,0.18)", borderRadius: "20px 6px 6px 6px", boxShadow: "0 8px 40px rgba(0,0,0,0.3)" }}
             >
@@ -345,19 +349,18 @@ export default async function Home({
                   <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formMessage")}</label>
                   <textarea name="message" required rows={4} className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none resize-none" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                 </div>
-                <button
+                <MotionButton
                   type="submit"
                   className="mt-2 w-full py-4 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90"
                   style={{ background: BLUE, borderRadius: "6px", boxShadow: `0 0 20px rgba(45,127,249,0.25)` }}
                 >
                   {t("formSubmit")}
-                </button>
+                </MotionButton>
               </form>
-            </div>
+            </FadeInSection>
           </div>
         </div>
       </section>
-      </div>
     </div>
   );
 }
