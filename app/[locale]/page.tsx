@@ -143,8 +143,6 @@ export default async function Home({
               </FadeInSection>
             ))}
           </div>
-          {/* Fade edge */}
-          <div className="absolute right-0 top-0 bottom-6 w-16 pointer-events-none" style={{ background: `linear-gradient(to left, #0A0E14, transparent)` }} />
         </div>
       </section>
 
@@ -212,7 +210,6 @@ export default async function Home({
                 );
               })}
             </div>
-            <div className="absolute right-0 top-0 bottom-8 w-24 pointer-events-none" style={{ background: `linear-gradient(to left, #0A0E14, transparent)` }} />
           </div>
         </section>
       )}
