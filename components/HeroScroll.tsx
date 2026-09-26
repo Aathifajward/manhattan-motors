@@ -203,8 +203,18 @@ export default function HeroScroll({
           muted
           playsInline
           preload="auto"
-          onLoadedMetadata={() => setVideoLoaded(true)}
-          onCanPlay={() => setVideoLoaded(true)}
+          onLoadedMetadata={(e) => {
+            const v = e.currentTarget;
+            v.defaultMuted = true;
+            v.muted = true;
+            setVideoLoaded(true);
+          }}
+          onCanPlay={(e) => {
+            const v = e.currentTarget;
+            v.defaultMuted = true;
+            v.muted = true;
+            setVideoLoaded(true);
+          }}
           onError={() => setVideoLoaded(true)} // Always resolve if it 404s/fails
           className="absolute inset-0 w-full h-full object-cover"
           style={{ 
