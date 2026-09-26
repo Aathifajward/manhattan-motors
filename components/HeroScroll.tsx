@@ -153,19 +153,20 @@ export default function HeroScroll({
       // Scrub video with frame deduplication and backpressure
       if (video.readyState >= 1) {
         if (frameIndex !== lastVideoFrame) {
-          if ('requestVideoFrameCallback' in video) {
+          const v = video as any;
+          if ('requestVideoFrameCallback' in v) {
             if (!isSeeking) {
               isSeeking = true;
               lastVideoFrame = frameIndex;
-              video.currentTime = (frameIndex / FRAME_COUNT) * video.duration;
-              (video as any).requestVideoFrameCallback(() => {
+              v.currentTime = (frameIndex / FRAME_COUNT) * v.duration;
+              v.requestVideoFrameCallback(() => {
                 isSeeking = false;
               });
             }
           } else {
             // Fallback for older Safari: just de-duplicate by frame index
             lastVideoFrame = frameIndex;
-            video.currentTime = (frameIndex / FRAME_COUNT) * video.duration;
+            v.currentTime = (frameIndex / FRAME_COUNT) * v.duration;
           }
         }
       }
