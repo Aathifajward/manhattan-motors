@@ -58,13 +58,38 @@ export default function HeroScroll({
   */
   // ── Safety timeout: never block the page forever if video fails/hangs ────
   useEffect(() => {
-    // If video hasn't loaded metadata within 3 seconds, force it to ready
-    // so the user isn't stuck looking at a spinner forever.
     const timer = setTimeout(() => {
       setVideoLoaded(true);
     }, 3000);
     return () => clearTimeout(timer);
   }, []);
+
+  // ── iOS Video Wake Sequence ────────────────────────────────────────────────
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const wakeVideo = async () => {
+      try {
+        video.muted = true; // must be set before play() on iOS
+        video.defaultMuted = true;
+        await video.play();
+        video.pause();
+        video.currentTime = 0;
+        setVideoLoaded(true);
+      } catch (err) {
+        console.error('iOS video wake failed:', err);
+        setVideoLoaded(true); // still proceed so page isn't stuck
+      }
+    };
+
+    if (video.readyState >= 1) {
+      wakeVideo();
+    } else {
+      video.addEventListener('loadedmetadata', wakeVideo, { once: true });
+    }
+  }, []);
+
 
   // ── Set hero scroll height directly on the DOM element ───────────────────
   useEffect(() => {
@@ -196,25 +221,14 @@ export default function HeroScroll({
           }}
         />
 
-        {/* Video for hardware-accelerated scrubbing */}
         <video
           ref={videoRef}
           src="/videos/hero.mp4"
           muted
           playsInline
+          // @ts-ignore: React sometimes complains about webkit-playsinline but it's required for older iOS
+          webkit-playsinline="true"
           preload="auto"
-          onLoadedMetadata={(e) => {
-            const v = e.currentTarget;
-            v.defaultMuted = true;
-            v.muted = true;
-            setVideoLoaded(true);
-          }}
-          onCanPlay={(e) => {
-            const v = e.currentTarget;
-            v.defaultMuted = true;
-            v.muted = true;
-            setVideoLoaded(true);
-          }}
           onError={() => setVideoLoaded(true)} // Always resolve if it 404s/fails
           className="absolute inset-0 w-full h-full object-cover"
           style={{ 
