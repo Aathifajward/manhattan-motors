@@ -57,30 +57,54 @@ export default function HeroScroll({
     }
   }, []);
   */
-  // ── Safety timeout: never block the page forever if video fails/hangs ────
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setVideoLoaded(true);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // ── iOS Video Wake Sequence ────────────────────────────────────────────────
+  // ── iOS Video Wake & Full Buffering Preload ────────────────────────────────
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    let timeoutId: NodeJS.Timeout;
+    let checkIntervalId: NodeJS.Timeout;
+
+    const finalizeReady = () => {
+      setVideoLoaded(true);
+      clearTimeout(timeoutId);
+      clearInterval(checkIntervalId);
+      video.removeEventListener('canplaythrough', checkBuffering);
+    };
+
+    // 5-second hard safety timeout
+    timeoutId = setTimeout(() => {
+      console.warn("Hero video preload timed out, forcing ready state");
+      finalizeReady();
+    }, 5000);
+
+    const checkBuffering = () => {
+      if (!video.duration) return;
+      const buffered = video.buffered;
+      if (buffered.length > 0) {
+        const end = buffered.end(buffered.length - 1);
+        if (end >= video.duration - 0.1) {
+          finalizeReady();
+        }
+      }
+    };
+
     const wakeVideo = async () => {
       try {
-        video.muted = true; // must be set before play() on iOS
+        video.muted = true; 
         video.defaultMuted = true;
         await video.play();
         video.pause();
         video.currentTime = 0;
-        setVideoLoaded(true);
+        
+        // After waking, check if it's already buffered
+        checkBuffering();
+        // And listen/poll for it to finish buffering
+        video.addEventListener('canplaythrough', checkBuffering);
+        checkIntervalId = setInterval(checkBuffering, 250);
       } catch (err) {
         console.error('iOS video wake failed:', err);
-        setVideoLoaded(true); // still proceed so page isn't stuck
+        finalizeReady(); // proceed anyway if playback fails
       }
     };
 
@@ -89,9 +113,13 @@ export default function HeroScroll({
     } else {
       video.addEventListener('loadedmetadata', wakeVideo, { once: true });
     }
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(checkIntervalId);
+      video.removeEventListener('canplaythrough', checkBuffering);
+    };
   }, []);
-
-
   // ── Set hero scroll height directly on the DOM element ───────────────────
   useEffect(() => {
     const applyHeight = () => {
