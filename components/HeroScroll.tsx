@@ -18,6 +18,7 @@ export default function HeroScroll({
   browseVehicles,
 }: HeroScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const textMaskRef = useRef<HTMLSpanElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
@@ -95,8 +96,8 @@ export default function HeroScroll({
   useEffect(() => {
     const applyHeight = () => {
       if (!containerRef.current) return;
-      // 250vh gives enough scroll distance to smoothly scrub through video
-      containerRef.current.style.height = window.innerWidth < 768 ? "250vh" : "400vh";
+      // 300vh gives enough scroll distance to smoothly scrub through video
+      containerRef.current.style.height = window.innerWidth < 768 ? "300vh" : "400vh";
     };
     applyHeight();
     window.addEventListener("resize", applyHeight, { passive: true });
@@ -174,15 +175,21 @@ export default function HeroScroll({
     };
 
     const handleScroll = () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !stickyRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
+      const stickyRect = stickyRef.current.getBoundingClientRect();
       const currentScrollTop = -rect.top;
-      const scrollableHeight = rect.height - window.innerHeight;
+      
+      // Use the actual rendered height of the sticky element, not window.innerHeight.
+      // On iOS Safari, 100vh (sticky element height) and window.innerHeight can disagree 
+      // due to the URL bar, causing the physical unpin point to mismatch the progress math.
+      const scrollableHeight = rect.height - stickyRect.height;
       
       let progress = 0;
       if (scrollableHeight > 0) {
         progress = currentScrollTop / scrollableHeight;
       }
+
       
       targetProgress = Math.max(0, Math.min(1, progress));
       startAnimationLoop();
@@ -211,7 +218,7 @@ export default function HeroScroll({
       className="relative w-full"
       style={{ height: "400vh", background: "var(--mm-navy)" }}
     >
-      <div className="sticky top-0 h-screen w-full overflow-hidden" style={{ backgroundColor: "#0A0E14" }}>
+      <div ref={stickyRef} className="sticky top-0 h-screen w-full overflow-hidden" style={{ backgroundColor: "#0A0E14" }}>
 
         {/* Radial blue glow — centered in lower half where car sits */}
         <div
