@@ -18,16 +18,18 @@ export default function HeroScroll({
   browseVehicles,
 }: HeroScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const textMaskRef = useRef<HTMLSpanElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const ctaBtnRef = useRef<HTMLDivElement>(null);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-  const imagesRef = useRef<HTMLImageElement[]>([]);
+  
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const t = useTranslations("HomePage");
   const tHero = useTranslations("hero");
 
+  // ── Preload + decode all frames (COMMENTED OUT FOR VIDEO FALLBACK) ────────
+  /*
   useEffect(() => {
     let loadedCount = 0;
     const images: HTMLImageElement[] = [];
@@ -44,7 +46,6 @@ export default function HeroScroll({
           setImagesLoaded(true);
         }
       }).catch((e) => {
-        // Fallback on error so it doesn't hang forever
         loadedCount++;
         if (loadedCount === FRAME_COUNT) {
           imagesRef.current = images;
@@ -54,118 +55,121 @@ export default function HeroScroll({
       images.push(img);
     }
   }, []);
+  */
+
+  // ── Set hero scroll height directly on the DOM element ───────────────────
+  useEffect(() => {
+    const applyHeight = () => {
+      if (!containerRef.current) return;
+      // 250vh gives enough scroll distance to smoothly scrub through video
+      containerRef.current.style.height = window.innerWidth < 768 ? "250vh" : "400vh";
+    };
+    applyHeight();
+    window.addEventListener("resize", applyHeight, { passive: true });
+    return () => window.removeEventListener("resize", applyHeight);
+  }, []);
 
   useEffect(() => {
-    if (!imagesLoaded || !canvasRef.current || !containerRef.current) return;
+    if (!videoLoaded || !videoRef.current || !containerRef.current) return;
+    const video = videoRef.current;
 
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    if (!context) return;
+    let rafId = 0;
+    
+    // Lerp state
+    let targetProgress = 0;
+    let currentProgress = 0;
+    let lastRenderedFrame = -1;
+    let isLoopRunning = false;
 
-    let animationFrameId: number;
-    let currentFrameIndex = -1;
-    let cssWidth = 0;
-    let cssHeight = 0;
-    let lastScrollTop = 0;
+    const renderFrame = (progress: number) => {
+      // We calculate a simulated frameIndex so UI elements (fade, etc) still sync perfectly
+      const frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
 
-    const renderFrame = (frameIndex: number, progress: number) => {
-      if (frameIndex === currentFrameIndex) return;
-      currentFrameIndex = frameIndex;
+      // Scrub video to exact time
+      if (video.readyState >= 1) {
+        video.currentTime = progress * video.duration;
+      }
 
-      if (imagesRef.current[frameIndex]) {
-        const img = imagesRef.current[frameIndex];
-        const scale = Math.max(cssWidth / img.width, cssHeight / img.height);
-        let x = (cssWidth / 2) - (img.width / 2) * scale;
-        const y = (cssHeight / 2) - (img.height / 2) * scale;
+      if (frameIndex !== lastRenderedFrame) {
+        lastRenderedFrame = frameIndex;
+        window.dispatchEvent(new CustomEvent("hero-frame", { detail: { frameIndex, isScrollingDown: targetProgress > currentProgress } }));
+      }
 
-        // On mobile/narrow screens, bias the crop horizontally to keep the front of the car in view,
-        // and gradually center it (0.3 -> 0.5) as scroll progress increases.
-        if (cssWidth < 768 && cssWidth / cssHeight < img.width / img.height) {
-          const cropBias = 0.3 + (progress * 0.2);
-          x = (cssWidth - img.width * scale) * cropBias;
-        }
+      if (textContainerRef.current) {
+        textContainerRef.current.style.transform = `translateY(${progress * 60}px)`;
+      }
 
-        context.clearRect(0, 0, cssWidth, cssHeight);
-        context.drawImage(img, x, y, img.width * scale, img.height * scale);
+      if (headingRef.current) {
+        const scaleValue = 1 + (progress * 0.20);
+        headingRef.current.style.transform = `scale(${scaleValue})`;
+      }
 
-        // Sync text glass mask with current frame
-        if (textMaskRef.current) {
-          textMaskRef.current.style.backgroundImage = `url(${img.src})`;
+      if (ctaBtnRef.current) {
+        if (frameIndex >= 48) {
+          ctaBtnRef.current.style.opacity = "1";
+          ctaBtnRef.current.style.transform = "translate(-50%, -50%) scale(1)";
+          ctaBtnRef.current.style.pointerEvents = "auto";
+        } else {
+          ctaBtnRef.current.style.opacity = "0";
+          ctaBtnRef.current.style.transform = "translate(-50%, -50%) scale(0.9)";
+          ctaBtnRef.current.style.pointerEvents = "none";
         }
       }
     };
 
-    const resizeCanvas = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const cappedDpr = Math.min(dpr, 1.5);
-      cssWidth = window.innerWidth;
-      cssHeight = window.innerHeight;
-      canvas.width = cssWidth * cappedDpr;
-      canvas.height = cssHeight * cappedDpr;
-      context.scale(cappedDpr, cappedDpr);
-      currentFrameIndex = -1;
-      if (containerRef.current) {
-        lastScrollTop = -containerRef.current.getBoundingClientRect().top;
+    const animationLoop = () => {
+      const diff = targetProgress - currentProgress;
+      
+      if (Math.abs(diff) < 0.001) {
+        currentProgress = targetProgress;
+        renderFrame(currentProgress);
+        isLoopRunning = false;
+        return;
       }
-      handleScroll();
+
+      currentProgress += diff * 0.15;
+      renderFrame(currentProgress);
+      rafId = requestAnimationFrame(animationLoop);
+    };
+
+    const startAnimationLoop = () => {
+      if (!isLoopRunning) {
+        isLoopRunning = true;
+        rafId = requestAnimationFrame(animationLoop);
+      }
     };
 
     const handleScroll = () => {
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      animationFrameId = requestAnimationFrame(() => {
-        if (!containerRef.current) return;
-        const rect = containerRef.current.getBoundingClientRect();
-        const currentScrollTop = -rect.top;
-        const isScrollingDown = currentScrollTop > lastScrollTop;
-        lastScrollTop = currentScrollTop;
-        const scrollDistance = currentScrollTop;
-        const scrollableHeight = rect.height - window.innerHeight;
-        let progress = scrollDistance / scrollableHeight;
-        progress = Math.max(0, Math.min(1, progress));
-        
-        let frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
-        // On mobile, skip every other frame to halve the JPEG decoding cost during scroll
-        if (window.innerWidth < 768) {
-          frameIndex = Math.floor(frameIndex / 2) * 2;
-        }
-        
-        renderFrame(frameIndex, progress);
-
-        if (textContainerRef.current) {
-          textContainerRef.current.style.transform = `translateY(${progress * 60}px)`;
-        }
-
-        if (headingRef.current) {
-          const scaleValue = 1 + (progress * 0.20); // Scale up to 1.20
-          headingRef.current.style.transform = `scale(${scaleValue})`;
-        }
-
-        if (ctaBtnRef.current) {
-          if (frameIndex >= 48) {
-            ctaBtnRef.current.style.opacity = "1";
-            ctaBtnRef.current.style.transform = "translate(-50%, -50%) scale(1)";
-            ctaBtnRef.current.style.pointerEvents = "auto";
-          } else {
-            ctaBtnRef.current.style.opacity = "0";
-            ctaBtnRef.current.style.transform = "translate(-50%, -50%) scale(0.9)";
-            ctaBtnRef.current.style.pointerEvents = "none";
-          }
-        }
-
-        window.dispatchEvent(new CustomEvent("hero-frame", { detail: { frameIndex, isScrollingDown } }));
-      });
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const currentScrollTop = -rect.top;
+      const scrollableHeight = rect.height - window.innerHeight;
+      
+      let progress = 0;
+      if (scrollableHeight > 0) {
+        progress = currentScrollTop / scrollableHeight;
+      }
+      
+      targetProgress = Math.max(0, Math.min(1, progress));
+      startAnimationLoop();
     };
 
-    window.addEventListener("resize", resizeCanvas);
+    const handleResize = () => {
+      handleScroll(); // just trigger recalculation
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    resizeCanvas();
+    window.addEventListener("resize", handleResize, { passive: true });
+    
+    // Initial sync
+    handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", resizeCanvas);
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", handleResize);
+      if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [imagesLoaded]);
+  }, [videoLoaded]);
 
   return (
     <section
@@ -183,11 +187,22 @@ export default function HeroScroll({
           }}
         />
 
-        {/* Canvas for frame sequence */}
-        <canvas
-          ref={canvasRef}
-          className="absolute inset-0 w-full h-full"
-          style={{ willChange: "transform", zIndex: 1 }}
+        {/* Video for hardware-accelerated scrubbing */}
+        <video
+          ref={videoRef}
+          src="/videos/hero.mp4"
+          muted
+          playsInline
+          preload="auto"
+          onLoadedMetadata={() => setVideoLoaded(true)}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ 
+            zIndex: 1, 
+            willChange: "transform",
+            // objectPosition: "30% center" keeps the front of the car in view on mobile 
+            // exactly like the old 0.3 crop bias did!
+            objectPosition: typeof window !== "undefined" && window.innerWidth < 768 ? "30% center" : "center" 
+          }}
         />
 
         {/* Strong vignette — darkens screen edges so car pops */}
@@ -202,7 +217,7 @@ export default function HeroScroll({
         {/* Loading state */}
         <div
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-700 z-30 ${
-            imagesLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
+            videoLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
           style={{ backgroundColor: "#0A0E14" }}
         >
@@ -217,7 +232,6 @@ export default function HeroScroll({
           </div>
         </div>
 
-        {/* Hero copy — top band, short title only, never over the car */}
         {/* Hero copy — top band, short title only, never over the car */}
         <div
           ref={textContainerRef}
@@ -239,7 +253,7 @@ export default function HeroScroll({
               ref={textMaskRef}
               className="absolute inset-0"
               style={{
-                backgroundImage: "url(/images/frames/frame_000000.jpg)",
+                // (FALLBACK) backgroundImage: "url(/images/frames/frame_000000.jpg)",
                 backgroundSize: "cover",
                 backgroundPosition: "center",
                 backgroundAttachment: "fixed",
