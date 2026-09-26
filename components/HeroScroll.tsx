@@ -56,6 +56,15 @@ export default function HeroScroll({
     }
   }, []);
   */
+  // ── Safety timeout: never block the page forever if video fails/hangs ────
+  useEffect(() => {
+    // If video hasn't loaded metadata within 3 seconds, force it to ready
+    // so the user isn't stuck looking at a spinner forever.
+    const timer = setTimeout(() => {
+      setVideoLoaded(true);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // ── Set hero scroll height directly on the DOM element ───────────────────
   useEffect(() => {
@@ -195,6 +204,8 @@ export default function HeroScroll({
           playsInline
           preload="auto"
           onLoadedMetadata={() => setVideoLoaded(true)}
+          onCanPlay={() => setVideoLoaded(true)}
+          onError={() => setVideoLoaded(true)} // Always resolve if it 404s/fails
           className="absolute inset-0 w-full h-full object-cover"
           style={{ 
             zIndex: 1, 
