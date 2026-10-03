@@ -88,24 +88,24 @@ export default function HeroScroll({
     };
 
     const wakeVideo = async () => {
+      video.muted = true; 
+      video.defaultMuted = true;
+      
       try {
-        video.muted = true; 
-        video.defaultMuted = true;
         await video.play();
         video.pause();
-        video.currentTime = 0;
-        
-        // After waking, check if it's already buffered
-        checkBuffering();
-        // And listen/poll for it to finish buffering
-        video.addEventListener('canplaythrough', checkBuffering);
-        checkIntervalId = setInterval(checkBuffering, 250);
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           console.error('iOS video wake failed:', err);
         }
-        finalizeReady(); // proceed anyway if playback fails
       }
+
+      video.currentTime = 0;
+      
+      // Always check buffering, even if play() was aborted
+      checkBuffering();
+      video.addEventListener('canplaythrough', checkBuffering);
+      checkIntervalId = setInterval(checkBuffering, 250);
     };
 
     if (video.readyState >= 1) {
