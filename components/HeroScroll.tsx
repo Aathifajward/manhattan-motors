@@ -10,7 +10,7 @@ interface HeroScrollProps {
   contactUs: string;
 }
 
-const FRAME_COUNT = 101; // frame_000000.jpg ... frame_000100.jpg
+const FRAME_COUNT = 81;// frame_000000.jpg ... frame_000100.jpg
 
 export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -31,7 +31,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
     for (let i = 0; i < FRAME_COUNT; i++) {
       const img = new Image();
       const paddedIndex = i.toString().padStart(6, "0");
-      img.src = `/images/frames/frame_${paddedIndex}.jpg`;
+      img.src = `/images/frames/frame_${paddedIndex}.webp`;
 
       const onDone = () => {
         loadedCount++;
