@@ -180,6 +180,7 @@ export default function HeroScroll({
         window.dispatchEvent(new CustomEvent("hero-frame", { detail: { frameIndex, isScrollingDown: targetProgress > currentProgress } }));
       }
 
+      /* DIAGNOSTIC TEST: Text animations completely disabled
       if (textContainerRef.current) {
         textContainerRef.current.style.transform = `translateY(${progress * 60}px)`;
       }
@@ -224,6 +225,7 @@ export default function HeroScroll({
           el.style.transform = `scale(${scale})`;
         });
       }
+      */
 
       if (videoRef.current) {
         const videoFadeOpacity = progress <= 0.90 ? 1 : Math.max(0, 1 - ((progress - 0.90) / 0.10));
@@ -375,10 +377,10 @@ export default function HeroScroll({
               ))}
             </h1>
 
-            {/* SECOND HEADING */}
+            {/* SECOND HEADING (Hidden for diagnostic test) */}
             <h2
               ref={secondHeadingRef}
-              className="font-heading text-center font-normal leading-tight absolute top-0 flex flex-col text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0]"
+              className="hidden font-heading text-center font-normal leading-tight absolute top-0 flex flex-col text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0]"
               style={{
                 letterSpacing: "-0.02em",
                 transformOrigin: "top center",
