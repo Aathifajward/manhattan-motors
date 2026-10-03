@@ -318,22 +318,22 @@ export default async function Home({
                 <input type="hidden" name="vehicleId" value="" />
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formName")}</label>
-                    <input name="name" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                    <label htmlFor="name" className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formName")}</label>
+                    <input id="name" name="name" autoComplete="name" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formEmail")}</label>
-                    <input name="email" type="email" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                    <label htmlFor="email" className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formEmail")}</label>
+                    <input id="email" name="email" type="email" autoComplete="email" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                   </div>
                 </div>
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formPhone")}</label>
-                    <input name="phone" className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                    <label htmlFor="phone" className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formPhone")}</label>
+                    <input id="phone" name="phone" autoComplete="tel" className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formVehicleType")}</label>
-                    <select name="preferredContact" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer dark:bg-zinc-900 dark:text-white dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0, background: "rgba(10,14,20,0.92)" }}>
+                    <label htmlFor="preferredContact" className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formVehicleType")}</label>
+                    <select id="preferredContact" name="preferredContact" required className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer dark:bg-zinc-900 dark:text-white dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0, background: "rgba(10,14,20,0.92)" }}>
                       <option value="Any" className="dark:bg-zinc-900 dark:text-white">{t("formTypeAny")}</option>
                       <option value="Car" className="dark:bg-zinc-900 dark:text-white">{t("formTypeCar")}</option>
                       <option value="Truck/Van" className="dark:bg-zinc-900 dark:text-white">{t("formTypeTruck")}</option>
@@ -343,8 +343,8 @@ export default async function Home({
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <label className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formMessage")}</label>
-                  <textarea name="message" required rows={4} className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none resize-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
+                  <label htmlFor="message" className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.35)" }}>{t("formMessage")}</label>
+                  <textarea id="message" name="message" required rows={4} className="border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none resize-none dark:[color-scheme:dark]" style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 }} />
                 </div>
                 <MotionButton
                   type="submit"

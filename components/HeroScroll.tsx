@@ -60,64 +60,38 @@ export default function HeroScroll({
     const video = videoRef.current;
     if (!video) return;
 
-    let timeoutId: NodeJS.Timeout;
-    let checkIntervalId: NodeJS.Timeout;
-
     const finalizeReady = () => {
       setVideoLoaded(true);
       clearTimeout(timeoutId);
-      clearInterval(checkIntervalId);
-      video.removeEventListener('canplaythrough', checkBuffering);
     };
 
-    // 5-second hard safety timeout
+    // Timeout as fallback, don't wait 5s normally
     timeoutId = setTimeout(() => {
       console.warn("Hero video preload timed out, forcing ready state");
       finalizeReady();
     }, 5000);
 
-    const checkBuffering = () => {
-      if (!video.duration) return;
-      const buffered = video.buffered;
-      if (buffered.length > 0) {
-        const end = buffered.end(buffered.length - 1);
-        if (end >= video.duration - 0.1) {
-          finalizeReady();
-        }
-      }
+    const handleCanPlay = () => {
+      finalizeReady();
     };
 
-    const wakeVideo = async () => {
-      video.muted = true; 
+    video.addEventListener('canplay', handleCanPlay);
+
+    // Also wake on loadedmetadata if needed for iOS
+    video.addEventListener('loadedmetadata', () => {
+      video.muted = true;
       video.defaultMuted = true;
-      
-      try {
-        await video.play();
-        video.pause();
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.error('iOS video wake failed:', err);
-        }
-      }
+      video.play().then(() => video.pause()).catch(() => {});
+    }, { once: true });
 
-      video.currentTime = 0;
-      
-      // Always check buffering, even if play() was aborted
-      checkBuffering();
-      video.addEventListener('canplaythrough', checkBuffering);
-      checkIntervalId = setInterval(checkBuffering, 250);
-    };
-
-    if (video.readyState >= 1) {
-      wakeVideo();
-    } else {
-      video.addEventListener('loadedmetadata', wakeVideo, { once: true });
+    if (video.readyState >= 3) { // HAVE_FUTURE_DATA or higher
+      finalizeReady();
     }
 
     return () => {
+    return () => {
       clearTimeout(timeoutId);
-      clearInterval(checkIntervalId);
-      video.removeEventListener('canplaythrough', checkBuffering);
+      video.removeEventListener('canplay', handleCanPlay);
     };
   }, []);
   // ── Set hero scroll height directly on the DOM element ───────────────────
@@ -311,7 +285,8 @@ export default function HeroScroll({
 
         <video
           ref={videoRef}
-          src="/videos/heronew.mp4"
+          src="/videos/heronew-optimized.mp4"
+          poster="/images/frames/frame_000000.jpg"
           muted
           playsInline
           // @ts-ignore: React sometimes complains about webkit-playsinline but it's required for older iOS
