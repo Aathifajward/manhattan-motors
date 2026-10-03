@@ -60,6 +60,8 @@ export default function HeroScroll({
     const video = videoRef.current;
     if (!video) return;
 
+    let timeoutId: NodeJS.Timeout;
+
     const finalizeReady = () => {
       setVideoLoaded(true);
       clearTimeout(timeoutId);
@@ -88,7 +90,6 @@ export default function HeroScroll({
       finalizeReady();
     }
 
-    return () => {
     return () => {
       clearTimeout(timeoutId);
       video.removeEventListener('canplay', handleCanPlay);
