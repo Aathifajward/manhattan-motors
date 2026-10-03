@@ -195,11 +195,11 @@ export default function HeroScroll({
           
           const opacity = 1 - wordProgress;
           const scale = 1 + (wordProgress * 0.3);
-          const blur = wordProgress * 14;
+          // blur disabled for testing
           
           const el = word as HTMLElement;
           el.style.opacity = opacity.toString();
-          el.style.filter = `blur(${blur}px)`;
+          // el.style.filter = `blur(${blur}px)`;
           el.style.transform = `scale(${scale})`;
         });
       }
@@ -216,11 +216,11 @@ export default function HeroScroll({
           
           const opacity = wordProgress;
           const scale = 1.3 - (wordProgress * 0.3);
-          const blur = (1 - wordProgress) * 14;
+          // blur disabled for testing
           
           const el = word as HTMLElement;
           el.style.opacity = opacity.toString();
-          el.style.filter = `blur(${blur}px)`;
+          // el.style.filter = `blur(${blur}px)`;
           el.style.transform = `scale(${scale})`;
         });
       }
@@ -369,7 +369,7 @@ export default function HeroScroll({
               }}
             >
               {tHero("heading").split(" ").map((word, i) => (
-                <span key={i} className="inline-block mx-[0.12em] will-change-transform" style={{ transformOrigin: "center center" }}>
+                <span key={i} className="inline-block mx-[0.12em]" style={{ transformOrigin: "center center", willChange: "transform, opacity" }}>
                   {word}
                 </span>
               ))}
@@ -386,14 +386,14 @@ export default function HeroScroll({
             >
               <div className="flex justify-center flex-wrap">
                 {tHero("secondHeadingLine1").split(" ").map((word, i) => (
-                  <span key={i} className="inline-block mx-[0.12em] will-change-transform opacity-0" style={{ transformOrigin: "center center" }}>
+                  <span key={i} className="inline-block mx-[0.12em] opacity-0" style={{ transformOrigin: "center center", willChange: "transform, opacity" }}>
                     {word}
                   </span>
                 ))}
               </div>
               <div className="flex justify-center flex-wrap">
                 {tHero("secondHeadingLine2").split(" ").map((word, i) => (
-                  <span key={`l2-${i}`} className="inline-block mx-[0.12em] will-change-transform opacity-0" style={{ transformOrigin: "center center" }}>
+                  <span key={`l2-${i}`} className="inline-block mx-[0.12em] opacity-0" style={{ transformOrigin: "center center", willChange: "transform, opacity" }}>
                     {word}
                   </span>
                 ))}
