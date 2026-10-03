@@ -191,6 +191,8 @@
     "success": "Thank you! Your inquiry has been sent."
   },
   "hero": {
-    "heading": "TRUSTED VEHICLES. FAIR PRICES."
+    "heading": "TRUSTED VEHICLES. FAIR PRICES.",
+    "secondHeadingLine1": "We Don't Just Sell Cars.",
+    "secondHeadingLine2": "We Find Your Perfect Match."
   }
 }

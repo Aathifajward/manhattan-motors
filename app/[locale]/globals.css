@@ -18,8 +18,8 @@
   --color-mm-navy: var(--mm-navy);
   --color-mm-blue: var(--mm-blue);
   --color-mm-cool-gray: var(--mm-cool-gray);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-bodoni), ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -11,19 +11,17 @@ interface HeroScrollProps {
   contactUs: string;
 }
 
-const FRAME_COUNT = 74;
-
 export default function HeroScroll({
   title,
+  subtitle,
   browseVehicles,
 }: HeroScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const textMaskRef = useRef<HTMLSpanElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const ctaBtnRef = useRef<HTMLDivElement>(null);
+  const secondHeadingRef = useRef<HTMLHeadingElement>(null);
   
   const [videoLoaded, setVideoLoaded] = useState(false);
   const t = useTranslations("HomePage");
@@ -102,8 +100,10 @@ export default function HeroScroll({
         // And listen/poll for it to finish buffering
         video.addEventListener('canplaythrough', checkBuffering);
         checkIntervalId = setInterval(checkBuffering, 250);
-      } catch (err) {
-        console.error('iOS video wake failed:', err);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('iOS video wake failed:', err);
+        }
         finalizeReady(); // proceed anyway if playback fails
       }
     };
@@ -147,8 +147,12 @@ export default function HeroScroll({
     let isLoopRunning = false;
 
     const renderFrame = (progress: number) => {
+      // Use video.duration dynamically to adapt to any video length (assuming ~30fps for simulated deduplication)
+      const currentDuration = video.duration || 1;
+      const dynamicFrameCount = Math.max(1, Math.floor(currentDuration * 30));
+      
       // We calculate a simulated frameIndex so UI elements (fade, etc) still sync perfectly
-      const frameIndex = Math.min(FRAME_COUNT - 1, Math.floor(progress * FRAME_COUNT));
+      const frameIndex = Math.min(dynamicFrameCount - 1, Math.floor(progress * dynamicFrameCount));
 
       // Scrub video with frame deduplication and backpressure
       if (video.readyState >= 1) {
@@ -158,7 +162,7 @@ export default function HeroScroll({
             if (!isSeeking) {
               isSeeking = true;
               lastVideoFrame = frameIndex;
-              v.currentTime = (frameIndex / FRAME_COUNT) * v.duration;
+              v.currentTime = progress * v.duration;
               v.requestVideoFrameCallback(() => {
                 isSeeking = false;
               });
@@ -166,7 +170,7 @@ export default function HeroScroll({
           } else {
             // Fallback for older Safari: just de-duplicate by frame index
             lastVideoFrame = frameIndex;
-            v.currentTime = (frameIndex / FRAME_COUNT) * v.duration;
+            v.currentTime = progress * v.duration;
           }
         }
       }
@@ -181,20 +185,49 @@ export default function HeroScroll({
       }
 
       if (headingRef.current) {
-        const scaleValue = 1 + (progress * 0.20);
-        headingRef.current.style.transform = `scale(${scaleValue})`;
+        const words = headingRef.current.querySelectorAll("span");
+        const fadeWindow = 0.25;
+        const staggerAmount = 0.05;
+        
+        words.forEach((word, index) => {
+          const wordStart = 0.08 + (index * staggerAmount);
+          const wordProgress = Math.max(0, Math.min(1, (progress - wordStart) / fadeWindow));
+          
+          const opacity = 1 - wordProgress;
+          const scale = 1 + (wordProgress * 0.3);
+          const blur = wordProgress * 14;
+          
+          const el = word as HTMLElement;
+          el.style.opacity = opacity.toString();
+          el.style.filter = `blur(${blur}px)`;
+          el.style.transform = `scale(${scale})`;
+        });
       }
 
-      if (ctaBtnRef.current) {
-        if (frameIndex >= 48) {
-          ctaBtnRef.current.style.opacity = "1";
-          ctaBtnRef.current.style.transform = "translate(-50%, -50%) scale(1)";
-          ctaBtnRef.current.style.pointerEvents = "auto";
-        } else {
-          ctaBtnRef.current.style.opacity = "0";
-          ctaBtnRef.current.style.transform = "translate(-50%, -50%) scale(0.9)";
-          ctaBtnRef.current.style.pointerEvents = "none";
-        }
+      if (secondHeadingRef.current) {
+        const words = secondHeadingRef.current.querySelectorAll("span");
+        const fadeWindow = 0.25;
+        const staggerAmount = 0.05;
+        
+        words.forEach((word, index) => {
+          const baseStart = 0.50;
+          const wordStart = baseStart + (index * staggerAmount);
+          const wordProgress = Math.max(0, Math.min(1, (progress - wordStart) / fadeWindow));
+          
+          const opacity = wordProgress;
+          const scale = 1.3 - (wordProgress * 0.3);
+          const blur = (1 - wordProgress) * 14;
+          
+          const el = word as HTMLElement;
+          el.style.opacity = opacity.toString();
+          el.style.filter = `blur(${blur}px)`;
+          el.style.transform = `scale(${scale})`;
+        });
+      }
+
+      if (videoRef.current) {
+        const videoFadeOpacity = progress <= 0.90 ? 1 : Math.max(0, 1 - ((progress - 0.90) / 0.10));
+        videoRef.current.style.opacity = videoFadeOpacity.toString();
       }
     };
 
@@ -276,7 +309,7 @@ export default function HeroScroll({
 
         <video
           ref={videoRef}
-          src="/videos/hero.mp4"
+          src="/videos/heronew.mp4"
           muted
           playsInline
           // @ts-ignore: React sometimes complains about webkit-playsinline but it's required for older iOS
@@ -326,72 +359,47 @@ export default function HeroScroll({
           className="absolute left-0 right-0 flex flex-col items-center pointer-events-none z-20"
           style={{ top: "clamp(100px, 15vh, 200px)", paddingLeft: "1.5rem", paddingRight: "1.5rem", willChange: "transform" }}
         >
-          <span className="mm-label mb-4">Manhattan Motors</span>
-          <h1
-            ref={headingRef}
-            className="text-center font-black tracking-tight leading-none relative text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl"
-            style={{
-              letterSpacing: "-0.02em",
-              transformOrigin: "top center",
-              willChange: "transform"
-            }}
-          >
-            {/* Blurred image mask (the "frosted glass") */}
-            <span
-              ref={textMaskRef}
-              className="absolute inset-0"
+          <div className="relative w-full flex justify-center h-[200px]">
+            <h1
+              ref={headingRef}
+              className="font-heading text-center font-normal leading-none absolute top-0 text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0]"
               style={{
-                // (FALLBACK) backgroundImage: "url(/images/frames/frame_000000.jpg)",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundAttachment: "fixed",
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                color: "transparent",
-                filter: "blur(4px) brightness(1.2)",
-                zIndex: 1,
+                letterSpacing: "-0.02em",
+                transformOrigin: "top center",
               }}
             >
-              {tHero("heading")}
-            </span>
-            {/* Stroke/silhouette for readability */}
-            <span
-              className="relative"
-              style={{
-                color: "transparent",
-                WebkitTextStroke: "1px rgba(255,255,255,0.4)",
-                textShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                zIndex: 2,
-              }}
-            >
-              {tHero("heading")}
-            </span>
-          </h1>
-        </div>
+              {tHero("heading").split(" ").map((word, i) => (
+                <span key={i} className="inline-block mx-[0.12em] will-change-transform" style={{ transformOrigin: "center center" }}>
+                  {word}
+                </span>
+              ))}
+            </h1>
 
-        {/* CTA Button — centered, fades in at frame 48 */}
-        <div 
-          ref={ctaBtnRef}
-          className="absolute left-1/2 top-[60%] sm:top-[55%] md:top-[45%] z-30"
-          style={{ 
-            transform: "translate(-50%, -50%) scale(0.9)", 
-            opacity: 0, 
-            pointerEvents: "none",
-            transition: "opacity 300ms ease, transform 300ms ease" 
-          }}
-        >
-          <Link
-            href="/vehicles"
-            className="hero-btn inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              padding: "0.65rem 1.75rem",
-              borderRadius: "6px",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.2)",
-            }}
-          >
-            {browseVehicles}
-            <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </Link>
+            {/* SECOND HEADING */}
+            <h2
+              ref={secondHeadingRef}
+              className="font-heading text-center font-normal leading-tight absolute top-0 flex flex-col text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0]"
+              style={{
+                letterSpacing: "-0.02em",
+                transformOrigin: "top center",
+              }}
+            >
+              <div className="flex justify-center flex-wrap">
+                {tHero("secondHeadingLine1").split(" ").map((word, i) => (
+                  <span key={i} className="inline-block mx-[0.12em] will-change-transform opacity-0" style={{ transformOrigin: "center center" }}>
+                    {word}
+                  </span>
+                ))}
+              </div>
+              <div className="flex justify-center flex-wrap">
+                {tHero("secondHeadingLine2").split(" ").map((word, i) => (
+                  <span key={`l2-${i}`} className="inline-block mx-[0.12em] will-change-transform opacity-0" style={{ transformOrigin: "center center" }}>
+                    {word}
+                  </span>
+                ))}
+              </div>
+            </h2>
+          </div>
         </div>
 
         {/* Bottom gradient — blends canvas into next section */}
