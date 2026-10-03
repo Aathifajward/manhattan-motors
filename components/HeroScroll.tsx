@@ -10,7 +10,7 @@ interface HeroScrollProps {
   contactUs: string;
 }
 
-const FRAME_COUNT = 81;// frame_000000.jpg ... frame_000100.jpg
+const FRAME_COUNT = 81; // frame_000000.webp ... frame_000080.webp
 
 export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScrollProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -80,7 +80,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-  // ── Scroll-driven frame rendering (cheap canvas draw, zero video seeking) ─
+  // ── Scroll-driven frame rendering with cross-fade blending ───────────────
   useEffect(() => {
     if (!framesLoaded) return;
     const canvas = canvasRef.current;
@@ -92,22 +92,13 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
     let targetProgress = 0;
     let currentProgress = 0;
     let lastDrawnFrame = -1;
+    let lastBlend = -1;
     let isLoopRunning = false;
 
-    const drawFrame = (progress: number) => {
-      const frameIndex = Math.min(FRAME_COUNT - 1, Math.max(0, Math.floor(progress * (FRAME_COUNT - 1))));
-      if (frameIndex === lastDrawnFrame) return;
-      lastDrawnFrame = frameIndex;
-
-      const img = imagesRef.current[frameIndex];
-      if (!img || !img.complete || img.naturalWidth === 0) return;
-
-      const canvasWidth = window.innerWidth;
-      const canvasHeight = window.innerHeight;
+    const getCoverRect = (img: HTMLImageElement, canvasWidth: number, canvasHeight: number) => {
       const imgRatio = img.naturalWidth / img.naturalHeight;
       const canvasRatio = canvasWidth / canvasHeight;
       const isMobile = canvasWidth < 768;
-
       let drawWidth: number, drawHeight: number, offsetX: number, offsetY: number;
 
       if (imgRatio > canvasRatio) {
@@ -122,9 +113,37 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         offsetX = 0;
         offsetY = -(drawHeight - canvasHeight) * 0.5;
       }
+      return { drawWidth, drawHeight, offsetX, offsetY };
+    };
 
+    const drawFrame = (progress: number) => {
+      const exactFrame = progress * (FRAME_COUNT - 1);
+      const frameA = Math.max(0, Math.min(FRAME_COUNT - 1, Math.floor(exactFrame)));
+      const frameB = Math.max(0, Math.min(FRAME_COUNT - 1, frameA + 1));
+      const blend = exactFrame - frameA;
+
+      if (frameA === lastDrawnFrame && blend === lastBlend) return;
+      lastDrawnFrame = frameA;
+      lastBlend = blend;
+
+      const imgA = imagesRef.current[frameA];
+      const imgB = imagesRef.current[frameB];
+      if (!imgA || !imgA.complete || imgA.naturalWidth === 0) return;
+
+      const canvasWidth = window.innerWidth;
+      const canvasHeight = window.innerHeight;
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+
+      const rectA = getCoverRect(imgA, canvasWidth, canvasHeight);
+      ctx.globalAlpha = 1;
+      ctx.drawImage(imgA, rectA.offsetX, rectA.offsetY, rectA.drawWidth, rectA.drawHeight);
+
+      if (imgB && imgB.complete && imgB.naturalWidth > 0 && blend > 0.01 && frameB !== frameA) {
+        const rectB = getCoverRect(imgB, canvasWidth, canvasHeight);
+        ctx.globalAlpha = blend;
+        ctx.drawImage(imgB, rectB.offsetX, rectB.offsetY, rectB.drawWidth, rectB.drawHeight);
+        ctx.globalAlpha = 1;
+      }
 
       if (textContainerRef.current) {
         const fadeOpacity = progress <= 0.15 ? 1 : Math.max(0, 1 - (progress - 0.15) / 0.2);
