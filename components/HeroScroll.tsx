@@ -20,6 +20,12 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
   const [videoLoaded, setVideoLoaded] = useState(false);
   const t = useTranslations("HomePage");
   const tHero = useTranslations("hero");
+  
+  const objectUrlRef = useRef<string | null>(null);
+  const primedRef = useRef(false);
+  const firstFramePaintedRef = useRef(false);
+  const blobLoadedRef = useRef(false);
+  const retryPrimeAttachedRef = useRef(false);
 
   useEffect(() => {
     // Force scroll restoration manual so we don't start halfway down on reload
@@ -48,26 +54,82 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
     const video = videoRef.current;
     if (!video) return;
 
-    const onLoaded = () => setVideoLoaded(true);
-    video.addEventListener("loadedmetadata", onLoaded);
-    video.addEventListener("canplay", onLoaded);
-    video.addEventListener("error", onLoaded);
+    let isMounted = true;
+    const videoSrc = "/videos/heronew-scrub.mp4";
+
+    const attemptPrime = async () => {
+      if (!video || primedRef.current) return;
+      try {
+        video.muted = true;
+        await video.play();
+        video.pause();
+        video.currentTime = 0;
+        primedRef.current = true;
+      } catch (err) {
+        if (!retryPrimeAttachedRef.current) {
+          retryPrimeAttachedRef.current = true;
+          const retry = () => {
+            attemptPrime();
+            window.removeEventListener("touchstart", retry);
+            window.removeEventListener("scroll", retry);
+          };
+          window.addEventListener("touchstart", retry, { once: true, passive: true });
+          window.addEventListener("scroll", retry, { once: true, passive: true });
+        }
+      }
+    };
+
+    const checkLoaded = () => {
+      if (blobLoadedRef.current && video.readyState >= 2) {
+        setVideoLoaded(true);
+        attemptPrime();
+      }
+    };
+
+    const onLoadedData = () => {
+      checkLoaded();
+    };
+
+    video.addEventListener("loadeddata", onLoadedData);
+    video.addEventListener("error", onLoadedData); // ensure it doesn't block forever
+
+    fetch(videoSrc)
+      .then((res) => {
+        if (!res.ok) throw new Error("Fetch failed");
+        return res.blob();
+      })
+      .then((blob) => {
+        if (!isMounted) return;
+        const objectUrl = URL.createObjectURL(blob);
+        objectUrlRef.current = objectUrl;
+        video.src = objectUrl;
+        blobLoadedRef.current = true;
+        checkLoaded();
+      })
+      .catch((err) => {
+        if (!isMounted) return;
+        video.src = videoSrc;
+        blobLoadedRef.current = true;
+        checkLoaded();
+      });
 
     const resetTime = () => {
       if (video) video.currentTime = 0;
     };
     
-    // Reset on mount, loadedmetadata, etc.
     resetTime();
     window.addEventListener("DOMContentLoaded", resetTime);
     window.addEventListener("pageshow", resetTime);
 
     return () => {
-      video.removeEventListener("loadedmetadata", onLoaded);
-      video.removeEventListener("canplay", onLoaded);
-      video.removeEventListener("error", onLoaded);
+      isMounted = false;
+      video.removeEventListener("loadeddata", onLoadedData);
+      video.removeEventListener("error", onLoadedData);
       window.removeEventListener("DOMContentLoaded", resetTime);
       window.removeEventListener("pageshow", resetTime);
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+      }
     };
   }, []);
 
@@ -84,8 +146,31 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
     let lastWriteStamp = 0;
     let posterFaded = false;
 
+    const hidePoster = () => {
+      if (!posterFaded && posterRef.current) {
+        posterRef.current.style.opacity = "0";
+        posterFaded = true;
+      }
+    };
+
+    const onFirstFrame = () => {
+      firstFramePaintedRef.current = true;
+      if (targetTime > 0) {
+        hidePoster();
+      }
+    };
+
     const onSeeked = () => {
       seekInFlight = false;
+      if (!firstFramePaintedRef.current) {
+        if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+          (video as any).requestVideoFrameCallback(() => {
+            onFirstFrame();
+          });
+        } else {
+          onFirstFrame();
+        }
+      }
     };
     video.addEventListener("seeked", onSeeked);
 
@@ -115,6 +200,8 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
       // Video fade near the end (last 10% of scroll)
       const duration = video.duration || 1;
       const progress = easedTime / duration;
+      
+      // Force video opacity to 1 before 90% scroll
       if (progress > 0.9) {
         video.style.opacity = Math.max(0, 1 - (progress - 0.9) * 10).toString();
       } else {
@@ -133,18 +220,17 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
       const progress = scrollableHeight > 0 ? -rect.top / scrollableHeight : 0;
       const p = Math.max(0, Math.min(1, progress));
       
-      if (p > 0 && !posterFaded && posterRef.current) {
-        posterRef.current.style.opacity = "0";
-        posterFaded = true;
+      if (video.duration) {
+        targetTime = p * video.duration;
+      }
+
+      if (p > 0 && firstFramePaintedRef.current) {
+        hidePoster();
       }
 
       if (textContainerRef.current) {
         const fadeOpacity = p <= 0.15 ? 1 : Math.max(0, 1 - (p - 0.15) / 0.2);
         textContainerRef.current.style.opacity = fadeOpacity.toString();
-      }
-
-      if (video.duration) {
-        targetTime = p * video.duration;
       }
     };
 
@@ -171,12 +257,12 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         <div className="absolute inset-0" style={{ zIndex: 1 }}>
           <video
             ref={videoRef}
-            src="/videos/heronew-scrub.mp4"
             muted
             playsInline
             preload="auto"
             poster="/images/frames/frame_000000.webp"
             className="absolute inset-0 w-full h-full object-cover [object-position:30%_center] md:[object-position:center]"
+            style={{ opacity: 1 }}
           />
           {/* Start Frame Poster (fades out on scroll) */}
           <img
