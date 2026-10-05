@@ -162,7 +162,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
 
   return (
     <section ref={containerRef} className="relative w-full" style={{ height: "400vh", background: "var(--mm-navy)" }}>
-      <div ref={stickyRef} className="sticky top-0 h-screen w-full overflow-hidden" style={{ backgroundColor: "#0A0E14" }}>
+      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden" style={{ backgroundColor: "#0A0E14" }}>
         <div
           className="absolute inset-0 pointer-events-none z-0"
           style={{ background: "radial-gradient(ellipse 70% 55% at 50% 68%, rgba(45,127,249,0.13) 0%, rgba(45,127,249,0.04) 50%, transparent 80%)" }}
