@@ -194,5 +194,42 @@
     "heading": "TRUSTED VEHICLES. FAIR PRICES.",
     "secondHeadingLine1": "We Don't Just Sell Cars.",
     "secondHeadingLine2": "We Find Your Perfect Match."
+  },
+  "Statement": {
+    "headlineLine1": "Headline line one",
+    "headlineLine2": "Headline line two",
+    "paragraph": "A short paragraph describing the process or the commitment to quality.",
+    "startProject": "Start your project"
+  },
+  "IdentityPanels": {
+    "panel1Title": "Our Vehicles",
+    "panel1Text": "A hand-picked used-vehicle stock, inspected and ready to drive.",
+    "panel1Button": "View Vehicles",
+    "panel2Title": "Fair Prices",
+    "panel2Text": "Clear, honest pricing with no hidden fees.",
+    "panel2Button": "Contact Us",
+    "panel3Title": "Trusted Service",
+    "panel3Text": "Japan-wide, with support in English and Japanese.",
+    "panel3Button": "Contact Us"
+  },
+  "WordReveal": {
+    "sentence": "We buy and sell quality used vehicles across Japan. Every car is inspected, priced fairly and explained honestly, so you can drive away with confidence.",
+    "caption": "Manhattan Motors, Japan"
+  },
+  "VehicleSlides": {
+    "featured": "FEATURED",
+    "viewVehicle": "View vehicle",
+    "viewAllVehicles": "View all vehicles",
+    "mileage": "Mileage",
+    "fuel": "Fuel",
+    "transmission": "Transmission",
+    "location": "Location",
+    "price": "Price"
+  },
+  "DriveEnd": {
+    "label": "MANHATTAN MOTORS",
+    "headline1a": "Your next",
+    "headline1b": "drive",
+    "headline2": "starts here."
   }
 }

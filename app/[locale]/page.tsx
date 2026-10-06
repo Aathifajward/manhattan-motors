@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { createInquiry } from "@/lib/actions/inquiry";
 import HeroScroll from "@/components/HeroScroll";
+import IdentityPanels from "@/components/IdentityPanels";
+import WordReveal from "@/components/WordReveal";
+import VehicleSlides from "@/components/VehicleSlides";
+import DriveEnd from "@/components/DriveEnd";
 import { Car, Truck, Bus, Tractor, Bike } from "lucide-react";
 import FadeInSection from "@/components/FadeInSection";
 import { MotionCard, MotionLink, MotionExternalLink, MotionButton } from "@/components/MotionElements";
@@ -68,6 +72,11 @@ export default async function Home({
         browseVehicles={t("browseVehicles")}
         contactUs={t("contactUs")}
       />
+
+      <IdentityPanels />
+      <WordReveal />
+      <VehicleSlides vehicles={featuredVehicles} />
+      <DriveEnd />
 
       {/* Blue accent divider */}
       <div style={{ height: "1px", background: `linear-gradient(to right, transparent, ${BLUE_GLOW}, transparent)` }} />

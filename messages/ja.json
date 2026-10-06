@@ -196,5 +196,42 @@
     "heading": "信頼の車両。公正な価格。",
     "secondHeadingLine1": "私たちは車を売るだけではありません。",
     "secondHeadingLine2": "あなたに最適な一台をお見つけします。"
+  },
+  "Statement": {
+    "headlineLine1": "Headline line one",
+    "headlineLine2": "Headline line two",
+    "paragraph": "A short paragraph describing the process or the commitment to quality.",
+    "startProject": "プロジェクトを開始"
+  },
+  "IdentityPanels": {
+    "panel1Title": "私たちの車両",
+    "panel1Text": "厳選された中古車在庫。点検済みでいつでも乗れる状態です。",
+    "panel1Button": "車両を見る",
+    "panel2Title": "公正な価格",
+    "panel2Text": "隠し費用のない、透明で誠実な価格設定。",
+    "panel2Button": "お問い合わせ",
+    "panel3Title": "信頼のサービス",
+    "panel3Text": "日本全国対応。英語と日本語でサポートします。",
+    "panel3Button": "お問い合わせ"
+  },
+  "WordReveal": {
+    "sentence": "私たちは日本全国で高品質な中古車を買取・販売しています。すべての車を点検し、適正な価格をつけ、誠実にご説明しますので、安心してお乗りいただけます。",
+    "caption": "Manhattan Motors, Japan"
+  },
+  "VehicleSlides": {
+    "featured": "おすすめ",
+    "viewVehicle": "車両を見る",
+    "viewAllVehicles": "すべての車両を見る",
+    "mileage": "走行距離",
+    "fuel": "燃料",
+    "transmission": "トランスミッション",
+    "location": "所在地",
+    "price": "価格"
+  },
+  "DriveEnd": {
+    "label": "MANHATTAN MOTORS",
+    "headline1a": "次の一台は、",
+    "headline1b": "",
+    "headline2": "ここから。"
   }
 }
