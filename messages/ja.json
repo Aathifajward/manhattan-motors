@@ -34,7 +34,6 @@
     "businessHoursValue": "月〜金, 9:00 - 18:00",
     "sellBannerTitle": "売りたい車両はありますか？ご相談ください。",
     "contactUsNow": "お問い合わせはこちら",
-    "contactUs": "お問い合わせ",
     "formName": "お名前",
     "formEmail": "メールアドレス",
     "formPhone": "電話番号",
@@ -52,7 +51,7 @@
     "formTypeTruck": "トラック・バン",
     "formTypeMachinery": "機械・パーツ",
     "formTypeMotorcycle": "バイク",
-    "formTypeMotorcycle": "バイク",
+    "formTypeSell": "車を売りたい",
     "addressValueMap": "〒448-0003\n愛知県刈谷市一ツ木町3-12-5",
     "reachUs": "お問い合わせ窓口",
     "phone": "電話番号",
@@ -60,7 +59,6 @@
     "line": "LINE",
     "loading": "読み込み中..."
   },
-
   "Nav": {
     "vehicles": "車両一覧",
     "about": "会社概要",
@@ -85,12 +83,11 @@
   "AboutPage": {
     "title": "マンハッタンモータースについて",
     "body": "愛知県刈谷市を拠点に、日本全国で質の高い中古車を売買しています。売却をご検討の方も、次の一台をお探しの方も、正直な査定・公正な価格・日本国内での手続きをすべてお任せください。",
-    "businessTypeValue": "中古車・機械の国内売買",
+    "businessTypeValue": "中古車・機械・部品の輸出販売",
     "companyInfo": "会社情報",
     "companyName": "会社名（法人名）",
     "companyNameValue": "株式会社MANHATTAN MOTORS",
     "businessType": "事業内容",
-    "businessTypeValue": "中古車・機械・部品の輸出販売",
     "representative": "代表者",
     "representativeValue": "マズールディーン",
     "address": "登録所在地",
@@ -198,21 +195,69 @@
     "secondHeadingLine2": "あなたに最適な一台をお見つけします。"
   },
   "Statement": {
-    "headlineLine1": "Headline line one",
-    "headlineLine2": "Headline line two",
-    "paragraph": "A short paragraph describing the process or the commitment to quality.",
-    "startProject": "プロジェクトを開始"
+    "headlineLine1": "クルマの売買を、",
+    "headlineLine2": "最後まで丁寧に。",
+    "paragraph": "誠実な査定から日本国内の名義変更・書類手続きまで、すべての工程を当社が代行します。安心してご売却・ご購入いただけます。",
+    "startProject": "お車を売却する",
+    "sellCta": "お車を売却する",
+    "services": {
+      "appraisal": {
+        "title": "車両査定",
+        "text": "出張査定は無料。誠実に評価いたします。"
+      },
+      "offer": {
+        "title": "適正な買取価格",
+        "text": "明確な価格、スピーディーなお支払い、追加費用なし。"
+      },
+      "prep": {
+        "title": "点検・整備",
+        "text": "すべての車両を点検・整備してから販売します。"
+      },
+      "handover": {
+        "title": "引き渡し・書類手続き",
+        "text": "名義変更などの手続きも当社が代行します。"
+      }
+    }
   },
   "IdentityPanels": {
-    "panel1Title": "私たちの車両",
-    "panel1Text": "厳選された中古車在庫。点検済みでいつでも乗れる状態です。",
-    "panel1Button": "車両を見る",
-    "panel2Title": "公正な価格",
-    "panel2Text": "隠し費用のない、透明で誠実な価格設定。",
-    "panel2Button": "お問い合わせ",
-    "panel3Title": "信頼のサービス",
-    "panel3Text": "日本全国対応。英語と日本語でサポートします。",
-    "panel3Button": "お問い合わせ"
+    "short": {
+      "CAR": "乗用車",
+      "SUV": "SUV",
+      "VAN": "バン",
+      "TRUCK": "トラック"
+    },
+    "categories": {
+      "CAR": {
+        "title": "乗用車",
+        "text": "コンパクトカーからファミリーカー、スポーツカーまで。点検済みですぐにお乗りいただけます。",
+        "button": "乗用車を見る"
+      },
+      "SUV": {
+        "title": "SUV",
+        "text": "どんな道も、どんな荷物も。頼れるSUV・クロスオーバー。",
+        "button": "SUVを見る"
+      },
+      "VAN": {
+        "title": "バン",
+        "text": "ご家族用から業務用まで、実用的なバンを取り揃えています。",
+        "button": "バンを見る"
+      },
+      "TRUCK": {
+        "title": "トラック",
+        "text": "お仕事や運搬に頼れるトラック。",
+        "button": "トラックを見る"
+      },
+      "MACHINERY": {
+        "title": "建設機械・部品",
+        "text": "産業・建設の現場を支える重機と部品。",
+        "button": "機械を見る"
+      },
+      "MOTORCYCLE": {
+        "title": "バイク",
+        "text": "通勤からツーリングまで楽しめるバイク。",
+        "button": "バイクを見る"
+      }
+    }
   },
   "WordReveal": {
     "sentence": "私たちは日本全国で高品質な中古車を買取・販売しています。すべての車を点検し、適正な価格をつけ、誠実にご説明しますので、安心してお乗りいただけます。",
@@ -233,5 +278,30 @@
     "headline1a": "次の一台は、",
     "headline1b": "",
     "headline2": "ここから。"
+  },
+  "LocationSection": {
+    "label": "アクセス",
+    "heading": "ショールームへお越しください",
+    "addressLabel": "住所",
+    "phoneLabel": "電話番号",
+    "hoursLabel": "営業時間",
+    "directions": "ルートを検索",
+    "mapTitle": "Google マップ — マンハッタンモータース ショールームの所在地"
+  },
+  "SellSection": {
+    "heading": "お車の売却をお考えですか？",
+    "subline": "お車の詳細をお知らせいただければ、担当者よりご連絡いたします。",
+    "sellCta": "お車を売却する",
+    "callCta": "お電話でのご相談",
+    "backToTop": "ページ上部へ戻る"
+  },
+  "ContactPage": {
+    "label": "お問い合わせ",
+    "title": "お気軽にご連絡ください",
+    "subtitle": "車両に関するご質問や、日本からのご購入についてのご相談など、お気軽にメッセージをお送りください。担当者より折り返しご連絡いたします。",
+    "sellLabel": "お車の売却",
+    "sellTitle": "お車の詳細をお知らせください",
+    "sellSubtitle": "車両情報をお送りいただければ、誠実な査定と明確な買取価格をご提示いたします。",
+    "sent": "メッセージを送信しました。担当者より折り返しご連絡いたします。"
   }
 }

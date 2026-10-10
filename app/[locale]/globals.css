@@ -18,8 +18,31 @@
   --color-mm-navy: var(--mm-navy);
   --color-mm-blue: var(--mm-blue);
   --color-mm-cool-gray: var(--mm-cool-gray);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-bodoni), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* DM Sans ships as a self-hosted @fontsource variable face (imported in the
+   root layout), so it has no next/font variable — name the family here. */
+:root {
+  --font-dm: "DM Sans Variable", system-ui, sans-serif;
+}
+
+/* Fonts live in a non-inline @theme so the `font-heading` / `font-body`
+   utilities compile to var(--font-heading) / var(--font-body) and can be
+   re-pointed per locale by the cascade (see the html[lang="ja"] block). */
+@theme {
+  --font-heading: var(--font-clash), system-ui, sans-serif;
+  --font-body: var(--font-dm);
+  /* `font-sans` is kept as an alias of the body face for existing call sites. */
+  --font-sans: var(--font-body);
+}
+
+/* Neither Clash Display nor DM Sans has Japanese glyphs — the ja locale uses a
+   system font stack (no webfont download, so nothing for the bundler to
+   resolve). Unlayered, and more specific than :root, so it beats the @theme
+   defaults. */
+:lang(ja), html[lang="ja"] {
+  --font-heading: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", system-ui, sans-serif;
+  --font-body: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", "Noto Sans JP", system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -29,13 +52,50 @@
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+/* Element defaults sit in @layer base so per-element Tailwind utilities
+   (tracking-widest, font-light, …) still win at the call site. */
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+  }
+
+  /* Clash Display for every heading level: tight tracking, medium weight. */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  /* Button text is display-face too — uppercase and wide-tracked at call sites. */
+  button,
+  [type="button"],
+  [type="submit"],
+  [type="reset"] {
+    font-family: var(--font-heading);
+    font-weight: 600;
+  }
+
+  /* Form fields stay on the body face so long input stays readable. */
+  input, textarea, select {
+    font-family: var(--font-body);
+  }
 }
 
-h1, h2, h3, h4, h5, h6 {
+/* Descriptive paragraph copy: DM Sans, generous leading, slightly muted. */
+.mm-body-copy {
+  font-family: var(--font-body);
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Small uppercase labels, counters and numerals — Clash Display. */
+.mm-meta {
   font-family: var(--font-heading);
+  font-weight: 500;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -49,8 +109,9 @@ h1, h2, h3, h4, h5, h6 {
 /* Electric blue eyebrow label */
 .mm-label {
   display: inline-block;
+  font-family: var(--font-heading);
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--mm-blue);
@@ -96,12 +157,13 @@ h1, h2, h3, h4, h5, h6 {
 /* ── Glassmorphic input ── */
 .mm-glass-input {
   width: 100%;
+  font-family: var(--font-body);
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 10px;
   padding: 0.5rem 0.75rem;
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 400;
   color: #fff;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -121,9 +183,10 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.25rem;
   padding: 0.3rem 0.75rem;
   border-radius: 9999px;
+  font-family: var(--font-heading);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   color: rgba(255,255,255,0.7);
   background: rgba(45,127,249,0.08);
   border: 1px solid rgba(45,127,249,0.18);

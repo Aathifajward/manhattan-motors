@@ -213,7 +213,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         >
           <div className="flex flex-col items-center gap-4">
             <div className="h-10 w-10 animate-spin rounded-full border-2" style={{ borderColor: "rgba(45,127,249,0.15)", borderTopColor: "#2D7FF9" }} />
-            <span className="text-xs font-medium tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>
+            <span className="text-xs tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.3)" }}>
               {t("loading")}
             </span>
           </div>

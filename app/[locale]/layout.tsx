@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
-import { Bodoni_Moda } from "next/font/google";
-import { GeistSans } from "geist/font/sans";
+import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import FooterStack from "@/components/scroll/FooterStack";
+import "@fontsource-variable/dm-sans";
 import "./globals.css";
 
-const bodoni = Bodoni_Moda({
-  variable: "--font-bodoni",
-  subsets: ["latin"],
+// Primary display face — variable, 200-700, used for headings, buttons and labels.
+const clash = localFont({
+  src: "../../public/fonts/ClashDisplay-Variable.woff2",
+  weight: "200 700",
+  style: "normal",
+  variable: "--font-clash",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -39,11 +44,8 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html
-      lang={locale}
-      className={`${GeistSans.variable} ${bodoni.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col font-sans" style={{ backgroundColor: "#0A0E14", color: "#fff" }}>
+    <html lang={locale} className={`${clash.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col font-body" style={{ backgroundColor: "#0A0E14", color: "#fff" }}>
         {/* Page-level continuous blue glow */}
         <div aria-hidden="true" style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: -1, overflow: "hidden" }}>
           <div style={{ position: "absolute", top: "5vh", left: "50%", marginLeft: "-450px", width: "900px", height: "600px", background: "radial-gradient(ellipse at center, rgba(45,127,249,0.10) 0%, transparent 65%)" }} />
@@ -53,7 +55,9 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <Navbar />
           <main className="flex flex-1 flex-col pt-[88px]">{children}</main>
-          <Footer />
+          <FooterStack>
+            <Footer />
+          </FooterStack>
         </NextIntlClientProvider>
       </body>
     </html>

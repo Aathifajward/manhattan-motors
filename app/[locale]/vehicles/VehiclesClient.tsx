@@ -116,7 +116,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
     <div className="flex flex-col gap-5">
       {/* ── Categories (always visible) ── */}
       <div>
-        <h3 className="text-[11px] font-bold text-[#2D7FF9] mb-2.5 uppercase tracking-[0.2em]">{t("category")}</h3>
+        <h3 className="text-[11px] text-[#2D7FF9] mb-2.5 uppercase tracking-[0.2em]">{t("category")}</h3>
         <div className="flex flex-col gap-0.5">
           {["CAR", "TRUCK", "VAN", "MOTORCYCLE", "MACHINERY"].map(cat => {
             const isActive = categories.includes(cat);
@@ -138,7 +138,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
                     <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                   )}
                 </div>
-                <span className="text-[12px] font-medium text-zinc-300 group-hover:text-white transition-colors">{tLabels(`category.${cat}`)}</span>
+                <span className="text-[12px] text-zinc-300 group-hover:text-white transition-colors">{tLabels(`category.${cat}`)}</span>
               </button>
             );
           })}
@@ -154,7 +154,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           onClick={() => setMakesOpen(!makesOpen)}
           className="flex items-center justify-between w-full group"
         >
-          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">{t("makeBrand")}</h3>
+          <h3 className="text-[11px] text-[#2D7FF9] uppercase tracking-[0.2em]">{t("makeBrand")}</h3>
           <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-200 ${makesOpen ? 'rotate-180' : ''}`} />
         </button>
         {makesOpen && (
@@ -179,14 +179,14 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
                       <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
                     )}
                   </div>
-                  <span className="text-[12px] font-medium text-zinc-300 group-hover:text-white transition-colors">{make}</span>
+                  <span className="text-[12px] text-zinc-300 group-hover:text-white transition-colors">{make}</span>
                 </button>
               );
             })}
             {makes.length > 5 && (
               <button
                 onClick={() => setMakesExpanded(!makesExpanded)}
-                className="mt-1 ml-2 text-[11px] font-semibold tracking-wide transition-colors"
+                className="mt-1 ml-2 text-[11px] tracking-wide transition-colors"
                 style={{ color: '#2D7FF9' }}
               >
                 {makesExpanded ? t("showLess") : t("showMore", { count: makes.length - 5 })}
@@ -202,8 +202,8 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
       {/* ── Price Range (always visible) ── */}
       <div>
         <div className="flex justify-between items-baseline mb-1">
-          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">{t("price")}</h3>
-          <span className="text-[11px] font-medium text-zinc-500">{priceFormatter.format(priceRange[0])} — {priceFormatter.format(priceRange[1])}</span>
+          <h3 className="text-[11px] text-[#2D7FF9] uppercase tracking-[0.2em]">{t("price")}</h3>
+          <span className="text-[11px] text-zinc-500">{priceFormatter.format(priceRange[0])} — {priceFormatter.format(priceRange[1])}</span>
         </div>
         <div className="relative w-full h-7 flex items-center">
           <div className="absolute w-full h-[3px] rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
@@ -246,7 +246,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           onClick={() => setYearOpen(!yearOpen)}
           className="flex items-center justify-between w-full group"
         >
-          <h3 className="text-[11px] font-bold text-[#2D7FF9] uppercase tracking-[0.2em]">{t("year")}</h3>
+          <h3 className="text-[11px] text-[#2D7FF9] uppercase tracking-[0.2em]">{t("year")}</h3>
           <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-200 ${yearOpen ? 'rotate-180' : ''}`} />
         </button>
         {yearOpen && (
@@ -267,10 +267,10 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           Mobile filter button (visible < md)
           ═══════════════════════════════════════════ */}
       <div className="md:hidden flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{t("title")}</h1>
+        <h1 className="font-heading text-2xl tracking-tight">{t("title")}</h1>
         <button
           onClick={() => setShowMobileFilters(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-200"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm tracking-wide transition-all duration-200"
           style={{
             background: 'rgba(20,24,32,0.6)',
             backdropFilter: 'blur(12px)',
@@ -281,7 +281,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           <Filter size={15} />
           {t("filters")}
           {hasActiveFilters && (
-            <span className="ml-1 w-5 h-5 rounded-full bg-[#2D7FF9] text-[10px] font-bold flex items-center justify-center">
+            <span className="ml-1 w-5 h-5 rounded-full bg-[#2D7FF9] text-[10px] flex items-center justify-center">
               {categories.length + selectedMakes.length + (minYear || maxYear ? 1 : 0) + (priceRange[0] > minDbPrice || priceRange[1] < maxDbPrice ? 1 : 0)}
             </span>
           )}
@@ -304,9 +304,9 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>{t("filters")}</h2>
+            <h2 className="font-heading text-lg tracking-wide">{t("filters")}</h2>
             <div className="flex items-center gap-4">
-              <button onClick={clearFilters} className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors">{t("reset")}</button>
+              <button onClick={clearFilters} className="text-[11px] uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors">{t("reset")}</button>
               <button className="text-zinc-500 hover:text-white transition-colors" onClick={() => setShowMobileFilters(false)}>
                 <X size={20} />
               </button>
@@ -314,7 +314,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           </div>
           {filterContent}
           <button
-            className="w-full mt-6 py-3 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
+            className="w-full mt-6 py-3 text-sm uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
             style={{ background: '#2D7FF9', borderRadius: '10px', boxShadow: '0 0 20px rgba(45,127,249,0.25)' }}
             onClick={() => setShowMobileFilters(false)}
           >
@@ -338,10 +338,10 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           }}
         >
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-bold tracking-wide" style={{ fontFamily: 'var(--font-heading)' }}>{t("filters")}</h2>
+            <h2 className="font-heading text-sm tracking-wide">{t("filters")}</h2>
             <button
               onClick={clearFilters}
-              className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors"
+              className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors"
             >
               {t("reset")}
             </button>
@@ -355,8 +355,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
           ═══════════════════════════════════════════ */}
       <main className="flex-1 min-w-0 flex flex-col gap-6">
         <h1
-          className="hidden md:block text-3xl font-bold tracking-tight"
-          style={{ fontFamily: 'var(--font-heading)' }}
+          className="font-heading hidden md:block text-3xl tracking-tight"
         >
           {t("title")}
         </h1>
@@ -383,13 +382,13 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
             />
           </div>
           <div className="flex items-center gap-5 w-full sm:w-auto justify-between sm:justify-end">
-            <span className="text-[12px] font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <span className="mm-meta text-[12px] uppercase tracking-widest whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.35)' }}>
               {t("vehiclesFound", { count: filteredVehicles.length })}
             </span>
             <select
               value={sortOption}
               onChange={e => setSortOption(e.target.value)}
-              className="appearance-none text-[13px] font-medium text-white px-4 py-2.5 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none"
+              className="font-body appearance-none text-[13px] text-white px-4 py-2.5 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none"
               style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.1)',
@@ -438,7 +437,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
             )}
             <button
               onClick={clearFilters}
-              className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors ml-2"
+              className="text-[11px] uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors ml-2"
             >
               {t("clearAll")}
             </button>
@@ -455,7 +454,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
             }}
           >
             <p className="text-zinc-500 text-sm">{t("empty") || t("emptyFallback")}</p>
-            <button onClick={clearFilters} className="mt-4 text-[#2D7FF9] hover:underline font-semibold text-sm">{t("clearAllFilters")}</button>
+            <button onClick={clearFilters} className="mt-4 text-[#2D7FF9] hover:underline text-sm">{t("clearAllFilters")}</button>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
@@ -515,7 +514,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
                       <div className="flex h-full w-full items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>{t("noImage")}</div>
                     )}
                     <div
-                      className="absolute top-4 left-4 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest rounded"
+                      className="mm-meta absolute top-4 left-4 px-2.5 py-1 text-[10px] uppercase tracking-widest rounded"
                       style={{
                         background: badgeBg,
                         color: badgeColor,
@@ -528,14 +527,14 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
                   </div>
 
                   <div className="flex flex-col p-5 gap-2">
-                    <h2 className="text-base font-bold leading-snug text-white group-hover:text-[#2D7FF9] transition-colors duration-300 line-clamp-1">
+                    <h2 className="text-base leading-snug text-white group-hover:text-[#2D7FF9] transition-colors duration-300 line-clamp-1">
                       {vehicle.year} {vehicle.make} {vehicle.model}
                     </h2>
-                    <p className="text-[12px] line-clamp-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    <p className="font-body text-[12px] line-clamp-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                       {vehicle.mileageKm.toLocaleString()} km • {transmissionLabels[vehicle.transmission] ?? vehicle.transmission} • {fuelTypeLabels[vehicle.fuelType] ?? vehicle.fuelType}
                     </p>
                     <div className="mt-2 pt-3 flex items-center justify-between" style={{ borderTop: '1px solid rgba(45,127,249,0.1)' }}>
-                      <p className="text-xl font-black tracking-tight" style={{ color: '#2D7FF9' }}>
+                      <p className="mm-meta text-xl tracking-tight" style={{ color: '#2D7FF9' }}>
                         {priceFormatter.format(vehicle.priceJpy)}
                       </p>
                       <div className="text-[#2D7FF9] opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">

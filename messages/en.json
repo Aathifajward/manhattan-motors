@@ -3,7 +3,7 @@
     "title": "Buy Smart.\nSell Fair.\nAll in Japan.",
     "subtitle": "We buy and sell quality used vehicles across Japan — straightforward pricing, no auctions, no middlemen.",
     "browseVehicles": "Browse Vehicles",
-    "contactUs": "Get in Touch",
+    "contactUs": "Contact Us",
     "featured": "Available Now",
     "viewAll": "Full Inventory",
     "howWeWork": "How We Work",
@@ -34,7 +34,6 @@
     "businessHoursValue": "Mon – Fri, 9:00 AM – 6:00 PM",
     "sellBannerTitle": "Have a vehicle to sell? Let's talk.",
     "contactUsNow": "Start a Conversation",
-    "contactUs": "Contact Us",
     "formName": "Your Name",
     "formEmail": "Email Address",
     "formPhone": "Phone Number",
@@ -52,7 +51,7 @@
     "formTypeTruck": "Truck / Van",
     "formTypeMachinery": "Machinery / Parts",
     "formTypeMotorcycle": "Motorcycle",
-    "formTypeMotorcycle": "Motorcycle",
+    "formTypeSell": "Sell My Vehicle",
     "addressValueMap": "3-12-5 Hitotsugi-cho\nKariya City, Aichi 448-0003\nJapan",
     "reachUs": "Reach Us",
     "phone": "Phone",
@@ -196,21 +195,69 @@
     "secondHeadingLine2": "We Find Your Perfect Match."
   },
   "Statement": {
-    "headlineLine1": "Headline line one",
-    "headlineLine2": "Headline line two",
-    "paragraph": "A short paragraph describing the process or the commitment to quality.",
-    "startProject": "Start your project"
+    "headlineLine1": "Buying and selling,",
+    "headlineLine2": "handled properly.",
+    "paragraph": "From honest appraisal to full Japanese paperwork, we take care of every step so you can buy or sell with confidence.",
+    "startProject": "Sell your vehicle",
+    "sellCta": "Sell your vehicle",
+    "services": {
+      "appraisal": {
+        "title": "Vehicle Appraisal",
+        "text": "Free on-site inspection and honest assessment."
+      },
+      "offer": {
+        "title": "Fair Purchase Offer",
+        "text": "Clear price, quick payment, no hidden fees."
+      },
+      "prep": {
+        "title": "Inspection & Prep",
+        "text": "Every vehicle checked and serviced before sale."
+      },
+      "handover": {
+        "title": "Handover & Paperwork",
+        "text": "Registration transfer handled for you."
+      }
+    }
   },
   "IdentityPanels": {
-    "panel1Title": "Our Vehicles",
-    "panel1Text": "A hand-picked used-vehicle stock, inspected and ready to drive.",
-    "panel1Button": "View Vehicles",
-    "panel2Title": "Fair Prices",
-    "panel2Text": "Clear, honest pricing with no hidden fees.",
-    "panel2Button": "Contact Us",
-    "panel3Title": "Trusted Service",
-    "panel3Text": "Japan-wide, with support in English and Japanese.",
-    "panel3Button": "Contact Us"
+    "short": {
+      "CAR": "Cars",
+      "SUV": "SUVs",
+      "VAN": "Vans",
+      "TRUCK": "Trucks"
+    },
+    "categories": {
+      "CAR": {
+        "title": "Passenger Cars",
+        "text": "Compact, family and sports cars, inspected and ready to drive.",
+        "button": "Browse cars"
+      },
+      "SUV": {
+        "title": "SUVs",
+        "text": "Capable SUVs and crossovers for every road and every load.",
+        "button": "Browse SUVs"
+      },
+      "VAN": {
+        "title": "Vans",
+        "text": "Practical vans for families, work and business.",
+        "button": "Browse vans"
+      },
+      "TRUCK": {
+        "title": "Trucks",
+        "text": "Reliable trucks for work and transport.",
+        "button": "Browse trucks"
+      },
+      "MACHINERY": {
+        "title": "Machinery & Parts",
+        "text": "Heavy machinery and parts for industry and construction.",
+        "button": "Browse machinery"
+      },
+      "MOTORCYCLE": {
+        "title": "Motorcycles",
+        "text": "Motorcycles for commuting and the open road.",
+        "button": "Browse motorcycles"
+      }
+    }
   },
   "WordReveal": {
     "sentence": "We buy and sell quality used vehicles across Japan. Every car is inspected, priced fairly and explained honestly, so you can drive away with confidence.",
@@ -231,5 +278,30 @@
     "headline1a": "Your next",
     "headline1b": "drive",
     "headline2": "starts here."
+  },
+  "LocationSection": {
+    "label": "Find us",
+    "heading": "Visit our showroom",
+    "addressLabel": "Address",
+    "phoneLabel": "Phone",
+    "hoursLabel": "Opening hours",
+    "directions": "Get directions",
+    "mapTitle": "Google Maps — Manhattan Motors showroom location"
+  },
+  "SellSection": {
+    "heading": "Have a vehicle to sell?",
+    "subline": "Tell us about yours and we’ll get back to you.",
+    "sellCta": "Sell your vehicle",
+    "callCta": "Call us",
+    "backToTop": "Back to top"
+  },
+  "ContactPage": {
+    "label": "Contact",
+    "title": "Get in touch",
+    "subtitle": "Questions about a vehicle, or about buying from Japan? Send us a message and we’ll reply shortly.",
+    "sellLabel": "Sell your vehicle",
+    "sellTitle": "Tell us about your vehicle",
+    "sellSubtitle": "Send us the details and we’ll come back to you with an honest appraisal and a clear offer.",
+    "sent": "Thanks — your message is on its way. We’ll be in touch shortly."
   }
 }

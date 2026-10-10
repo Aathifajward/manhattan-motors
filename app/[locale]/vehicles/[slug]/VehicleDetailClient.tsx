@@ -75,7 +75,7 @@ export default function VehicleDetailClient({
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-12 flex flex-col gap-12">
       {/* ── Breadcrumb ── */}
-      <nav className="flex items-center gap-2 text-xs font-medium tracking-wide" style={{ color: "rgba(255,255,255,0.4)" }}>
+      <nav className="flex items-center gap-2 text-xs tracking-wide" style={{ color: "rgba(255,255,255,0.4)" }}>
         <Link href="/" className="hover:text-white transition-colors">{t("home")}</Link>
         <span>/</span>
         <Link href="/vehicles" className="hover:text-white transition-colors">{t("vehicles")}</Link>
@@ -123,7 +123,7 @@ export default function VehicleDetailClient({
         {/* ── Right Column: Info + Overview ── */}
         <div className="flex flex-col">
           <FadeInSection delay={0.1}>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-4" style={{ fontFamily: 'var(--font-heading)' }}>
+            <h1 className="font-heading text-3xl sm:text-5xl tracking-tight mb-4">
               {vehicle.year} {vehicle.make} {vehicle.model}
             </h1>
             <div className="flex flex-wrap gap-2 items-center mb-8">
@@ -144,14 +144,14 @@ export default function VehicleDetailClient({
               </span>
             </div>
             
-            <p className="text-4xl sm:text-5xl font-black tracking-tight mb-6" style={{ color: BLUE }}>
+            <p className="mm-meta text-4xl sm:text-5xl tracking-tight mb-6" style={{ color: BLUE }}>
               {priceFormatter.format(vehicle.priceJpy)}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
               <MotionLink
-                href="/#contact"
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
+                href="/contact"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 font-heading font-semibold text-sm uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
                 style={{
                   background: 'rgba(255,255,255,0.08)',
                   backdropFilter: 'blur(16px)',
@@ -166,7 +166,7 @@ export default function VehicleDetailClient({
                 href="https://line.me/ti/p/~Maz615"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 font-heading font-semibold text-sm uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
                 style={{ background: BLUE, borderRadius: '10px', boxShadow: `0 0 20px rgba(45,127,249,0.25)` }}
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" style={{ color: '#06C755' }}><path d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 3.905 8.91 9.489 9.613.393.076.924.232 1.062.535.125.275.081.71.039.998l-.206 1.258c-.063.385-.297 1.455 1.272.793 1.57-.661 8.468-4.992 10.73-7.925 1.092-1.42 1.614-2.81 1.614-4.272z" /></svg>
@@ -192,63 +192,63 @@ export default function VehicleDetailClient({
 
           <FadeInSection delay={0.2}>
             <section>
-              <h2 className="mb-6 text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{t("overview")}</h2>
+              <h2 className="font-heading mb-6 text-xl tracking-tight">{t("overview")}</h2>
               <div className="mm-glass-card p-6 grid grid-cols-2 gap-x-6 gap-y-6">
                 <div className="flex flex-col gap-4">
                   <div>
-                    <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("status")}</dt>
-                    <dd className="text-sm font-semibold mt-1" style={{ color: badgeColor }}>{statusLabels[vehicle.status] ?? vehicle.status}</dd>
+                    <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("status")}</dt>
+                    <dd className="text-sm mt-1" style={{ color: badgeColor }}>{statusLabels[vehicle.status] ?? vehicle.status}</dd>
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
                   <div>
-                    <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("year")}</dt>
-                    <dd className="text-sm font-semibold text-white mt-1">{vehicle.year}</dd>
+                    <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("year")}</dt>
+                    <dd className="text-sm text-white mt-1">{vehicle.year}</dd>
                   </div>
                 </div>
                 <div className="flex flex-col gap-4">
                   {vehicle.transmission && (
                     <div>
-                      <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("transmission")}</dt>
-                      <dd className="text-sm font-semibold text-white mt-1">{transmissionLabels[vehicle.transmission] ?? vehicle.transmission}</dd>
+                      <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("transmission")}</dt>
+                      <dd className="text-sm text-white mt-1">{transmissionLabels[vehicle.transmission] ?? vehicle.transmission}</dd>
                     </div>
                   )}
                 </div>
                 <div className="flex flex-col gap-4">
                   <div>
-                    <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("category")}</dt>
-                    <dd className="text-sm font-semibold text-white mt-1">{tLabels(`category.${vehicle.category}`)}</dd>
+                    <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("category")}</dt>
+                    <dd className="text-sm text-white mt-1">{tLabels(`category.${vehicle.category}`)}</dd>
                   </div>
                 </div>
                 
                 {vehicle.mileageKm != null && (
                   <div className="flex flex-col gap-4">
                     <div>
-                      <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("mileage")}</dt>
-                      <dd className="text-sm font-semibold text-white mt-1">{vehicle.mileageKm.toLocaleString()} km</dd>
+                      <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("mileage")}</dt>
+                      <dd className="text-sm text-white mt-1">{vehicle.mileageKm.toLocaleString()} km</dd>
                     </div>
                   </div>
                 )}
                 {vehicle.fuelType && (
                   <div className="flex flex-col gap-4">
                     <div>
-                      <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("fuelType")}</dt>
-                      <dd className="text-sm font-semibold text-white mt-1">{fuelTypeLabels[vehicle.fuelType] ?? vehicle.fuelType}</dd>
+                      <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("fuelType")}</dt>
+                      <dd className="text-sm text-white mt-1">{fuelTypeLabels[vehicle.fuelType] ?? vehicle.fuelType}</dd>
                     </div>
                   </div>
                 )}
                 {vehicle.color && (
                   <div className="flex flex-col gap-4">
                     <div>
-                      <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("color")}</dt>
-                      <dd className="text-sm font-semibold text-white mt-1">{vehicle.color}</dd>
+                      <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("color")}</dt>
+                      <dd className="text-sm text-white mt-1">{vehicle.color}</dd>
                     </div>
                   </div>
                 )}
                 <div className="flex flex-col gap-4">
                   <div>
-                    <dt className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("price")}</dt>
-                    <dd className="text-sm font-semibold mt-1" style={{ color: BLUE }}>{priceFormatter.format(vehicle.priceJpy)}</dd>
+                    <dt className="mm-meta text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(255,255,255,0.35)' }}>{t("price")}</dt>
+                    <dd className="text-sm mt-1" style={{ color: BLUE }}>{priceFormatter.format(vehicle.priceJpy)}</dd>
                   </div>
                 </div>
               </div>
@@ -261,14 +261,14 @@ export default function VehicleDetailClient({
       {description && (
         <FadeInSection>
           <section>
-            <h2 className="mb-6 text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{t("description")}</h2>
+            <h2 className="font-heading mb-6 text-xl tracking-tight">{t("description")}</h2>
             {showFallbackNote && (
               <p className="mb-3 text-xs italic" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 {t("descriptionFallbackNote")}
               </p>
             )}
             <div className="mm-glass-card p-6 sm:p-8">
-              <div className="whitespace-pre-line text-[14px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+              <div className="font-body whitespace-pre-line text-[14px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
                 {description}
               </div>
             </div>
@@ -278,15 +278,15 @@ export default function VehicleDetailClient({
 
       <FadeInSection>
         <section>
-          <h2 className="mb-6 text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>{t("location")}</h2>
+          <h2 className="font-heading mb-6 text-xl tracking-tight">{t("location")}</h2>
           <div className="mm-glass-card overflow-hidden" style={{ borderRadius: "20px 6px 20px 6px" }}>
             <div className="flex flex-col md:flex-row">
               <div className="flex flex-col justify-center p-8 md:w-80 shrink-0" style={{ background: 'rgba(10,14,20,0.6)' }}>
-                <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BLUE }}>{tHome("addressLabel")}</div>
+                <div className="mm-meta mb-2 text-[10px] uppercase tracking-widest" style={{ color: BLUE }}>{tHome("addressLabel")}</div>
                 <p className="mb-8 text-[14px] leading-relaxed whitespace-pre-line" style={{ color: "rgba(255,255,255,0.65)" }}>{tHome("addressValueMap")}</p>
-                <div className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: BLUE }}>{tHome("businessHours")}</div>
+                <div className="mm-meta mb-2 text-[10px] uppercase tracking-widest" style={{ color: BLUE }}>{tHome("businessHours")}</div>
                 <p className="text-[14px]" style={{ color: "rgba(255,255,255,0.65)" }}>{tHome("businessHoursValue")}</p>
-                <a href="https://maps.app.goo.gl/FmmMz14kUWkGk1HcA" target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#2D7FF9] hover:text-white transition-colors">
+                <a href="https://maps.app.goo.gl/FmmMz14kUWkGk1HcA" target="_blank" rel="noopener noreferrer" className="mm-meta mt-6 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#2D7FF9] hover:text-white transition-colors">
                   {t("openInMaps")}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </a>

@@ -100,7 +100,7 @@ export default function Navbar() {
             className="flex items-center gap-3 text-white hover:opacity-70 transition-opacity p-2"
             onClick={() => setMobileMenuOpen(true)}
           >
-            <span className="hidden md:block text-xs uppercase font-medium tracking-[0.15em] font-sans">Navigate</span>
+            <span className="hidden md:block font-heading font-semibold text-xs uppercase tracking-[0.15em]">Navigate</span>
             <Menu size={24} />
           </button>
         </div>
@@ -108,7 +108,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay (Moved outside header so fixed inset-0 is relative to viewport) */}
       <div 
-        className={`fixed inset-0 z-[100] transition-all duration-300 ease-in-out md:hidden ${
+        className={`fixed inset-0 z-[100] transition-all duration-300 ease-in-out ${
           mobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         }`}
         style={{
@@ -133,14 +133,14 @@ export default function Navbar() {
             </button>
           </div>
           
-          <nav className="flex flex-col gap-10 text-3xl font-bold text-white tracking-wide items-center justify-center flex-1">
+          <nav className="flex flex-col gap-10 font-body text-3xl text-white tracking-wide items-center justify-center flex-1">
             <Link href="/vehicles" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#2D7FF9] transition-colors">{t("vehicles")}</Link>
             <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#2D7FF9] transition-colors">{t("about")}</Link>
-            <Link href="/#contact" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#2D7FF9] transition-colors">{t("contact")}</Link>
+            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#2D7FF9] transition-colors">{t("contact")}</Link>
           </nav>
           
           <div className="w-full flex flex-col items-center mt-auto pb-12 pt-8 border-t border-white/10">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 mb-6 font-bold">Language / 言語</p>
+            <p className="mm-meta text-xs uppercase tracking-widest text-zinc-500 mb-6">Language / 言語</p>
             <LanguageSwitcher />
           </div>
         </div>

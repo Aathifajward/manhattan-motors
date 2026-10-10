@@ -2,7 +2,14 @@
 
 import { useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useScrollProgress } from "./useScrollProgress";
+
+/** The four steps shown at the end of the section — order defines the stagger. */
+const SERVICES = ["appraisal", "offer", "prep", "handover"] as const;
+
+/** Full-viewport photo the headline zooms into. */
+const STATEMENT_IMAGE = "/images/frames/frame_000040.webp";
 
 export default function StatementReveal() {
   const containerRef = useRef<HTMLElement>(null);
@@ -12,7 +19,7 @@ export default function StatementReveal() {
   const imageRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const logosRef = useRef<HTMLDivElement>(null);
+  const serviceRefs = useRef<(HTMLDivElement | null)[]>([]);
   
   const t = useTranslations("Statement");
 
@@ -57,13 +64,14 @@ export default function StatementReveal() {
       contentRef.current.style.transform = `translateY(${contentTranslate}px)`;
     }
 
-    // 0.60-1.00: logos slide horizontally
-    if (logosRef.current) {
-      const logosOpacity = p <= 0.6 ? 0 : p >= 0.8 ? 1 : (p - 0.6) / 0.2;
-      const logosTranslate = p <= 0.6 ? 100 : 100 - (100 * ((p - 0.6) / 0.4));
-      logosRef.current.style.opacity = String(logosOpacity);
-      logosRef.current.style.transform = `translateX(${logosTranslate}px)`;
-    }
+    // 0.70-1.00: the four service items slide up one after the other
+    serviceRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const start = 0.7 + i * 0.055;
+      const local = Math.min(1, Math.max(0, (p - start) / 0.11));
+      el.style.opacity = String(local);
+      el.style.transform = `translateY(${24 * (1 - local)}px)`;
+    });
   }, []);
 
   useScrollProgress(containerRef, stickyRef, onProgress);
@@ -80,8 +88,8 @@ export default function StatementReveal() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src="/images/sections/statement.webp" 
-            alt="Statement"
+            src={STATEMENT_IMAGE} 
+            alt=""
             className="w-full h-full object-cover"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
@@ -95,7 +103,7 @@ export default function StatementReveal() {
         {/* Headline */}
         <h2 
           ref={headlineRef}
-          className="font-heading text-center font-normal leading-tight text-[clamp(2rem,6vw,5rem)] text-white z-10 w-full px-6 absolute top-1/2 left-1/2 will-change-transform"
+          className="font-heading text-center font-medium leading-tight text-[clamp(2rem,6vw,5rem)] text-white z-10 w-full px-6 absolute top-1/2 left-1/2 will-change-transform"
           style={{ opacity: 0, transform: "translate(-50%, -50%)" }}
         >
           {t("headlineLine1")}<br />{t("headlineLine2")}
@@ -104,27 +112,39 @@ export default function StatementReveal() {
         {/* Secondary Content & Button (Bottom Right) */}
         <div 
           ref={contentRef}
-          className="absolute bottom-1/4 right-6 md:right-24 lg:right-32 flex flex-col items-end text-right z-20 will-change-transform max-w-sm"
+          className="absolute bottom-[38%] md:bottom-1/4 right-6 md:right-24 lg:right-32 flex flex-col items-end text-right z-20 will-change-transform max-w-sm"
           style={{ opacity: 0, transform: "translateY(30px)" }}
         >
-          <p className="text-white text-[clamp(1rem,2vw,1.25rem)] mb-6 opacity-90 leading-relaxed font-sans">
+          <p className="mm-body-copy mb-6">
             {t("paragraph")}
           </p>
-          <button className="px-8 py-3 bg-[#2D7FF9] text-white font-bold uppercase tracking-widest text-xs rounded hover:bg-white hover:text-black transition-colors duration-300">
-            {t("startProject")}
-          </button>
+          <Link
+            href={{ pathname: "/contact", query: { type: "sell" } }}
+            className="px-8 py-3 bg-[#2D7FF9] font-heading font-semibold text-white uppercase tracking-widest text-xs rounded hover:bg-white hover:text-black transition-colors duration-300"
+          >
+            {t("sellCta")}
+          </Link>
         </div>
 
-        {/* Logos sliding row */}
-        <div 
-          ref={logosRef}
-          className="absolute bottom-12 left-0 w-full flex items-center gap-12 px-6 overflow-visible z-20 will-change-transform opacity-50"
-          style={{ opacity: 0, transform: "translateX(100px)" }}
-        >
-          {["Toyota", "Nissan", "Honda", "Mazda", "Subaru"].map(logo => (
-            <span key={logo} className="text-white font-bold uppercase tracking-[0.2em] text-sm md:text-base opacity-70 whitespace-nowrap">
-              {logo}
-            </span>
+        {/* Service steps — slide up one by one at the end of the scroll */}
+        <div className="absolute bottom-8 left-0 w-full px-6 md:px-12 z-20 grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-5 md:gap-8">
+          {SERVICES.map((key, i) => (
+            <div
+              key={key}
+              ref={(el) => { serviceRefs.current[i] = el; }}
+              className="will-change-transform"
+              style={{ opacity: 0, transform: "translateY(24px)" }}
+            >
+              <span className="mm-meta block text-[#2D7FF9] text-xs tracking-[0.2em] mb-1.5">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <h3 className="text-white text-sm md:text-base leading-snug mb-1">
+                {t(`services.${key}.title`)}
+              </h3>
+              <p className="font-body text-white/60 text-xs md:text-sm leading-snug">
+                {t(`services.${key}.text`)}
+              </p>
+            </div>
           ))}
         </div>
       </div>

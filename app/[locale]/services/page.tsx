@@ -37,7 +37,7 @@ export default async function ServicesPage() {
     <div className="flex flex-1 flex-col items-center min-h-screen">
       <div className="mx-auto w-full max-w-5xl px-6 py-24">
         <div className="mb-16 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-black dark:text-white sm:text-5xl">{t("title")}</h1>
+          <h1 className="text-4xl tracking-tight text-black dark:text-white sm:text-5xl">{t("title")}</h1>
           <p className="mt-4 text-xl text-zinc-600 dark:text-zinc-400">
             {t("subtitle")}
           </p>
@@ -52,7 +52,7 @@ export default async function ServicesPage() {
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl text-3xl" style={{ background: "rgba(255,255,255,0.05)" }}>
                 {service.icon}
               </div>
-              <h2 className="mb-3 text-2xl font-bold text-black dark:text-white">{service.title}</h2>
+              <h2 className="mb-3 text-2xl text-black dark:text-white">{service.title}</h2>
               <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
                 {service.desc}
               </p>

@@ -24,9 +24,15 @@ export async function createInquiry(formData: FormData) {
     },
   });
 
+  // Optional: a page can ask to be returned to (e.g. /contact). Relative,
+  // locale-scoped paths only — never trust it as a full URL.
+  const returnTo = formData.get("returnTo") as string | null;
+
   if (slug) {
     redirect(`/${locale}/vehicles/${slug}?sent=true`);
+  } else if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) {
+    redirect(`/${locale}${returnTo}?sent=true`);
   } else {
-    redirect(`/${locale}?sent=true#contact`);
+    redirect(`/${locale}/contact?sent=true`);
   }
 }

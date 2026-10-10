@@ -1,118 +1,193 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
+type Panel = {
+  key: "CAR" | "SUV" | "VAN" | "TRUCK";
+  /** Giant faint word behind the copy. */
+  word: string;
+  image: string;
+  /** Pre-blurred copy used for the text panel (scripts/generate-blur.mjs). */
+  blurSrc: string;
+  /**
+   * object-position for the sharp photo. Pushed to the right so the whole
+   * front of the vehicle sits inside the 60vw box; tune per photo.
+   */
+  position: string;
+};
+
+/**
+ * Four panels on one sticky stage, all sharing a two-column layout: a blurred,
+ * mirrored text panel on the left 40vw and the sharp photo in the right 60vw.
+ * The split is a hard vertical edge — the two sides deliberately do not share a
+ * crop, so the vehicle never looks like it continues across it.
+ *
+ * Adding an entry is enough — the timeline, the "0X / 0N" counter, the vertical
+ * index and the section height all follow the array. MACHINERY and MOTORCYCLE
+ * are parked; their translation keys still exist.
+ */
+const PANELS: Panel[] = [
+  { key: "CAR", word: "CARS", image: "/images/car.jpeg", blurSrc: "/images/blur/car-blur.jpg", position: "100% center" },
+  { key: "SUV", word: "SUVS", image: "/images/suv.jpeg", blurSrc: "/images/blur/suv-blur.jpg", position: "100% center" },
+  { key: "VAN", word: "VANS", image: "/images/van.jpeg", blurSrc: "/images/blur/van-blur.jpg", position: "100% center" },
+  { key: "TRUCK", word: "TRUCKS", image: "/images/truck.jpeg", blurSrc: "/images/blur/truck-blur.jpg", position: "100% center" },
+];
+
+/** Shown instead of a broken-image icon while a photo is missing. */
+const FALLBACK_BG = "linear-gradient(135deg, #1A2433 0%, #0A0E14 100%)";
+
+const COUNT = PANELS.length;
+/** 0.00-0.15 is the stage slide-up; the rest splits evenly between the panels. */
+const INTRO_END = 0.15;
+const SLICE = (1 - INTRO_END) / COUNT;
+/** Fraction of a panel's slice spent opening its clip. */
+const REVEAL = 0.4;
+/** Share of a transition given to the outgoing copy leaving and the incoming
+ *  copy arriving. They do not overlap, so only one text block is ever on
+ *  screen: the old one is gone by 0.4, the new one starts at 0.6. */
+const TEXT_OUT = 0.4;
+const TEXT_IN = 0.6;
+
+/** Vertical-only drift for the photo. The mover's overshoot is kept small
+ *  (104%) because `object-fit: cover` scales to the mover's height — any extra
+ *  height enlarges the picture and eats into how much of the vehicle fits. */
+const MAIN_Y = 2;
+const WORD_X = 6; // vw — the word drifts against the photo
+const WORD_OPACITY = 0.07;
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const step = (v: number) => (v >= 0.5 ? 1 : 0);
+
+/** The one reveal, shared by every panel: a centred rectangle opening outwards. */
+const clipFor = (t: number) => `inset(${(50 * (1 - t)).toFixed(2)}%)`;
+
+/** Left column on desktop, full width on mobile. */
+const LEFT_COLUMN = "absolute inset-y-0 left-0 w-full overflow-hidden md:w-[40vw]";
+
 export default function IdentityPanels() {
-  const containerRef = useRef<HTMLElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  
-  const panelRef = useRef<HTMLDivElement>(null);
-  
-  const bg1Ref = useRef<HTMLDivElement>(null);
-  const bg2Ref = useRef<HTMLDivElement>(null);
-  const bg3Ref = useRef<HTMLDivElement>(null);
-  
-  const img1Ref = useRef<HTMLImageElement>(null);
-  const img2Ref = useRef<HTMLImageElement>(null);
-  const img3Ref = useRef<HTMLImageElement>(null);
-  
-  const textColRef = useRef<HTMLDivElement>(null);
-  const text1Ref = useRef<HTMLDivElement>(null);
-  const text2Ref = useRef<HTMLDivElement>(null);
-  const text3Ref = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const slideRef = useRef<HTMLDivElement>(null);
+
+  const bgRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const wordRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const clipRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const moveRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const textWrapRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const textRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const indexRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const indexLineRef = useRef<HTMLDivElement>(null);
 
   const t = useTranslations("IdentityPanels");
 
   useEffect(() => {
-    const container = containerRef.current;
-    const sticky = stickyRef.current;
-    const panel = panelRef.current;
-    if (!container || !sticky || !panel) return;
+    const section = sectionRef.current;
+    const stage = stageRef.current;
+    const slide = slideRef.current;
+    if (!section || !stage || !slide) return;
+
+    const reduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let disposed = false;
     let rafId = 0;
-    
-    // Backgrounds
-    const bg1 = bg1Ref.current;
-    const bg2 = bg2Ref.current;
-    const bg3 = bg3Ref.current;
-    
-    // Images
-    const img1 = img1Ref.current;
-    const img2 = img2Ref.current;
-    const img3 = img3Ref.current;
-    
-    // Texts
-    const t1 = text1Ref.current;
-    const t2 = text2Ref.current;
-    const t3 = text3Ref.current;
+    const enter = new Array<number>(COUNT).fill(0);
+
+    // Geometry is cached here and on resize so the rAF loop never reads layout.
+    let topPx = 0;
+    let scrollable = 1;
+    const measure = () => {
+      topPx = section.offsetTop;
+      scrollable = Math.max(1, section.offsetHeight - stage.offsetHeight);
+    };
+    measure();
 
     const tick = () => {
       rafId = 0;
       if (disposed) return;
-      
-      const rect = container.getBoundingClientRect();
-      const scrollable = rect.height - sticky.offsetHeight;
-      const progress = scrollable > 0 ? Math.min(1, Math.max(0, -rect.top / scrollable)) : 0;
-      
-      // The panel slides up from the bottom (translateY 100% to 0) over the full-screen photo.
-      // 0.00-0.15: slide up
-      const slideUp = progress <= 0.15 ? 1 - progress / 0.15 : 0;
-      panel.style.transform = `translateY(${slideUp * 100}%)`;
-      
-      // Crossfade backgrounds
-      if (bg1 && bg2 && bg3) {
-        // bg1 fades out during 0.45-0.55
-        const bg1Op = progress < 0.45 ? 1 : progress > 0.55 ? 0 : 1 - (progress - 0.45) / 0.1;
-        // bg2 fades in during 0.45-0.55, fades out 0.80-0.90
-        const bg2Op = progress < 0.45 ? 0 : progress > 0.90 ? 0 :
-                      progress < 0.55 ? (progress - 0.45) / 0.1 : 
-                      progress > 0.80 ? 1 - (progress - 0.80) / 0.1 : 1;
-        // bg3 fades in 0.80-0.90
-        const bg3Op = progress < 0.80 ? 0 : progress > 0.90 ? 1 : (progress - 0.80) / 0.1;
-        
-        bg1.style.opacity = String(bg1Op);
-        bg2.style.opacity = String(bg2Op);
-        bg3.style.opacity = String(bg3Op);
+
+      const progress = clamp01((window.scrollY - topPx) / scrollable);
+
+      // The stage rises into place on translate alone — it never fades, at
+      // either end; the section simply unpins.
+      const intro = reduced || progress >= INTRO_END ? 0 : 1 - progress / INTRO_END;
+      slide.style.transform = `translateY(${(intro * 100).toFixed(2)}%)`;
+
+      // How far each panel has wiped in. Panel 0 is the base layer, already
+      // open while the stage slides up.
+      let active = 0;
+      for (let i = 0; i < COUNT; i++) {
+        const local = (progress - (INTRO_END + i * SLICE)) / SLICE;
+        const e = i === 0 ? 1 : clamp01(local / REVEAL);
+        enter[i] = reduced ? step(e) : e;
+        if (enter[i] >= 0.5) active = i;
       }
 
-      // Switch Images
-      if (img1 && img2 && img3) {
-        // img2 animation 0.45 - 0.55
-        const img2Op = progress < 0.45 ? 0 : progress > 0.55 ? 1 : (progress - 0.45) / 0.1;
-        const img2Scale = 0.6 + 0.4 * img2Op;
-        img2.style.opacity = String(img2Op);
-        img2.style.transform = `scale(${img2Scale})`;
+      for (let i = 0; i < COUNT; i++) {
+        const local = (progress - (INTRO_END + i * SLICE)) / SLICE;
+        const held = clamp01(local);
 
-        // img3 animation 0.80 - 0.90
-        const img3Op = progress < 0.80 ? 0 : progress > 0.90 ? 1 : (progress - 0.80) / 0.1;
-        const img3Scale = 0.6 + 0.4 * img3Op;
-        img3.style.opacity = String(img3Op);
-        img3.style.transform = `scale(${img3Scale})`;
+        const open = enter[i];
+        // Copy only: the outgoing block clears out in the first 40% of the
+        // transition, the incoming one arrives in the last 40%. Images have no
+        // exit animation of any kind.
+        const next = i === COUNT - 1 ? 0 : enter[i + 1];
+        let textOut = clamp01(next / TEXT_OUT);
+        let textIn = clamp01((open - TEXT_IN) / (1 - TEXT_IN));
+        if (reduced) {
+          textOut = step(textOut);
+          textIn = step(textIn);
+        }
+        const textShown = textIn * (1 - textOut);
+
+        // The blurred text panel crossfades; the layers are stacked, so a plain
+        // fade-in is enough and the outgoing one never animates.
+        const bg = bgRefs.current[i];
+        if (bg) bg.style.opacity = String(open);
+
+        // Parallax drift — translateY only, so the horizontal crop stays put
+        // and the whole vehicle keeps its margins. The photo never scales.
+        const drift = reduced ? 0 : (held - 0.5) * 2;
+        const move = moveRefs.current[i];
+        if (move) {
+          move.style.transform = `translateY(${(drift * MAIN_Y).toFixed(3)}%)`;
+        }
+
+        // Only the incoming image animates: its rectangle opens on top of the
+        // one before, which is simply covered. Nothing ever closes.
+        const clip = clipRefs.current[i];
+        if (clip) clip.style.clipPath = clipFor(open);
+
+        // The giant word follows the copy, so it never lingers over the next one.
+        const word = wordRefs.current[i];
+        if (word) {
+          word.style.transform = `translateX(${(-drift * WORD_X).toFixed(3)}vw)`;
+          word.style.opacity = (WORD_OPACITY * textShown).toFixed(4);
+        }
+
+        // Copy is the one thing allowed to slide and fade.
+        const text = textRefs.current[i];
+        if (text) {
+          text.style.transform =
+            `translateY(${(40 * (1 - textIn) - 40 * textOut).toFixed(2)}%)`;
+          text.style.opacity = textShown.toFixed(4);
+        }
+        const textWrap = textWrapRefs.current[i];
+        if (textWrap) {
+          textWrap.style.pointerEvents = textShown > 0.99 ? "auto" : "none";
+        }
       }
 
-      // Texts
-      if (t1 && t2 && t3) {
-        // Text 1 slides out 0.45 - 0.55
-        const t1Out = progress < 0.45 ? 0 : progress > 0.55 ? 1 : (progress - 0.45) / 0.1;
-        t1.style.opacity = String(1 - t1Out);
-        t1.style.transform = `translateY(${-t1Out * 30}px)`;
-        t1.style.pointerEvents = t1Out === 0 ? "auto" : "none";
-
-        // Text 2 slides in 0.45 - 0.55, out 0.80 - 0.90
-        const t2In = progress < 0.45 ? 0 : progress > 0.55 ? 1 : (progress - 0.45) / 0.1;
-        const t2Out = progress < 0.80 ? 0 : progress > 0.90 ? 1 : (progress - 0.80) / 0.1;
-        t2.style.opacity = String(t2In - t2Out);
-        t2.style.transform = `translateY(${30 * (1 - t2In) - 30 * t2Out}px)`;
-        t2.style.pointerEvents = t2In === 1 && t2Out === 0 ? "auto" : "none";
-
-        // Text 3 slides in 0.80 - 0.90
-        const t3In = progress < 0.80 ? 0 : progress > 0.90 ? 1 : (progress - 0.80) / 0.1;
-        t3.style.opacity = String(t3In);
-        t3.style.transform = `translateY(${30 * (1 - t3In)}px)`;
-        t3.style.pointerEvents = t3In === 1 ? "auto" : "none";
+      for (let i = 0; i < COUNT; i++) {
+        const label = indexRefs.current[i];
+        if (label) label.style.opacity = i === active ? "1" : "0.35";
+      }
+      if (indexLineRef.current) {
+        indexLineRef.current.style.transform = `scaleY(${progress.toFixed(4)})`;
       }
 
       rafId = requestAnimationFrame(tick);
@@ -120,88 +195,171 @@ export default function IdentityPanels() {
 
     tick();
 
-    const onScrollOrResize = () => {
+    const kick = () => {
       if (!rafId && !disposed) rafId = requestAnimationFrame(tick);
     };
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize, { passive: true });
+    const onResize = () => {
+      measure();
+      kick();
+    };
+
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
 
     return () => {
       disposed = true;
       if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 
-  const IMG_1 = "/images/frames/frame_000020.webp";
-  const IMG_2 = "/images/frames/frame_000040.webp";
-  const IMG_3 = "/images/frames/frame_000060.webp";
+  const total = String(COUNT).padStart(2, "0");
 
   return (
-    <section ref={containerRef} className="relative w-full h-[500vh] sm:h-[400vh] -mt-[100vh]" style={{ zIndex: 10 }}>
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden pointer-events-none">
-        
-        {/* The sliding glass panel */}
-        <div ref={panelRef} className="absolute inset-0 w-full h-full will-change-transform flex items-center justify-center pointer-events-auto overflow-hidden">
-          
-          {/* Background Layer: crossfading scaled images */}
-          <div className="absolute inset-0 z-0 overflow-hidden">
-            <div ref={bg1Ref} className="absolute inset-0 w-full h-full will-change-transform bg-cover bg-center opacity-100" style={{ backgroundImage: `url(${IMG_1})`, transform: "scale(2)", filter: "blur(0)" }}></div>
-            <div ref={bg2Ref} className="absolute inset-0 w-full h-full will-change-transform bg-cover bg-center opacity-0" style={{ backgroundImage: `url(${IMG_2})`, transform: "scale(2)", filter: "blur(0)" }}></div>
-            <div ref={bg3Ref} className="absolute inset-0 w-full h-full will-change-transform bg-cover bg-center opacity-0" style={{ backgroundImage: `url(${IMG_3})`, transform: "scale(2)", filter: "blur(0)" }}></div>
-            {/* Navy Overlay */}
-            <div className="absolute inset-0 bg-[#0A0E14] opacity-80"></div>
+    <section
+      ref={sectionRef}
+      className="relative w-full -mt-[100vh]"
+      /* One viewport per panel, plus a buffer for the slide-up intro. */
+      style={{ zIndex: 10, height: `${(COUNT + 1) * 100}vh` }}
+    >
+      <div
+        ref={stageRef}
+        className="sticky top-0 h-[100svh] w-full overflow-hidden pointer-events-none"
+      >
+        <div
+          ref={slideRef}
+          className="absolute inset-0 h-full w-full overflow-hidden will-change-transform"
+          style={{ transform: "translateY(100%)", background: FALLBACK_BG }}
+        >
+          {/* ── 1. Text panel: the blurred photo, mirrored and darkened, so it
+                 reads as its own surface rather than a continuation of the
+                 picture. The blur is baked into the file; no CSS filter. ── */}
+          <div className={`${LEFT_COLUMN} z-0`} style={{ background: FALLBACK_BG }}>
+            {PANELS.map((panel, i) => (
+              <div
+                key={panel.key}
+                ref={(el) => { bgRefs.current[i] = el; }}
+                className="absolute inset-0 h-full w-full"
+                style={{ zIndex: i, opacity: i === 0 ? 1 : 0 }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={panel.blurSrc}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-full w-full object-cover object-center"
+                  /* Mirrored so it never lines up with the sharp photo. */
+                  style={{ transform: "scaleX(-1)" }}
+                />
+              </div>
+            ))}
+            <div
+              className="absolute inset-0"
+              style={{ background: "rgba(0,0,0,0.35)", zIndex: COUNT }}
+            />
           </div>
 
-          <div className="relative z-10 w-full max-w-7xl px-6 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-20 h-full py-20">
-            {/* Left: Images */}
-            <div className="relative w-full max-w-sm md:max-w-md shrink-0 aspect-[4/5] rounded-xl border border-white/20 overflow-hidden shadow-2xl">
-              <img ref={img1Ref} src={IMG_1} alt="Panel 1" className="absolute inset-0 w-full h-full object-cover will-change-transform opacity-100" />
-              <img ref={img2Ref} src={IMG_2} alt="Panel 2" className="absolute inset-0 w-full h-full object-cover will-change-transform opacity-0 scale-75" />
-              <img ref={img3Ref} src={IMG_3} alt="Panel 3" className="absolute inset-0 w-full h-full object-cover will-change-transform opacity-0 scale-75" />
-            </div>
-
-            {/* Right: Text Container */}
-            <div ref={textColRef} className="relative w-full md:w-1/2 h-[250px] md:h-[300px] flex items-center shrink-0">
-              {/* Text 1 */}
-              <div ref={text1Ref} className="absolute inset-x-0 top-0 bottom-0 flex flex-col justify-center will-change-transform text-center md:text-left">
-                <span className="text-[#2D7FF9] text-sm font-bold tracking-widest mb-4">01 / 03</span>
-                <h2 className="font-heading text-4xl md:text-5xl text-white mb-6 leading-tight">{t("panel1Title")}</h2>
-                <p className="text-white/70 text-lg md:text-xl mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">{t("panel1Text")}</p>
-                <div>
-                  <Link href="/vehicles" className="inline-block px-8 py-3 bg-[#2D7FF9] text-white font-bold uppercase tracking-widest text-xs rounded hover:bg-white hover:text-black transition-colors duration-300">
-                    {t("panel1Button")}
-                  </Link>
-                </div>
+          {/* ── 2. Giant words, clipped to the text panel so they never run
+                 over the vehicle ── */}
+          <div className={`${LEFT_COLUMN} pointer-events-none z-[5]`}>
+            {PANELS.map((panel, i) => (
+              <div
+                key={panel.key}
+                ref={(el) => { wordRefs.current[i] = el; }}
+                aria-hidden="true"
+                className="font-heading absolute left-[4vw] top-[58vh] select-none whitespace-nowrap text-[18vw] font-medium uppercase leading-none text-white will-change-transform md:left-[2vw] md:top-[32vh] md:text-[22vw]"
+                style={{ opacity: i === 0 ? WORD_OPACITY : 0 }}
+              >
+                {panel.word}
               </div>
-
-              {/* Text 2 */}
-              <div ref={text2Ref} className="absolute inset-x-0 top-0 bottom-0 flex flex-col justify-center will-change-transform opacity-0 translate-y-8 text-center md:text-left">
-                <span className="text-[#2D7FF9] text-sm font-bold tracking-widest mb-4">02 / 03</span>
-                <h2 className="font-heading text-4xl md:text-5xl text-white mb-6 leading-tight">{t("panel2Title")}</h2>
-                <p className="text-white/70 text-lg md:text-xl mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">{t("panel2Text")}</p>
-                <div>
-                  <Link href="/#contact" className="inline-block px-8 py-3 bg-[#2D7FF9] text-white font-bold uppercase tracking-widest text-xs rounded hover:bg-white hover:text-black transition-colors duration-300">
-                    {t("panel2Button")}
-                  </Link>
-                </div>
-              </div>
-
-              {/* Text 3 */}
-              <div ref={text3Ref} className="absolute inset-x-0 top-0 bottom-0 flex flex-col justify-center will-change-transform opacity-0 translate-y-8 text-center md:text-left">
-                <span className="text-[#2D7FF9] text-sm font-bold tracking-widest mb-4">03 / 03</span>
-                <h2 className="font-heading text-4xl md:text-5xl text-white mb-6 leading-tight">{t("panel3Title")}</h2>
-                <p className="text-white/70 text-lg md:text-xl mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">{t("panel3Text")}</p>
-                <div>
-                  <Link href="/#contact" className="inline-block px-8 py-3 bg-[#2D7FF9] text-white font-bold uppercase tracking-widest text-xs rounded hover:bg-white hover:text-black transition-colors duration-300">
-                    {t("panel3Button")}
-                  </Link>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
+          {/* ── 3. Sharp photo: exactly the right 60vw, hard edge, own box ── */}
+          {PANELS.map((panel, i) => (
+            <div
+              key={panel.key}
+              ref={(el) => { clipRefs.current[i] = el; }}
+              className="absolute left-0 top-0 h-[45vh] w-full overflow-hidden md:left-[40vw] md:h-full md:w-[60vw]"
+              style={{ clipPath: clipFor(i === 0 ? 1 : 0), zIndex: 10 + i }}
+            >
+              <div
+                ref={(el) => { moveRefs.current[i] = el; }}
+                className="absolute left-0 top-[-2%] h-[104%] w-full will-change-transform"
+              >
+                <Image
+                  src={panel.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 100vw, 60vw"
+                  quality={80}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  className="object-cover"
+                  style={{ objectPosition: panel.position }}
+                />
+              </div>
+            </div>
+          ))}
+
+          {/* ── 4. Copy — slides through its own clipped box, translateY only ── */}
+          {PANELS.map((panel, i) => (
+            <div
+              key={panel.key}
+              ref={(el) => { textWrapRefs.current[i] = el; }}
+              className="absolute left-[6vw] top-[50vh] z-30 h-[40vh] w-[88vw] overflow-hidden text-left md:left-[5vw] md:top-[24vh] md:h-[40vh] md:w-[30vw]"
+            >
+              <div
+                ref={(el) => { textRefs.current[i] = el; }}
+                className="flex h-full flex-col justify-center will-change-[transform,opacity]"
+                style={{
+                  transform: i === 0 ? "translateY(0)" : "translateY(40%)",
+                  opacity: i === 0 ? 1 : 0,
+                }}
+              >
+                <span className="mm-meta mb-4 text-sm tracking-widest text-[#2D7FF9]">
+                  {String(i + 1).padStart(2, "0")} / {total}
+                </span>
+                <h2 className="font-heading mb-5 text-4xl leading-tight text-white md:text-5xl">
+                  {t(`categories.${panel.key}.title`)}
+                </h2>
+                <p className="mm-body-copy mb-7 max-w-lg">
+                  {t(`categories.${panel.key}.text`)}
+                </p>
+                <div>
+                  <Link
+                    href={{ pathname: "/vehicles", query: { category: panel.key } }}
+                    className="font-heading inline-block bg-[#2D7FF9] px-8 py-3 text-xs font-semibold uppercase tracking-widest text-white transition-colors duration-300 hover:bg-white hover:text-black"
+                  >
+                    {t(`categories.${panel.key}.button`)}
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* ── 5. Vertical index, bottom-left of the text panel (desktop) ── */}
+          <div className="pointer-events-none absolute bottom-[8vh] left-[5vw] z-40 hidden md:flex md:items-center md:gap-4">
+            <div className="relative h-[14vh] w-px bg-white/15">
+              <div
+                ref={indexLineRef}
+                className="absolute inset-0 origin-top bg-white will-change-transform"
+                style={{ transform: "scaleY(0)" }}
+              />
+            </div>
+            <div className="flex flex-col gap-3">
+              {PANELS.map((panel, i) => (
+                <span
+                  key={panel.key}
+                  ref={(el) => { indexRefs.current[i] = el; }}
+                  className="mm-meta text-[11px] uppercase tracking-[0.2em] text-white"
+                  style={{ opacity: i === 0 ? 1 : 0.35 }}
+                >
+                  {t(`short.${panel.key}`)}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 interface HeroScrollProps {
@@ -27,13 +28,10 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
   // Hero refs
   const videoRef = useRef<HTMLVideoElement>(null);
   const posterRef = useRef<HTMLImageElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
   const debugRef = useRef<HTMLPreElement>(null);
-  const heroOverlayRef = useRef<HTMLDivElement>(null);
 
   // Statement refs
   const statementImageRef = useRef<HTMLDivElement>(null);
-  const statementOverlayRef = useRef<HTMLDivElement>(null);
   const statementContentRef = useRef<HTMLDivElement>(null);
 
   const [ready, setReady] = useState(false);
@@ -48,13 +46,14 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
     if (!video || !container || !sticky) return;
 
     const poster = posterRef.current;
-    const textEl = textRef.current;
     const debugEl = debugRef.current;
-    
+
     const sImageEl = statementImageRef.current;
-    const sOverlayEl = statementOverlayRef.current;
     const sContentEl = statementContentRef.current;
-    const heroOverlayEl = heroOverlayRef.current;
+
+    const reduced =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const debugOn = new URLSearchParams(window.location.search).has("heroDebug");
     if (debugEl && debugOn) debugEl.style.display = "block";
@@ -160,30 +159,25 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
       const showPoster = !(frameShown && progress > 0.002);
       if (poster) poster.style.opacity = showPoster ? "1" : "0";
 
-      // 0.55–0.68: hero video, heading, and overlay fade out in place
-      const heroFadeProgress = progress <= 0.55 ? 0 : progress >= 0.68 ? 1 : (progress - 0.55) / 0.13;
-      const heroOpacity = String(1 - heroFadeProgress);
-      video.style.opacity = heroOpacity;
-      if (textEl) textEl.style.opacity = heroOpacity;
-      if (heroOverlayEl) heroOverlayEl.style.opacity = heroOpacity;
+      // The hero video, heading and glow are never faded out. The statement
+      // rectangle simply expands over them until it covers the screen.
 
-      // 0.60–0.90: statement image layer scales up from 0.3 to 1
-      const scaleProgress = progress <= 0.60 ? 0 : progress >= 0.90 ? 1 : (progress - 0.60) / 0.30;
+      // 0.55–0.92: a centred rectangle opens to the full viewport and the
+      // statement is revealed through it. The photo is always at full viewport
+      // size — only the clip moves, so nothing ever scales.
+      const revealRaw = progress <= 0.55 ? 0 : progress >= 0.92 ? 1 : (progress - 0.55) / 0.37;
+      const reveal = reduced ? (revealRaw >= 0.5 ? 1 : 0) : revealRaw;
       if (sImageEl) {
-        const scale = 0.3 + 0.7 * scaleProgress;
-        const radius = 50 * (1 - scaleProgress);
-        // Using transform and clip-path only for animations
-        sImageEl.style.transform = `scale(${scale})`;
-        sImageEl.style.clipPath = `inset(0px round ${radius}px)`;
-        // Fade it in quickly at the start so it doesn't pop
-        sImageEl.style.opacity = progress <= 0.55 ? "0" : "1";
+        const edge = 50 * (1 - reveal);
+        sImageEl.style.clipPath = `inset(${edge}%)`;
       }
 
-      // 0.85–1.00: section 2 headline, paragraph and CTA fade in and slide up
-      const contentProgress = progress <= 0.85 ? 0 : progress >= 1.00 ? 1 : (progress - 0.85) / 0.15;
+      // 0.80–1.00: headline, paragraph and CTA slide up into place. Translate
+      // only — the opening clip above is what makes them appear.
+      const contentRaw = progress <= 0.80 ? 0 : progress >= 1.00 ? 1 : (progress - 0.80) / 0.20;
+      const contentProgress = reduced ? 1 : contentRaw;
       if (sContentEl) {
-        sContentEl.style.opacity = String(contentProgress);
-        sContentEl.style.transform = `translateY(${30 * (1 - contentProgress)}px)`;
+        sContentEl.style.transform = `translateY(${48 * (1 - contentProgress)}px)`;
       }
 
       if (debugOn && debugEl && now - lastDebugAt > 100) {
@@ -329,48 +323,56 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         style={{ backgroundColor: "#0A0E14" }}
       >
         
-        {/* Layer 0: Statement Image and Text */}
-        <div 
-          ref={statementImageRef} 
-          className="absolute inset-0 w-full h-full will-change-transform flex items-center justify-center origin-center overflow-hidden"
-          style={{ opacity: 0, transform: "scale(0.3)", clipPath: "inset(0px round 50px)", zIndex: 0 }}
+        {/* Statement: sits above the hero video and is revealed by a centred
+            rectangle that opens to the full viewport. The photo is always at
+            full viewport size; only the clip animates, so nothing scales.
+            The gradient underneath is the fallback for a missing file. */}
+        <div
+          ref={statementImageRef}
+          className="absolute inset-0 w-full h-full overflow-hidden"
+          style={{
+            clipPath: "inset(50%)",
+            willChange: "clip-path",
+            background: "linear-gradient(45deg, #1A2433, #0A0E14)",
+            zIndex: 45,
+          }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src="/images/sections/statement.webp" 
-            alt="Statement"
-            className="absolute inset-0 w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-              (e.target as HTMLImageElement).parentElement!.style.background = 'linear-gradient(45deg, #1A2433, #0A0E14)';
-            }}
+          <Image
+            src="/images/statement.jpeg"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={80}
+            className="object-cover"
           />
+
           {/* Dark overlay for readability */}
-          <div ref={statementOverlayRef} className="absolute inset-0 bg-black" style={{ opacity: 0.3 }} />
-        </div>
-        
-        <div 
-          ref={statementContentRef}
-          className="absolute inset-0 w-full h-full pointer-events-none will-change-transform flex items-center justify-center flex-col px-6"
-          style={{ opacity: 0, transform: "translateY(30px)", zIndex: 10 }}
-        >
-          <h2 className="font-heading text-center font-normal leading-tight text-[clamp(2rem,6vw,5rem)] text-white mb-12">
-            {tStatement("headlineLine1")}<br />{tStatement("headlineLine2")}
-          </h2>
-          
-          <div className="flex flex-col items-center text-center max-w-lg pointer-events-auto">
-            <p className="text-white text-[clamp(1rem,2vw,1.25rem)] mb-8 opacity-90 leading-relaxed font-sans">
-              {tStatement("paragraph")}
-            </p>
-            <button className="px-8 py-3 bg-[#2D7FF9] text-white font-bold uppercase tracking-widest text-xs rounded hover:bg-white hover:text-black transition-colors duration-300">
-              {tStatement("startProject")}
-            </button>
+          <div className="absolute inset-0 bg-black" style={{ opacity: 0.35 }} />
+
+          {/* Inside the clip, so the opening rectangle is what reveals it —
+              no opacity animation of its own. */}
+          <div
+            ref={statementContentRef}
+            className="absolute inset-0 w-full h-full will-change-transform flex items-center justify-center flex-col px-6"
+            style={{ transform: "translateY(48px)" }}
+          >
+            <h2 className="font-heading text-center font-medium leading-tight text-[clamp(2rem,6vw,5rem)] text-white mb-12">
+              {tStatement("headlineLine1")}<br />{tStatement("headlineLine2")}
+            </h2>
+
+            <div className="flex flex-col items-center text-center max-w-lg">
+              <p className="mm-body-copy mb-8">
+                {tStatement("paragraph")}
+              </p>
+              <button className="px-8 py-3 bg-[#2D7FF9] font-semibold text-white uppercase tracking-widest text-xs rounded hover:bg-white hover:text-black transition-colors duration-300">
+                {tStatement("startProject")}
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Layer 1: Hero Video and Overlay */}
         <div
-          ref={heroOverlayRef}
           className="absolute inset-0 pointer-events-none z-0 will-change-transform"
           style={{
             background:
@@ -410,7 +412,6 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         />
 
         <div
-          ref={textRef}
           className="absolute left-0 right-0 flex flex-col items-center pointer-events-none will-change-transform"
           style={{
             top: "clamp(100px, 15vh, 200px)",
@@ -420,7 +421,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
           }}
         >
           <h1
-            className="font-heading text-center font-normal leading-none text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0]"
+            className="font-heading text-center font-medium leading-none text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0]"
             style={{ letterSpacing: "-0.02em" }}
           >
             {tHero("heading")}
@@ -439,7 +440,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
             style={{ borderColor: "rgba(45,127,249,0.15)", borderTopColor: "#2D7FF9" }}
           />
           <span
-            className="text-xs font-medium tracking-widest uppercase"
+            className="mm-meta text-xs tracking-widest uppercase"
             style={{ color: "rgba(255,255,255,0.4)" }}
           >
             {t("loading")}

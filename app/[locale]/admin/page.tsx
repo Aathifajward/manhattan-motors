@@ -20,14 +20,14 @@ export default async function AdminPage() {
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Admin</h1>
+        <h1 className="text-3xl tracking-tight">Admin</h1>
         <form
           action={async () => {
             "use server";
             await signOut({ redirectTo: "/" });
           }}
         >
-          <button type="submit" className="text-sm font-medium text-zinc-500 hover:text-black dark:hover:text-white">
+          <button type="submit" className="text-sm text-zinc-500 hover:text-black dark:hover:text-white">
             Log out
           </button>
         </form>
@@ -35,7 +35,7 @@ export default async function AdminPage() {
 
       <Link
         href="/admin/new"
-        className="mb-8 inline-block rounded-lg bg-black px-6 py-3 font-medium text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
+        className="mb-8 inline-block rounded-lg bg-black px-6 py-3 text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
       >
         Add Vehicle
       </Link>
@@ -57,13 +57,13 @@ export default async function AdminPage() {
               className="flex flex-col gap-4 rounded-xl border border-black/[.08] bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-white/[.145] dark:bg-zinc-900/20 sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="text-lg font-bold">
+                <p className="text-lg">
                   {vehicle.year} {vehicle.make} {vehicle.model}
                 </p>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className="text-sm font-medium">¥{vehicle.priceJpy.toLocaleString()}</span>
+                  <span className="text-sm">¥{vehicle.priceJpy.toLocaleString()}</span>
                   <span className="text-zinc-400">•</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${statusColor}`}>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${statusColor}`}>
                     {vehicle.status}
                   </span>
                 </div>
@@ -76,11 +76,11 @@ export default async function AdminPage() {
                     <option value="reserved" className="dark:bg-zinc-900 dark:text-white">Reserved</option>
                     <option value="sold" className="dark:bg-zinc-900 dark:text-white">Sold</option>
                   </select>
-                  <button type="submit" className="rounded-lg bg-zinc-100 px-4 py-1.5 text-sm font-medium transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">
+                  <button type="submit" className="rounded-lg bg-zinc-100 px-4 py-1.5 text-sm transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700">
                     Update
                   </button>
                 </form>
-                <Link href={`/admin/vehicles/${vehicle.id}/edit`} className="rounded-lg bg-black px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80">
+                <Link href={`/admin/vehicles/${vehicle.id}/edit`} className="rounded-lg bg-black px-4 py-1.5 text-sm text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80">
                   Edit
                 </Link>
                 <form action={deleteVehicle.bind(null, vehicle.id)}>

@@ -10,7 +10,7 @@ export default async function NewVehiclePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-12">
-      <h1 className="mb-8 text-3xl font-bold tracking-tight">Add Vehicle</h1>
+      <h1 className="mb-8 text-3xl tracking-tight">Add Vehicle</h1>
       
       <div className="rounded-xl border border-black/[.08] bg-white p-6 shadow-sm dark:border-white/[.145] dark:bg-zinc-900/50">
         <form action={createVehicle} className="flex flex-col gap-4">
@@ -53,17 +53,17 @@ export default async function NewVehiclePage() {
           <textarea name="descriptionJa" placeholder="Description (Japanese, optional)" className="min-h-[120px] rounded-lg border border-zinc-200 bg-transparent px-3 py-2.5 text-sm dark:border-zinc-700 dark:[color-scheme:dark]" />
           
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Upload Photos</label>
+            <label className="text-sm text-zinc-700 dark:text-zinc-300">Upload Photos</label>
             <input
               type="file"
               name="images"
               accept="image/*"
               multiple
-              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2.5 text-sm dark:border-zinc-700 dark:[color-scheme:dark] dark:bg-zinc-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 dark:file:bg-zinc-800 dark:file:text-white dark:hover:file:bg-zinc-700"
+              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2.5 text-sm dark:border-zinc-700 dark:[color-scheme:dark] dark:bg-zinc-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 dark:file:bg-zinc-800 dark:file:text-white dark:hover:file:bg-zinc-700"
             />
           </div>
           
-          <button type="submit" className="mt-4 rounded-lg bg-black py-3 font-medium text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80">
+          <button type="submit" className="mt-4 rounded-lg bg-black py-3 text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80">
             Save Vehicle
           </button>
         </form>
