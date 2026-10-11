@@ -148,6 +148,7 @@
   "VehicleLabels": {
     "category": {
       "CAR": "乗用車",
+      "SUV": "SUV",
       "TRUCK": "トラック",
       "VAN": "バン",
       "MOTORCYCLE": "バイク",

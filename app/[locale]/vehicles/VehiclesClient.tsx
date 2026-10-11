@@ -3,9 +3,8 @@
 import { useState, useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { Search, Filter, X, Bookmark, ChevronDown } from "lucide-react";
-import { motion } from "framer-motion";
-import FadeInSection from "@/components/FadeInSection";
+import { Search, Filter, X, ChevronDown } from "lucide-react";
+import Reveal from "@/components/Reveal";
 
 type Vehicle = any;
 
@@ -17,6 +16,57 @@ interface VehiclesClientProps {
 
 /* Status priority: available first, reserved second, sold last */
 const STATUS_ORDER: Record<string, number> = { available: 0, reserved: 1, sold: 2 };
+
+/* ── Shared visual language, borrowed from the home page and contact form ──
+   Near-black stage, Clash Display for headings and meta, DM Sans for copy,
+   and blue reserved for accents: a filter's active dot, the range it covers,
+   and the hairline that draws under a card on hover.                      */
+
+const BLACK = "#0a0a0a";
+const BLUE = "#2D7FF9";
+
+/** Small uppercase tracked labels — the contact form's treatment. */
+const LABEL = "mm-meta text-[11px] uppercase tracking-[0.22em]";
+const LABEL_STYLE = { color: "rgba(255,255,255,0.35)" } as const;
+
+/** Borderless, bottom-line-only fields — also the contact form's. */
+const FIELD =
+  "font-body w-full border-b bg-transparent px-0 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none dark:[color-scheme:dark]";
+const FIELD_STYLE = { borderColor: "rgba(255,255,255,0.12)", borderRadius: 0 } as const;
+
+/** A plain text toggle: white with a blue dot when on, grey when off. The dot
+ *  keeps its space either way, so nothing shifts. */
+function FilterToggle({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex w-full items-center gap-2.5 py-[7px] text-left"
+    >
+      <span
+        aria-hidden="true"
+        className={`h-[5px] w-[5px] shrink-0 transition-opacity duration-200 ${
+          active ? "opacity-100" : "opacity-0"
+        }`}
+        style={{ background: BLUE }}
+      />
+      <span
+        className={`font-body text-[13px] transition-colors duration-200 ${
+          active ? "text-white" : "text-white/40 group-hover:text-white/70"
+        }`}
+      >
+        {label}
+      </span>
+    </button>
+  );
+}
 
 export default function VehiclesClient({ initialVehicles, makes, locale }: VehiclesClientProps) {
   const t = useTranslations("VehiclesPage");
@@ -113,81 +163,46 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
 
   /* ─── Shared filter panel content ─── */
   const filterContent = (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-9">
       {/* ── Categories (always visible) ── */}
       <div>
-        <h3 className="text-[11px] text-[#2D7FF9] mb-2.5 uppercase tracking-[0.2em]">{t("category")}</h3>
-        <div className="flex flex-col gap-0.5">
-          {["CAR", "TRUCK", "VAN", "MOTORCYCLE", "MACHINERY"].map(cat => {
-            const isActive = categories.includes(cat);
-            return (
-              <button
-                key={cat}
-                onClick={() => setCategories(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])}
-                className="flex items-center gap-2.5 w-full px-2 py-[7px] rounded-md cursor-pointer group transition-colors duration-200 hover:bg-white/[0.04]"
-              >
-                <div
-                  className="w-4 h-4 rounded flex items-center justify-center transition-all duration-200 shrink-0"
-                  style={{
-                    background: isActive ? '#2D7FF9' : 'rgba(255,255,255,0.04)',
-                    border: isActive ? '1px solid #2D7FF9' : '1px solid rgba(255,255,255,0.12)',
-                    boxShadow: isActive ? '0 0 8px rgba(45,127,249,0.3)' : 'none',
-                  }}
-                >
-                  {isActive && (
-                    <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                  )}
-                </div>
-                <span className="text-[12px] text-zinc-300 group-hover:text-white transition-colors">{tLabels(`category.${cat}`)}</span>
-              </button>
-            );
-          })}
+        <h3 className={`${LABEL} mb-3`} style={LABEL_STYLE}>{t("category")}</h3>
+        <div className="flex flex-col">
+          {["CAR", "SUV", "TRUCK", "VAN", "MOTORCYCLE", "MACHINERY"].map(cat => (
+            <FilterToggle
+              key={cat}
+              label={tLabels(`category.${cat}`)}
+              active={categories.includes(cat)}
+              onClick={() => setCategories(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])}
+            />
+          ))}
         </div>
       </div>
-
-      {/* ── Divider ── */}
-      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(45,127,249,0.12), transparent)' }} />
 
       {/* ── Make / Brand (collapsible) ── */}
       <div>
         <button
           onClick={() => setMakesOpen(!makesOpen)}
-          className="flex items-center justify-between w-full group"
+          className="flex w-full items-center justify-between"
         >
-          <h3 className="text-[11px] text-[#2D7FF9] uppercase tracking-[0.2em]">{t("makeBrand")}</h3>
-          <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-200 ${makesOpen ? 'rotate-180' : ''}`} />
+          <h3 className={LABEL} style={LABEL_STYLE}>{t("makeBrand")}</h3>
+          <ChevronDown size={13} className={`text-white/25 transition-transform duration-200 ${makesOpen ? 'rotate-180' : ''}`} />
         </button>
         {makesOpen && (
-          <div className="mt-2 flex flex-col gap-0.5">
-            {visibleMakes.map(make => {
-              const isActive = selectedMakes.includes(make);
-              return (
-                <button
-                  key={make}
-                  onClick={() => setSelectedMakes(prev => prev.includes(make) ? prev.filter(m => m !== make) : [...prev, make])}
-                  className="flex items-center gap-2.5 w-full px-2 py-[7px] rounded-md cursor-pointer group transition-colors duration-200 hover:bg-white/[0.04]"
-                >
-                  <div
-                    className="w-4 h-4 rounded flex items-center justify-center transition-all duration-200 shrink-0"
-                    style={{
-                      background: isActive ? '#2D7FF9' : 'rgba(255,255,255,0.04)',
-                      border: isActive ? '1px solid #2D7FF9' : '1px solid rgba(255,255,255,0.12)',
-                      boxShadow: isActive ? '0 0 8px rgba(45,127,249,0.3)' : 'none',
-                    }}
-                  >
-                    {isActive && (
-                      <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                    )}
-                  </div>
-                  <span className="text-[12px] text-zinc-300 group-hover:text-white transition-colors">{make}</span>
-                </button>
-              );
-            })}
+          <div className="mt-3 flex flex-col">
+            {visibleMakes.map(make => (
+              <FilterToggle
+                key={make}
+                label={make}
+                active={selectedMakes.includes(make)}
+                onClick={() => setSelectedMakes(prev => prev.includes(make) ? prev.filter(m => m !== make) : [...prev, make])}
+              />
+            ))}
             {makes.length > 5 && (
               <button
                 onClick={() => setMakesExpanded(!makesExpanded)}
-                className="mt-1 ml-2 text-[11px] tracking-wide transition-colors"
-                style={{ color: '#2D7FF9' }}
+                className="mt-2 pl-[15px] text-left text-[11px] uppercase tracking-[0.18em] transition-opacity hover:opacity-70"
+                style={{ color: BLUE }}
               >
                 {makesExpanded ? t("showLess") : t("showMore", { count: makes.length - 5 })}
               </button>
@@ -196,24 +211,22 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
         )}
       </div>
 
-      {/* ── Divider ── */}
-      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(45,127,249,0.12), transparent)' }} />
-
       {/* ── Price Range (always visible) ── */}
       <div>
-        <div className="flex justify-between items-baseline mb-1">
-          <h3 className="text-[11px] text-[#2D7FF9] uppercase tracking-[0.2em]">{t("price")}</h3>
-          <span className="text-[11px] text-zinc-500">{priceFormatter.format(priceRange[0])} — {priceFormatter.format(priceRange[1])}</span>
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <h3 className={LABEL} style={LABEL_STYLE}>{t("price")}</h3>
+          <span className="font-body text-[11px] text-white/35">
+            {priceFormatter.format(priceRange[0])} — {priceFormatter.format(priceRange[1])}
+          </span>
         </div>
-        <div className="relative w-full h-7 flex items-center">
-          <div className="absolute w-full h-[3px] rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        <div className="relative flex h-6 w-full items-center">
+          <div className="absolute h-px w-full" style={{ background: "rgba(255,255,255,0.14)" }} />
           <div
-            className="absolute h-[3px] rounded-full pointer-events-none"
+            className="pointer-events-none absolute h-px"
             style={{
-              background: 'linear-gradient(90deg, #2D7FF9, #5B9FFF)',
+              background: BLUE,
               left: `${(priceRange[0] / maxDbPrice) * 100}%`,
               right: `${100 - (priceRange[1] / maxDbPrice) * 100}%`,
-              boxShadow: '0 0 8px rgba(45,127,249,0.4)',
             }}
           />
           <input
@@ -223,7 +236,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
               const val = Math.min(Number(e.target.value), priceRange[1] - 50000);
               setPriceRange([val, priceRange[1]]);
             }}
-            className="mm-range-slider" style={{ zIndex: 3 }}
+            className="mm-range-line" style={{ zIndex: 3 }}
           />
           <input
             type="range" min={minDbPrice} max={maxDbPrice} step={50000}
@@ -232,28 +245,25 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
               const val = Math.max(Number(e.target.value), priceRange[0] + 50000);
               setPriceRange([priceRange[0], val]);
             }}
-            className="mm-range-slider" style={{ zIndex: 4 }}
+            className="mm-range-line" style={{ zIndex: 4 }}
           />
         </div>
       </div>
-
-      {/* ── Divider ── */}
-      <div style={{ height: '1px', background: 'linear-gradient(to right, transparent, rgba(45,127,249,0.12), transparent)' }} />
 
       {/* ── Year (collapsible) ── */}
       <div>
         <button
           onClick={() => setYearOpen(!yearOpen)}
-          className="flex items-center justify-between w-full group"
+          className="flex w-full items-center justify-between"
         >
-          <h3 className="text-[11px] text-[#2D7FF9] uppercase tracking-[0.2em]">{t("year")}</h3>
-          <ChevronDown size={14} className={`text-zinc-500 transition-transform duration-200 ${yearOpen ? 'rotate-180' : ''}`} />
+          <h3 className={LABEL} style={LABEL_STYLE}>{t("year")}</h3>
+          <ChevronDown size={13} className={`text-white/25 transition-transform duration-200 ${yearOpen ? 'rotate-180' : ''}`} />
         </button>
         {yearOpen && (
-          <div className="mt-2 flex items-center gap-2">
-            <input type="number" placeholder={t("min")} value={minYear} onChange={e => setMinYear(e.target.value)} className="mm-glass-input !py-1.5 !text-[12px]" />
-            <span className="text-zinc-600 text-[10px]">—</span>
-            <input type="number" placeholder={t("max")} value={maxYear} onChange={e => setMaxYear(e.target.value)} className="mm-glass-input !py-1.5 !text-[12px]" />
+          <div className="mt-3 flex items-center gap-4">
+            <input type="number" placeholder={t("min")} value={minYear} onChange={e => setMinYear(e.target.value)} className={`${FIELD} !py-1.5 !text-[13px]`} style={FIELD_STYLE} />
+            <span className="text-[11px] text-white/25">—</span>
+            <input type="number" placeholder={t("max")} value={maxYear} onChange={e => setMaxYear(e.target.value)} className={`${FIELD} !py-1.5 !text-[13px]`} style={FIELD_STYLE} />
           </div>
         )}
       </div>
@@ -261,294 +271,252 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12 flex flex-col md:flex-row gap-8 relative">
+    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100vh" }}>
+      <div className="mx-auto max-w-7xl px-6 pb-28 pt-20 md:pt-28 lg:px-8">
 
-      {/* ═══════════════════════════════════════════
-          Mobile filter button (visible < md)
-          ═══════════════════════════════════════════ */}
-      <div className="md:hidden flex justify-between items-center">
-        <h1 className="font-heading text-2xl tracking-tight">{t("title")}</h1>
-        <button
-          onClick={() => setShowMobileFilters(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm tracking-wide transition-all duration-200"
-          style={{
-            background: 'rgba(20,24,32,0.6)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(45,127,249,0.18)',
-            color: '#fff',
-          }}
-        >
-          <Filter size={15} />
-          {t("filters")}
-          {hasActiveFilters && (
-            <span className="ml-1 w-5 h-5 rounded-full bg-[#2D7FF9] text-[10px] flex items-center justify-center">
-              {categories.length + selectedMakes.length + (minYear || maxYear ? 1 : 0) + (priceRange[0] > minDbPrice || priceRange[1] < maxDbPrice ? 1 : 0)}
-            </span>
-          )}
-        </button>
+        {/* ═══════════════════════════════════════════
+            Page heading
+            ═══════════════════════════════════════════ */}
+        <Reveal as="header" className="mb-14 flex items-end justify-between gap-6 md:mb-20">
+          <h1
+            className="font-heading font-medium text-white text-[clamp(2.25rem,5vw,4rem)]"
+            style={{ lineHeight: 1.05, letterSpacing: "-0.02em" }}
+          >
+            {t("title")}
+          </h1>
+
+          {/* Mobile filter trigger (visible < md) */}
+          <button
+            onClick={() => setShowMobileFilters(true)}
+            className={`${LABEL} flex shrink-0 items-center gap-2 border-b pb-2 text-white/70 transition-colors hover:text-white md:hidden`}
+            style={{ borderColor: "rgba(255,255,255,0.12)" }}
+          >
+            <Filter size={13} />
+            {t("filters")}
+            {hasActiveFilters && (
+              <span style={{ color: BLUE }}>
+                {categories.length + selectedMakes.length + (minYear || maxYear ? 1 : 0) + (priceRange[0] > minDbPrice || priceRange[1] < maxDbPrice ? 1 : 0)}
+              </span>
+            )}
+          </button>
+        </Reveal>
+
+        <div className="flex flex-col gap-14 md:flex-row md:gap-16">
+
+          {/* ═══════════════════════════════════════════
+              Desktop sidebar (visible >= md) — no box
+              ═══════════════════════════════════════════ */}
+          <aside className="hidden shrink-0 md:block md:w-[200px] lg:w-[220px]">
+            <Reveal className="sticky top-[120px]">
+              <div className="mb-8 flex items-baseline justify-between gap-3">
+                <h2 className={LABEL} style={{ color: "rgba(255,255,255,0.7)" }}>{t("filters")}</h2>
+                <button
+                  onClick={clearFilters}
+                  className="text-[10px] uppercase tracking-[0.2em] text-white/30 transition-colors hover:text-white"
+                >
+                  {t("reset")}
+                </button>
+              </div>
+              {filterContent}
+            </Reveal>
+          </aside>
+
+          {/* ═══════════════════════════════════════════
+              Main content area
+              ═══════════════════════════════════════════ */}
+          <main className="flex min-w-0 flex-1 flex-col gap-10">
+
+            {/* ── Search / Sort bar — bottom lines only, no panel ── */}
+            <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-10">
+              <div className="relative w-full sm:max-w-sm">
+                <Search className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 text-white/30" size={15} />
+                <input
+                  type="text"
+                  placeholder={t("findPlaceholder")}
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className={`${FIELD} !pl-7`}
+                  style={FIELD_STYLE}
+                />
+              </div>
+
+              <div className="flex items-end justify-between gap-8 sm:justify-end">
+                <span className={`${LABEL} whitespace-nowrap pb-2.5`} style={LABEL_STYLE}>
+                  {t("vehiclesFound", { count: filteredVehicles.length })}
+                </span>
+                <div className="relative">
+                  <select
+                    value={sortOption}
+                    onChange={e => setSortOption(e.target.value)}
+                    className={`${FIELD} !w-auto cursor-pointer appearance-none pr-6`}
+                    style={FIELD_STYLE}
+                  >
+                    <option value="newest" style={{ background: BLACK }}>{t("sortNewest")}</option>
+                    <option value="recommended" style={{ background: BLACK }}>{t("sortRecommended")}</option>
+                    <option value="price-asc" style={{ background: BLACK }}>{t("sortPriceAsc")}</option>
+                    <option value="price-desc" style={{ background: BLACK }}>{t("sortPriceDesc")}</option>
+                  </select>
+                  <ChevronDown size={13} className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-white/30" />
+                </div>
+              </div>
+            </Reveal>
+
+            {/* ── Active filters — plain text, no pills ── */}
+            {hasActiveFilters && (
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                {searchQuery && (
+                  <span className="mm-filter-text">
+                    &ldquo;{searchQuery}&rdquo;
+                    <button onClick={() => removeFilter("search")} className="ml-1.5 text-white/30 transition-colors hover:text-white"><X size={11} /></button>
+                  </span>
+                )}
+                {categories.map(cat => (
+                  <span key={cat} className="mm-filter-text">
+                    {tLabels(`category.${cat}`)}
+                    <button onClick={() => removeFilter("category", cat)} className="ml-1.5 text-white/30 transition-colors hover:text-white"><X size={11} /></button>
+                  </span>
+                ))}
+                {selectedMakes.map(make => (
+                  <span key={make} className="mm-filter-text">
+                    {make}
+                    <button onClick={() => removeFilter("make", make)} className="ml-1.5 text-white/30 transition-colors hover:text-white"><X size={11} /></button>
+                  </span>
+                ))}
+                {(priceRange[0] > minDbPrice || priceRange[1] < maxDbPrice) && (
+                  <span className="mm-filter-text">
+                    {priceFormatter.format(priceRange[0])} — {priceFormatter.format(priceRange[1])}
+                    <button onClick={() => removeFilter("price")} className="ml-1.5 text-white/30 transition-colors hover:text-white"><X size={11} /></button>
+                  </span>
+                )}
+                {(minYear || maxYear) && (
+                  <span className="mm-filter-text">
+                    {minYear || t("any")} — {maxYear || t("any")}
+                    <button onClick={() => removeFilter("year")} className="ml-1.5 text-white/30 transition-colors hover:text-white"><X size={11} /></button>
+                  </span>
+                )}
+                <button
+                  onClick={clearFilters}
+                  className="text-[10px] uppercase tracking-[0.2em] text-white/30 transition-colors hover:text-white"
+                >
+                  {t("clearAll")}
+                </button>
+              </div>
+            )}
+
+            {/* ── Card Grid ── */}
+            {filteredVehicles.length === 0 ? (
+              <div className="py-32 text-center">
+                <p className="font-body text-sm text-white/35">{t("empty") || t("emptyFallback")}</p>
+                <button
+                  onClick={clearFilters}
+                  className="mt-5 text-[11px] uppercase tracking-[0.2em] transition-opacity hover:opacity-70"
+                  style={{ color: BLUE }}
+                >
+                  {t("clearAllFilters")}
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 xl:grid-cols-3">
+                {filteredVehicles.map((vehicle: any, i: number) => (
+                  <Reveal key={vehicle.id} delay={Math.min(i * 50, 400)} className="h-full">
+                    <Link href={`/vehicles/${vehicle.slug}`} className="group flex h-full flex-col">
+
+                      {/* Hard-edged image, title sitting on its own scrim */}
+                      <div className="relative aspect-[4/3] w-full overflow-hidden" style={{ background: "rgba(255,255,255,0.03)" }}>
+                        {vehicle.images?.[0] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={vehicle.images[0].url}
+                            alt={`${vehicle.make} ${vehicle.model}`}
+                            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs text-white/15">{t("noImage")}</div>
+                        )}
+
+                        {/* The scrim the title reads against — same treatment as
+                            the Location and Sell sections. */}
+                        <div
+                          aria-hidden="true"
+                          className="absolute inset-x-0 bottom-0 h-3/5"
+                          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.45) 42%, transparent 100%)" }}
+                        />
+
+                        {/* Status is only worth saying when it is not available. */}
+                        {vehicle.status !== "available" && (
+                          <span className={`${LABEL} absolute left-5 top-5 text-white/70`}>
+                            {statusLabels[vehicle.status] ?? vehicle.status}
+                          </span>
+                        )}
+
+                        <h2 className="absolute inset-x-0 bottom-0 line-clamp-1 px-5 pb-4 font-heading text-[1.0625rem] font-medium leading-snug text-white">
+                          {vehicle.year} {vehicle.make} {vehicle.model}
+                        </h2>
+
+                        {/* The one piece of blue on a card: a hairline drawn in
+                            under it on hover. */}
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 transition-transform duration-500 group-hover:scale-x-100"
+                          style={{ background: BLUE }}
+                        />
+                      </div>
+
+                      <p className="font-body mt-4 line-clamp-1 text-[12px] text-white/40">
+                        {vehicle.mileageKm.toLocaleString()} km • {transmissionLabels[vehicle.transmission] ?? vehicle.transmission} • {fuelTypeLabels[vehicle.fuelType] ?? vehicle.fuelType}
+                      </p>
+
+                      <div className="mt-2.5 flex items-baseline justify-between gap-4">
+                        <p className="mm-meta text-[1.15rem] tracking-tight text-white">
+                          {priceFormatter.format(vehicle.priceJpy)}
+                        </p>
+                        <span
+                          className="-translate-x-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                          style={{ color: BLUE }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                        </span>
+                      </div>
+                    </Link>
+                  </Reveal>
+                ))}
+              </div>
+            )}
+          </main>
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════
           Mobile filter drawer (slide-over)
           ═══════════════════════════════════════════ */}
       <div
-        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${showMobileFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-40 bg-black/70 transition-opacity duration-300 md:hidden ${showMobileFilters ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
         onClick={() => setShowMobileFilters(false)}
       />
-      <div className={`fixed top-0 left-0 bottom-0 z-50 w-[320px] max-w-[85vw] overflow-y-auto transition-transform duration-300 ease-out md:hidden ${showMobileFilters ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{
-          background: 'rgba(10,14,20,0.97)',
-          backdropFilter: 'blur(24px)',
-          borderRight: '1px solid rgba(45,127,249,0.12)',
-        }}
+      <div
+        className={`fixed bottom-0 left-0 top-0 z-50 w-[320px] max-w-[85vw] overflow-y-auto transition-transform duration-300 ease-out md:hidden ${showMobileFilters ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ background: BLACK }}
       >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="font-heading text-lg tracking-wide">{t("filters")}</h2>
-            <div className="flex items-center gap-4">
-              <button onClick={clearFilters} className="text-[11px] uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors">{t("reset")}</button>
-              <button className="text-zinc-500 hover:text-white transition-colors" onClick={() => setShowMobileFilters(false)}>
-                <X size={20} />
+        <div className="px-6 py-8">
+          <div className="mb-10 flex items-center justify-between">
+            <h2 className={LABEL} style={{ color: "rgba(255,255,255,0.7)" }}>{t("filters")}</h2>
+            <div className="flex items-center gap-5">
+              <button onClick={clearFilters} className="text-[10px] uppercase tracking-[0.2em] text-white/30 transition-colors hover:text-white">{t("reset")}</button>
+              <button className="text-white/40 transition-colors hover:text-white" onClick={() => setShowMobileFilters(false)}>
+                <X size={18} />
               </button>
             </div>
           </div>
           {filterContent}
           <button
-            className="w-full mt-6 py-3 text-sm uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: '#2D7FF9', borderRadius: '10px', boxShadow: '0 0 20px rgba(45,127,249,0.25)' }}
+            className="mm-meta mt-12 w-full py-3.5 text-[11px] uppercase tracking-[0.2em] text-white transition-opacity duration-200 hover:opacity-90"
+            style={{ background: BLUE, borderRadius: 0 }}
             onClick={() => setShowMobileFilters(false)}
           >
             {t("applyFilters")}
           </button>
         </div>
       </div>
-
-      {/* ═══════════════════════════════════════════
-          Desktop sidebar (visible >= md)
-          ═══════════════════════════════════════════ */}
-      <aside className="hidden md:block md:w-[260px] shrink-0">
-        <div
-          className="sticky top-[100px] rounded-2xl p-5"
-          style={{
-            background: 'rgba(20,24,32,0.6)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid rgba(45,127,249,0.18)',
-            boxShadow: '0 0 0 1px rgba(45,127,249,0.06), 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)',
-          }}
-        >
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-heading text-sm tracking-wide">{t("filters")}</h2>
-            <button
-              onClick={clearFilters}
-              className="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors"
-            >
-              {t("reset")}
-            </button>
-          </div>
-          {filterContent}
-        </div>
-      </aside>
-
-      {/* ═══════════════════════════════════════════
-          Main content area
-          ═══════════════════════════════════════════ */}
-      <main className="flex-1 min-w-0 flex flex-col gap-6">
-        <h1
-          className="font-heading hidden md:block text-3xl tracking-tight"
-        >
-          {t("title")}
-        </h1>
-
-        {/* ── Search / Sort bar ── */}
-        <div
-          className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between rounded-2xl p-4"
-          style={{
-            background: 'rgba(20,24,32,0.6)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(45,127,249,0.18)',
-            boxShadow: '0 0 0 1px rgba(45,127,249,0.06), 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)',
-          }}
-        >
-          <div className="relative w-full sm:w-96 flex-shrink-0">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2" size={16} style={{ color: 'rgba(45,127,249,0.5)' }} />
-            <input
-              type="text"
-              placeholder={t("findPlaceholder")}
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="mm-glass-input !pl-10 !w-full !rounded-xl !py-2.5"
-            />
-          </div>
-          <div className="flex items-center gap-5 w-full sm:w-auto justify-between sm:justify-end">
-            <span className="mm-meta text-[12px] uppercase tracking-widest whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.35)' }}>
-              {t("vehiclesFound", { count: filteredVehicles.length })}
-            </span>
-            <select
-              value={sortOption}
-              onChange={e => setSortOption(e.target.value)}
-              className="font-body appearance-none text-[13px] text-white px-4 py-2.5 rounded-xl cursor-pointer transition-all duration-200 focus:outline-none"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)',
-              }}
-            >
-              <option value="newest" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortNewest")}</option>
-              <option value="recommended" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortRecommended")}</option>
-              <option value="price-asc" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortPriceAsc")}</option>
-              <option value="price-desc" style={{ background: '#141820' }} className="dark:bg-zinc-900 dark:text-white">{t("sortPriceDesc")}</option>
-            </select>
-          </div>
-        </div>
-
-        {/* ── Active filter chips ── */}
-        {hasActiveFilters && (
-          <div className="flex flex-wrap gap-2 items-center">
-            {searchQuery && (
-              <span className="mm-filter-chip">
-                &ldquo;{searchQuery}&rdquo;
-                <button onClick={() => removeFilter("search")} className="ml-1.5 hover:text-white transition-colors"><X size={11} /></button>
-              </span>
-            )}
-            {categories.map(cat => (
-              <span key={cat} className="mm-filter-chip">
-                {tLabels(`category.${cat}`)}
-                <button onClick={() => removeFilter("category", cat)} className="ml-1.5 hover:text-white transition-colors"><X size={11} /></button>
-              </span>
-            ))}
-            {selectedMakes.map(make => (
-              <span key={make} className="mm-filter-chip">
-                {make}
-                <button onClick={() => removeFilter("make", make)} className="ml-1.5 hover:text-white transition-colors"><X size={11} /></button>
-              </span>
-            ))}
-            {(priceRange[0] > minDbPrice || priceRange[1] < maxDbPrice) && (
-              <span className="mm-filter-chip">
-                {priceFormatter.format(priceRange[0])} — {priceFormatter.format(priceRange[1])}
-                <button onClick={() => removeFilter("price")} className="ml-1.5 hover:text-white transition-colors"><X size={11} /></button>
-              </span>
-            )}
-            {(minYear || maxYear) && (
-              <span className="mm-filter-chip">
-                {minYear || t("any")} — {maxYear || t("any")}
-                <button onClick={() => removeFilter("year")} className="ml-1.5 hover:text-white transition-colors"><X size={11} /></button>
-              </span>
-            )}
-            <button
-              onClick={clearFilters}
-              className="text-[11px] uppercase tracking-widest text-zinc-500 hover:text-[#2D7FF9] transition-colors ml-2"
-            >
-              {t("clearAll")}
-            </button>
-          </div>
-        )}
-
-        {/* ── Card Grid ── */}
-        {filteredVehicles.length === 0 ? (
-          <div
-            className="rounded-2xl py-24 text-center"
-            style={{
-              background: 'rgba(20,24,32,0.4)',
-              border: '1px dashed rgba(45,127,249,0.15)',
-            }}
-          >
-            <p className="text-zinc-500 text-sm">{t("empty") || t("emptyFallback")}</p>
-            <button onClick={clearFilters} className="mt-4 text-[#2D7FF9] hover:underline text-sm">{t("clearAllFilters")}</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredVehicles.map((vehicle: any, i: number) => {
-              let badgeBg = 'rgba(255,255,255,0.06)';
-              let badgeColor = 'rgba(255,255,255,0.5)';
-              let badgeBorder = 'rgba(255,255,255,0.1)';
-              if (vehicle.status === "available") {
-                badgeBg = 'rgba(34,197,94,0.1)';
-                badgeColor = '#4ADE80';
-                badgeBorder = 'rgba(34,197,94,0.25)';
-              } else if (vehicle.status === "sold") {
-                badgeBg = 'rgba(239,68,68,0.1)';
-                badgeColor = '#F87171';
-                badgeBorder = 'rgba(239,68,68,0.25)';
-              } else if (vehicle.status === "reserved") {
-                badgeBg = 'rgba(234,179,8,0.1)';
-                badgeColor = '#FACC15';
-                badgeBorder = 'rgba(234,179,8,0.25)';
-              }
-
-              return (
-                <FadeInSection key={vehicle.id} delay={Math.min(i * 0.05, 0.5)} className="h-full">
-                  <motion.div 
-                    whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(45,127,249,0.3)" }}
-                    className="mm-glass-card group relative flex flex-col overflow-hidden h-full"
-                  >
-                    <Link href={`/vehicles/${vehicle.slug}`} className="absolute inset-0 z-10">
-                    <span className="sr-only">View {vehicle.make} {vehicle.model}</span>
-                  </Link>
-
-                  <button
-                    className="absolute top-4 right-4 z-20 p-2 rounded-full transition-all duration-200"
-                    style={{
-                      background: 'rgba(10,14,20,0.5)',
-                      backdropFilter: 'blur(8px)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      color: 'rgba(255,255,255,0.5)',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(45,127,249,0.4)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-                  >
-                    <Bookmark size={14} />
-                  </button>
-
-                  <div className="relative aspect-[4/3] w-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    {vehicle.images?.[0] ? (
-                      <>
-                        <img
-                          src={vehicle.images[0].url}
-                          alt={`${vehicle.make} ${vehicle.model}`}
-                          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,14,20,0.88) 0%, rgba(10,14,20,0.1) 45%, transparent 100%)' }} />
-                      </>
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>{t("noImage")}</div>
-                    )}
-                    <div
-                      className="mm-meta absolute top-4 left-4 px-2.5 py-1 text-[10px] uppercase tracking-widest rounded"
-                      style={{
-                        background: badgeBg,
-                        color: badgeColor,
-                        border: `1px solid ${badgeBorder}`,
-                        backdropFilter: 'blur(4px)',
-                      }}
-                    >
-                      {statusLabels[vehicle.status] ?? vehicle.status}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col p-5 gap-2">
-                    <h2 className="text-base leading-snug text-white group-hover:text-[#2D7FF9] transition-colors duration-300 line-clamp-1">
-                      {vehicle.year} {vehicle.make} {vehicle.model}
-                    </h2>
-                    <p className="font-body text-[12px] line-clamp-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                      {vehicle.mileageKm.toLocaleString()} km • {transmissionLabels[vehicle.transmission] ?? vehicle.transmission} • {fuelTypeLabels[vehicle.fuelType] ?? vehicle.fuelType}
-                    </p>
-                    <div className="mt-2 pt-3 flex items-center justify-between" style={{ borderTop: '1px solid rgba(45,127,249,0.1)' }}>
-                      <p className="mm-meta text-xl tracking-tight" style={{ color: '#2D7FF9' }}>
-                        {priceFormatter.format(vehicle.priceJpy)}
-                      </p>
-                      <div className="text-[#2D7FF9] opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                      </div>
-                    </div>
-                  </div>
-                  </motion.div>
-                </FadeInSection>
-              );
-            })}
-          </div>
-        )}
-      </main>
     </div>
   );
 }

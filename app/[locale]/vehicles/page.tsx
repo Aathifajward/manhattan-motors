@@ -43,10 +43,10 @@ export default async function VehiclesPage({
   } catch (error) {
     console.error("Failed to fetch vehicles from database:", error);
     return (
-      <div className="mx-auto max-w-5xl px-6 py-12">
-        <div className="rounded-xl border border-dashed border-red-300 bg-red-50 py-16 text-center dark:border-red-900/30 dark:bg-red-950/20">
-          <p className="text-red-600 dark:text-red-400">Unable to connect to the database. The server might be waking up.</p>
-          <p className="mt-2 text-sm text-red-500/80 dark:text-red-400/80">Please refresh the page in a few seconds.</p>
+      <div className="-mt-[88px] w-full pt-[88px]" style={{ background: "#0a0a0a", minHeight: "100vh" }}>
+        <div className="mx-auto max-w-5xl px-6 pb-28 pt-20 text-center md:pt-28">
+          <p className="font-body text-sm text-white/70">Unable to connect to the database. The server might be waking up.</p>
+          <p className="font-body mt-2 text-sm text-white/35">Please refresh the page in a few seconds.</p>
         </div>
       </div>
     );

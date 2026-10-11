@@ -26,6 +26,18 @@ import {
    either end: the cars start the moment the card lands and the moment they
    finish is the moment Location starts rising.                              */
 
+/** The road the cars drive up: a top-down strip of asphalt with the centre
+ *  line running the way they travel. */
+const ROAD_SRC = "/images/road2.jpeg";
+/**
+ * The art is already almost black — the asphalt measures 2% luma and only
+ * the centre line, at 48%, is bright. So the scrim is kept light: its whole
+ * job is taking the edge off that line where the headline crosses it, and
+ * anything heavier would push the asphalt below the navy underneath and
+ * lose the road altogether.
+ */
+const ROAD_SCRIM = 0.22;
+
 /** The car pass itself — this card's HOLD, and the only part that is not
  *  geometry shared with the rest of the stack. */
 const DRIVE_VH = 600;
@@ -343,6 +355,22 @@ export default function DriveEnd() {
           className="absolute inset-0 h-full w-full overflow-hidden bg-[var(--mm-navy)] will-change-transform"
           style={{ transform: "translate3d(0, 100%, 0)" }}
         >
+        {/* The road, held still while the cars and the copy move over it.
+            It lives inside the sliding wrapper so it arrives with the card
+            rather than showing through before it has risen. The navy on the
+            wrapper stays as the backstop under it. */}
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+          <Image
+            src={ROAD_SRC}
+            alt=""
+            fill
+            sizes="100vw"
+            quality={80}
+            className="object-cover"
+          />
+          <div className="absolute inset-0" style={{ background: `rgba(10,14,20,${ROAD_SCRIM})` }} />
+        </div>
+
         <div ref={driftRef} className="absolute inset-0 will-change-transform">
 
         {/* "Your next / drive" — behind the cars, carried off the top */}

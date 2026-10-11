@@ -5,6 +5,7 @@ import cloudinary from "@/lib/cloudinary";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import type { VehicleCategory } from "@prisma/client";
 
 export async function createVehicle(formData: FormData) {
   const session = await auth();
@@ -15,7 +16,7 @@ export async function createVehicle(formData: FormData) {
   const make = formData.get("make") as string;
   const model = formData.get("model") as string;
   const year = Number(formData.get("year"));
-  const category = formData.get("category") as "CAR" | "TRUCK" | "VAN" | "MOTORCYCLE" | "MACHINERY";
+  const category = formData.get("category") as VehicleCategory;
   const mileageKm = Number(formData.get("mileageKm"));
   const priceJpy = Number(formData.get("priceJpy"));
   const transmission = formData.get("transmission") as string;
@@ -63,18 +64,38 @@ export async function createVehicle(formData: FormData) {
     });
 
     await prisma.vehicleImage.create({
-      data: {
-        vehicleId: vehicle.id,
-        url: result.secure_url,
-        order,
-        isCover: order === 0,
-      },
+      data: { vehicleId: vehicle.id, url: result.secure_url, order },
     });
 
     order++;
   }
 
+  await normaliseImages(vehicle.id);
+
   redirect("/en/admin");
+}
+
+/**
+ * Renumbers a vehicle's images 0..n-1 in their current order and makes the
+ * first one the cover. Every path that adds, removes or reorders images ends
+ * here, so a vehicle can never be left with two covers or none — the listing
+ * grid queries `isCover`, and an uncovered vehicle shows no photo at all.
+ */
+async function normaliseImages(vehicleId: string) {
+  const images = await prisma.vehicleImage.findMany({
+    where: { vehicleId },
+    orderBy: [{ order: "asc" }, { id: "asc" }],
+    select: { id: true },
+  });
+
+  await prisma.$transaction(
+    images.map((img, i) =>
+      prisma.vehicleImage.update({
+        where: { id: img.id },
+        data: { order: i, isCover: i === 0 },
+      })
+    )
+  );
 }
 
 export async function updateVehicleStatus(vehicleId: string, formData: FormData) {
@@ -105,7 +126,7 @@ export async function updateVehicle(vehicleId: string, formData: FormData) {
   const make = formData.get("make") as string;
   const model = formData.get("model") as string;
   const year = Number(formData.get("year"));
-  const category = formData.get("category") as "CAR" | "TRUCK" | "VAN" | "MOTORCYCLE" | "MACHINERY";
+  const category = formData.get("category") as VehicleCategory;
   const mileageKm = Number(formData.get("mileageKm"));
   const priceJpy = Number(formData.get("priceJpy"));
   const transmission = formData.get("transmission") as string;
@@ -149,16 +170,13 @@ export async function updateVehicle(vehicleId: string, formData: FormData) {
     });
 
     await prisma.vehicleImage.create({
-      data: {
-        vehicleId,
-        url: result.secure_url,
-        order,
-        isCover: order === 0,
-      },
+      data: { vehicleId, url: result.secure_url, order },
     });
 
     order++;
   }
+
+  await normaliseImages(vehicleId);
 
   revalidatePath("/en/admin");
   revalidatePath("/ja/admin");
@@ -189,6 +207,50 @@ export async function deleteVehicleImage(imageId: string, vehicleId: string) {
   }
 
   await prisma.vehicleImage.delete({ where: { id: imageId } });
+  // Deleting the cover would otherwise leave the vehicle without one.
+  await normaliseImages(vehicleId);
 
   revalidatePath(`/en/admin/vehicles/${vehicleId}/edit`);
+  revalidatePath("/en/admin");
+  revalidatePath("/ja/admin");
+  revalidatePath("/en/vehicles");
+  revalidatePath("/ja/vehicles");
+}
+
+/**
+ * Writes a new image order for one vehicle. `orderedIds` is the full list of
+ * that vehicle's image ids in the order the admin dragged them into; the
+ * first becomes the cover.
+ */
+export async function reorderVehicleImages(vehicleId: string, orderedIds: string[]) {
+  const session = await auth();
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+
+  const owned = await prisma.vehicleImage.findMany({
+    where: { vehicleId },
+    select: { id: true },
+  });
+  const ownedIds = new Set(owned.map((i) => i.id));
+  // Ignore anything that is not this vehicle's, and keep any image the client
+  // did not mention at the end rather than dropping it.
+  const ids = orderedIds.filter((id) => ownedIds.has(id));
+  const rest = owned.map((i) => i.id).filter((id) => !ids.includes(id));
+  const final = [...ids, ...rest];
+
+  await prisma.$transaction(
+    final.map((id, i) =>
+      prisma.vehicleImage.update({
+        where: { id },
+        data: { order: i, isCover: i === 0 },
+      })
+    )
+  );
+
+  revalidatePath(`/en/admin/vehicles/${vehicleId}/edit`);
+  revalidatePath("/en/admin");
+  revalidatePath("/ja/admin");
+  revalidatePath("/en/vehicles");
+  revalidatePath("/ja/vehicles");
 }

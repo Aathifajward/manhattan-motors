@@ -1,4 +1,5 @@
 import { createVehicle } from "@/lib/actions/vehicle";
+import { NewImagePicker } from "../_components/VehicleImages";
 import { auth } from "@/auth";
 import { redirect } from "@/i18n/navigation";
 
@@ -17,6 +18,7 @@ export default async function NewVehiclePage() {
           <select name="category" required className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:[color-scheme:dark]">
             <option value="" className="dark:bg-zinc-900 dark:text-white">Category</option>
             <option value="CAR" className="dark:bg-zinc-900 dark:text-white">Car</option>
+            <option value="SUV" className="dark:bg-zinc-900 dark:text-white">SUV</option>
             <option value="TRUCK" className="dark:bg-zinc-900 dark:text-white">Truck</option>
             <option value="VAN" className="dark:bg-zinc-900 dark:text-white">Van</option>
             <option value="MOTORCYCLE" className="dark:bg-zinc-900 dark:text-white">Motorcycle</option>
@@ -52,16 +54,7 @@ export default async function NewVehiclePage() {
           <textarea name="descriptionEn" placeholder="Description (English)" required className="min-h-[120px] rounded-lg border border-zinc-200 bg-transparent px-3 py-2.5 text-sm dark:border-zinc-700 dark:[color-scheme:dark]" />
           <textarea name="descriptionJa" placeholder="Description (Japanese, optional)" className="min-h-[120px] rounded-lg border border-zinc-200 bg-transparent px-3 py-2.5 text-sm dark:border-zinc-700 dark:[color-scheme:dark]" />
           
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-zinc-700 dark:text-zinc-300">Upload Photos</label>
-            <input
-              type="file"
-              name="images"
-              accept="image/*"
-              multiple
-              className="rounded-lg border border-zinc-200 bg-transparent px-3 py-2.5 text-sm dark:border-zinc-700 dark:[color-scheme:dark] dark:bg-zinc-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-zinc-100 file:text-zinc-700 hover:file:bg-zinc-200 dark:file:bg-zinc-800 dark:file:text-white dark:hover:file:bg-zinc-700"
-            />
-          </div>
+          <NewImagePicker label="Upload Photos" />
           
           <button type="submit" className="mt-4 rounded-lg bg-black py-3 text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80">
             Save Vehicle

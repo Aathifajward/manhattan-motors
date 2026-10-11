@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { createInquiry } from "@/lib/actions/inquiry";
 import { MotionButton } from "@/components/MotionElements";
+import Reveal from "@/components/Reveal";
 
 /**
  * Value written to Inquiry.preferredContact when someone wants to sell us a
@@ -54,22 +55,22 @@ export default async function InquiryForm({
       {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
+        <Reveal delay={0} className="flex flex-col gap-2">
           <label htmlFor="name" className={LABEL} style={LABEL_STYLE}>{t("formName")}</label>
           <input id="name" name="name" autoComplete="name" required className={FIELD} style={FIELD_STYLE} />
-        </div>
-        <div className="flex flex-col gap-2">
+        </Reveal>
+        <Reveal delay={50} className="flex flex-col gap-2">
           <label htmlFor="email" className={LABEL} style={LABEL_STYLE}>{t("formEmail")}</label>
           <input id="email" name="email" type="email" autoComplete="email" required className={FIELD} style={FIELD_STYLE} />
-        </div>
+        </Reveal>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
+        <Reveal delay={100} className="flex flex-col gap-2">
           <label htmlFor="phone" className={LABEL} style={LABEL_STYLE}>{t("formPhone")}</label>
           <input id="phone" name="phone" autoComplete="tel" className={FIELD} style={FIELD_STYLE} />
-        </div>
-        <div className="flex flex-col gap-2">
+        </Reveal>
+        <Reveal delay={150} className="flex flex-col gap-2">
           <label htmlFor="preferredContact" className={LABEL} style={LABEL_STYLE}>{t("formVehicleType")}</label>
           <select
             id="preferredContact"
@@ -77,7 +78,7 @@ export default async function InquiryForm({
             required
             defaultValue={defaultType}
             className="font-body border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none appearance-none cursor-pointer dark:bg-zinc-900 dark:text-white dark:[color-scheme:dark]"
-            style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0, background: "rgba(10,14,20,0.92)" }}
+            style={{ borderColor: "rgba(255,255,255,0.12)", borderRadius: 0, background: "#0a0a0a" }}
           >
             {types.map(([value, label]) => (
               <option key={value} value={value} className="dark:bg-zinc-900 dark:text-white">
@@ -85,18 +86,18 @@ export default async function InquiryForm({
               </option>
             ))}
           </select>
-        </div>
+        </Reveal>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <Reveal delay={200} className="flex flex-col gap-2">
         <label htmlFor="message" className={LABEL} style={LABEL_STYLE}>{t("formMessage")}</label>
         <textarea id="message" name="message" required rows={4} className="font-body border-b bg-transparent px-0 py-2.5 text-sm text-white focus:outline-none resize-none dark:[color-scheme:dark]" style={FIELD_STYLE} />
-      </div>
+      </Reveal>
 
       <MotionButton
         type="submit"
-        className="mt-2 w-full py-4 font-heading font-semibold text-sm uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5 hover:opacity-90"
-        style={{ background: BLUE, borderRadius: "6px", boxShadow: `0 0 20px rgba(45,127,249,0.25)` }}
+        className="mm-meta mt-6 w-full py-4 text-[11px] uppercase tracking-[0.2em] text-white transition-opacity duration-200 hover:opacity-80"
+        style={{ background: BLUE, borderRadius: 0 }}
       >
         {t("formSubmit")}
       </MotionButton>

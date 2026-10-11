@@ -15,6 +15,7 @@ datasource db {
 }
 enum VehicleCategory {
   CAR
+  SUV
   TRUCK
   VAN
   MOTORCYCLE
