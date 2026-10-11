@@ -6,7 +6,6 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import FooterStack from "@/components/scroll/FooterStack";
 import "@fontsource-variable/dm-sans";
 import "./globals.css";
 
@@ -55,9 +54,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <Navbar />
           <main className="flex flex-1 flex-col pt-[88px]">{children}</main>
-          <FooterStack>
-            <Footer />
-          </FooterStack>
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

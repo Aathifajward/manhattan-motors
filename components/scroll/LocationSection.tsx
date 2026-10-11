@@ -11,16 +11,12 @@ import {
   addressFor,
   openingHoursFor,
 } from "@/lib/siteConfig";
-import ProgressLine from "./ProgressLine";
 import {
-  CARD_VH,
   CARD_MARGIN_VH,
-  OUTRO_DIM,
-  OUTRO_RISE_VH,
+  LAST_CARD_VH,
   TEXT_DIM,
   TEXT_RISE_PX,
   clamp01,
-  coverStart,
   slideEnd,
   span,
   useStackProgress,
@@ -34,8 +30,12 @@ const LOCATION_IMAGE = "/images/location.jpeg";
 /** Shown instead of a broken-image icon while the photo is missing. */
 const FALLBACK_BG = "linear-gradient(45deg, #1A2433, #0A0E14)";
 
-const SLIDE_END = slideEnd();
-const COVER_START = coverStart();
+/**
+ * This is the last card in the stack: it rises over DriveEnd on a hard edge,
+ * nothing covers it in turn, and Sell after it is a plain section that scrolls
+ * up normally once this pin releases.
+ */
+const SLIDE_END = slideEnd(LAST_CARD_VH);
 /** The copy is scrubbed in just after the card lands, one block after another. */
 const REVEAL_FROM = SLIDE_END;
 const REVEAL_SPAN = 0.16;
@@ -45,9 +45,6 @@ export default function LocationSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const slideRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const dimRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
 
   const t = useTranslations("LocationSection");
@@ -68,17 +65,10 @@ export default function LocationSection() {
       el.style.transform = `translate3d(0, ${(TEXT_RISE_PX * (1 - r)).toFixed(2)}px, 0)`;
       el.style.opacity = (TEXT_DIM + (1 - TEXT_DIM) * r).toFixed(4);
     });
-
-    // Being covered by the next card: drift up and darken.
-    const out = span(p, COVER_START, 1);
-    if (innerRef.current) {
-      innerRef.current.style.transform = `translate3d(0, ${(-OUTRO_RISE_VH * out).toFixed(3)}vh, 0)`;
-    }
-    if (dimRef.current) dimRef.current.style.opacity = (OUTRO_DIM * out).toFixed(4);
-    if (lineRef.current) lineRef.current.style.transform = `scaleX(${p.toFixed(4)})`;
   }, []);
 
-  useStackProgress(sectionRef, stageRef, apply, COVER_START);
+  // Nothing covers this card, so the settled frame is its last one.
+  useStackProgress(sectionRef, stageRef, apply, 1);
 
   const address = addressFor(locale);
   const hours = openingHoursFor(locale);
@@ -88,7 +78,7 @@ export default function LocationSection() {
       ref={sectionRef}
       id="location"
       className="relative w-full"
-      style={{ height: `${CARD_VH}vh`, marginTop: `${CARD_MARGIN_VH}vh`, zIndex: 30 }}
+      style={{ height: `${LAST_CARD_VH}vh`, marginTop: `${CARD_MARGIN_VH}vh`, zIndex: 30 }}
     >
       <div ref={stageRef} className="sticky top-0 h-[100svh] w-full overflow-hidden">
         <div
@@ -131,7 +121,7 @@ export default function LocationSection() {
         style={{ background: "linear-gradient(180deg, transparent 0%, #000 100%)" }}
       />
 
-      <div ref={innerRef} className="absolute inset-0 z-10 flex items-center will-change-transform">
+      <div className="absolute inset-0 z-10 flex items-center">
         <div className="mx-auto w-full max-w-6xl px-6 py-24">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           {/* ── Left: details ── */}
@@ -230,16 +220,6 @@ export default function LocationSection() {
           </div>
         </div>
       </div>
-
-          {/* Darkens while the next card covers this one */}
-          <div
-            ref={dimRef}
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-30 bg-black"
-            style={{ opacity: 0 }}
-          />
-
-          <ProgressLine lineRef={lineRef} />
         </div>
       </div>
     </section>

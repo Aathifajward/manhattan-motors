@@ -3,6 +3,12 @@
 import { useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import {
+  CARD_MARGIN_VH,
+  OUTRO_DIM as COVER_DIM,
+  OUTRO_RISE_VH as COVER_RISE_VH,
+  coverStart,
+} from "./scroll/stacked";
 
 /** Only the fields this slide actually renders. */
 type SlideVehicle = {
@@ -25,6 +31,19 @@ const ZOOM_FROM = 1.12;
 const OUTRO_DIM = 0.4;
 /** Share of a slide spent in the cross-over. */
 const SWITCH = 0.4;
+
+/**
+ * The card is one stage plus a fixed 900vh of scroll, however many vehicles
+ * there are: the slide sequence shares everything before the COVER pass, so
+ * each vehicle's pass is 900vh minus stage minus cover, divided by the count.
+ * The COVER pass at the end is where DriveEnd rises over this card while it
+ * stays pinned, drifting up and darkening. `CARD_VH` is the full scroll
+ * container, `COVER_START` the progress where the sequence is done and that
+ * cover begins — every internal range below is expressed against those, so
+ * they rescale with the height rather than being pinned to it.
+ */
+const CARD_VH = 900;
+const COVER_START = coverStart(CARD_VH);
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
@@ -50,6 +69,10 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
   const imageRefs = useRef<(HTMLImageElement | null)[]>([]);
   /** Darkens the outgoing picture as the next one covers it. */
   const dimRefs = useRef<(HTMLDivElement | null)[]>([]);
+  /** The whole stage, drifting up while DriveEnd covers this card. */
+  const driftRef = useRef<HTMLDivElement>(null);
+  /** Darkens this card under DriveEnd. */
+  const coverDimRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -95,7 +118,19 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
       const scrollable = rect.height - sticky.offsetHeight;
       const progress = scrollable > 0 ? Math.min(1, Math.max(0, -rect.top / scrollable)) : 0;
 
-      const p = progress * N; // 0 to N
+      // The slide sequence fills everything before the cover, so the vehicles
+      // split that span evenly however many of them there are.
+      const p = clamp01(progress / COVER_START) * N; // 0 to N
+
+      // Being covered by DriveEnd: the whole stage drifts up and darkens.
+      const outro = clamp01((progress - COVER_START) / (1 - COVER_START));
+      if (driftRef.current) {
+        driftRef.current.style.transform =
+          `translate3d(0, ${(-COVER_RISE_VH * outro).toFixed(3)}vh, 0)`;
+      }
+      if (coverDimRef.current) {
+        coverDimRef.current.style.opacity = (COVER_DIM * outro).toFixed(4);
+      }
 
       for (let i = 0; i < N; i++) {
         const textEl = textRefs.current[i];
@@ -227,7 +262,12 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
 
   if (prefersReducedMotion) {
     return (
-      <section className="w-full bg-[var(--mm-navy)] py-20 px-6">
+      <section
+        className="w-full bg-[var(--mm-navy)] py-20 px-6"
+        /* No stage to cover, so DriveEnd's -200vh pull-up has nothing to eat
+           into here — give it back, or it would swallow the last two slides. */
+        style={{ marginBottom: `${-CARD_MARGIN_VH}vh` }}
+      >
         <div className="max-w-7xl mx-auto flex flex-col gap-20">
           {vehicles.map((v, i) => (
             <div key={v.id} className="flex flex-col md:flex-row gap-10 items-center">
@@ -271,9 +311,13 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
     <section
       ref={containerRef}
       className="relative w-full"
-      style={{ height: `${(vehicles.length + 1) * 100}vh` }}
+      style={{ height: `${CARD_VH}vh`, zIndex: 10 }}
     >
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden flex flex-col-reverse md:flex-row bg-[var(--mm-navy)]">
+      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[var(--mm-navy)]">
+        <div
+          ref={driftRef}
+          className="absolute inset-0 flex flex-col-reverse md:flex-row will-change-transform"
+        >
 
         {/* Left Column: Text */}
         <div className="w-full h-[50svh] md:h-[100svh] md:w-1/2 flex flex-col justify-center relative bg-[var(--mm-navy)] z-20">
@@ -352,6 +396,15 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
           ))}
         </div>
 
+        </div>
+
+        {/* Darkens while DriveEnd rises over this card */}
+        <div
+          ref={coverDimRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-30 bg-black"
+          style={{ opacity: 0 }}
+        />
       </div>
     </section>
   );

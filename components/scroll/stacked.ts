@@ -3,8 +3,8 @@
 import { useEffect } from "react";
 
 /**
- * Shared geometry for the stacked-card closers (DriveEnd → Location → Sell →
- * Footer). Each card is a tall scroll container with a sticky stage; the next
+ * Shared geometry for the stacked cards (VehicleSlides -> DriveEnd ->
+ * Location). Each card is a tall scroll container with a sticky stage; the next
  * card slides up over it while it stays pinned, then the pin releases exactly
  * as the cover completes — so there is never an idle frame between them.
  *
@@ -17,26 +17,30 @@ import { useEffect } from "react";
  * A card's own SLIDE is consumed from the previous card's COVER, which is why
  * MARGIN is -(STAGE + SLIDE): it starts exactly SLIDE before the previous
  * card unpins.
+ *
+ * Location is the end of the chain: nothing covers it, and Sell and the footer
+ * after it are plain sections that scroll normally.
  */
 export const STAGE = 100;
 export const SLIDE = 100;
 export const HOLD = 60;
 export const COVER = SLIDE; // the next card's slide is this card's cover
 
-/** Height of a card that gets covered by another one. */
-export const CARD_VH = STAGE + SLIDE + HOLD + COVER; // 360
-/** Height of the last card, which nothing covers. */
-export const LAST_CARD_VH = STAGE + SLIDE; // 200
+/**
+ * Height of the last card, which nothing covers. It keeps its HOLD so its copy
+ * can finish landing before the pin releases.
+ */
+export const LAST_CARD_VH = STAGE + SLIDE + HOLD; // 260
 /** Pulls a card up so it starts rising before the one before it unpins. */
 export const CARD_MARGIN_VH = -(STAGE + SLIDE); // -200
 
 const scrollableOf = (heightVh: number) => heightVh - STAGE;
 
 /** Progress at which a card has finished rising into place. */
-export const slideEnd = (heightVh = CARD_VH) => SLIDE / scrollableOf(heightVh);
+export const slideEnd = (heightVh: number) => SLIDE / scrollableOf(heightVh);
 /** Progress at which the next card starts covering this one. */
-export const coverStart = (heightVh = CARD_VH) =>
-  (SLIDE + HOLD) / scrollableOf(heightVh);
+export const coverStart = (heightVh: number) =>
+  (scrollableOf(heightVh) - COVER) / scrollableOf(heightVh);
 
 /** How far the outgoing content drifts up while it is being covered. */
 export const OUTRO_RISE_VH = 15;
