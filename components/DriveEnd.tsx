@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import ProgressLine from "./scroll/ProgressLine";
 import {
   CARD_MARGIN_VH,
   COVER,
@@ -150,7 +149,6 @@ export default function DriveEnd() {
   const slideRef = useRef<HTMLDivElement>(null);
   const driftRef = useRef<HTMLDivElement>(null);
   const dimRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
 
   const startTextRef = useRef<HTMLDivElement>(null);
   /** Mask riding under the GTR's rear; later parks at stage centre. Its top
@@ -287,7 +285,6 @@ export default function DriveEnd() {
         driftRef.current.style.transform = `translate3d(0, ${(-OUTRO_RISE_VH * outro).toFixed(3)}vh, 0)`;
       }
       if (dimRef.current) dimRef.current.style.opacity = (OUTRO_DIM * outro).toFixed(4);
-      if (lineRef.current) lineRef.current.style.transform = `scaleX(${progress.toFixed(4)})`;
     };
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -472,7 +469,6 @@ export default function DriveEnd() {
           style={{ opacity: 0 }}
         />
 
-        <ProgressLine lineRef={lineRef} />
         </div>
       </div>
     </section>

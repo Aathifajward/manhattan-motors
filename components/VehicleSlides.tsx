@@ -5,8 +5,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
   CARD_MARGIN_VH,
+  COVER,
   OUTRO_DIM as COVER_DIM,
   OUTRO_RISE_VH as COVER_RISE_VH,
+  STAGE,
   coverStart,
 } from "./scroll/stacked";
 
@@ -29,21 +31,38 @@ type SlideVehicle = {
 const ZOOM_FROM = 1.12;
 /** How far the outgoing picture darkens as the next one covers it. */
 const OUTRO_DIM = 0.4;
-/** Share of a slide spent in the cross-over. */
-const SWITCH = 0.4;
+
+/* ── Scroll budget ────────────────────────────────────────────────────────
+   The height is built from the animation, not the other way round: one
+   TRANSITION per slide plus one HOLD per slide, and nothing else. Every vh
+   of a transition moves something; the holds are the only still frames in
+   the sequence and they are deliberately a fraction of a transition long.
+
+       |<- STAGE ->|<- T ->|<-H->|<- T ->|<-H->| ... |<- COVER ->|
+                     ^ slide 0 zooms out   ^ slide 1 arrives
+                             ^ slide 0 readable, already settled at 1.0   */
+
+/** The cross-over: the next picture rises and eases 1.12 -> 1.0 while the
+ *  outgoing one darkens behind it. All of it animates. */
+const TRANSITION_VH = 90;
+/** The readable window. The picture is settled at 1.0 for all of it — there
+ *  is nothing left waiting to start, so the next transition begins on the
+ *  very next pixel of scroll. */
+const HOLD_VH = 18;
+
+/** One slide's share of the sequence. */
+const SLIDE_VH = TRANSITION_VH + HOLD_VH;
+/** Share of that spent in the cross-over; the remainder is the hold. */
+const SWITCH = TRANSITION_VH / SLIDE_VH;
 
 /**
- * The card is one stage plus a fixed 900vh of scroll, however many vehicles
- * there are: the slide sequence shares everything before the COVER pass, so
- * each vehicle's pass is 900vh minus stage minus cover, divided by the count.
- * The COVER pass at the end is where DriveEnd rises over this card while it
- * stays pinned, drifting up and darkening. `CARD_VH` is the full scroll
- * container, `COVER_START` the progress where the sequence is done and that
- * cover begins — every internal range below is expressed against those, so
- * they rescale with the height rather than being pinned to it.
+ * Stage, then one SLIDE_VH per vehicle, then the COVER pass where DriveEnd
+ * rises over this card while it stays pinned, drifting up and darkening.
+ * There is no padding anywhere in it: the sequence ends on the frame the
+ * last slide's hold ends, which is the frame the cover begins.
  */
-const CARD_VH = 900;
-const COVER_START = coverStart(CARD_VH);
+const cardVh = (n: number) => STAGE + n * SLIDE_VH + COVER;
+const coverStartOf = (n: number) => coverStart(cardVh(n));
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
@@ -85,26 +104,32 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
     let disposed = false;
     let rafId = 0;
     const N = vehicles.length;
+    const COVER_START = coverStartOf(N);
 
     /**
      * Zoom and dim depend only on where `p` sits relative to this slide, so they
      * run straight through the clip/text branching below.
      *
-     * Zoom holds at 1.12 while the slide is still rising (p < i), then eases to
-     * 1.0 across its active-and-being-covered span (p = i -> i + 1). The last
-     * slide is never covered, so it simply holds its pre-zoom.
+     * Zoom rides the slide's own cross-over — the SWITCH-long window ending at
+     * p = i, the same window its clip and text ride — so it eases 1.12 -> 1.0
+     * as the picture arrives and is settled for the whole of the hold that
+     * follows. Dim rides the next slide's cross-over instead, the window
+     * ending at p = i + 1, so the outgoing picture darkens while the incoming
+     * one rises and zooms over it. Nothing is left over for the hold.
      */
     const setLook = (i: number, p: number) => {
       const isLast = i === N - 1;
 
       const img = imageRefs.current[i];
       if (img) {
-        const zoom = isLast ? ZOOM_FROM : ZOOM_FROM - (ZOOM_FROM - 1) * clamp01(p - i);
+        const rise = clamp01((p - (i - SWITCH)) / SWITCH);
+        const zoom = ZOOM_FROM - (ZOOM_FROM - 1) * rise;
         img.style.transform = `scale(${zoom.toFixed(4)})`;
       }
 
       const dim = dimRefs.current[i];
       if (dim) {
+        // The last slide is never covered, so it never darkens.
         const t = isLast ? 0 : clamp01((p - (i + 1 - SWITCH)) / SWITCH);
         dim.style.opacity = (OUTRO_DIM * t).toFixed(4);
       }
@@ -118,9 +143,11 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
       const scrollable = rect.height - sticky.offsetHeight;
       const progress = scrollable > 0 ? Math.min(1, Math.max(0, -rect.top / scrollable)) : 0;
 
-      // The slide sequence fills everything before the cover, so the vehicles
-      // split that span evenly however many of them there are.
-      const p = clamp01(progress / COVER_START) * N; // 0 to N
+      // The sequence fills everything before the cover, one SLIDE_VH each.
+      // Offset by SWITCH so slide 0 opens inside a cross-over of its own: it
+      // is fully shown from the first frame (see the p <= 0 branch below) and
+      // spends that window zooming out, rather than sitting still.
+      const p = clamp01(progress / COVER_START) * N - SWITCH; // -SWITCH to N - SWITCH
 
       // Being covered by DriveEnd: the whole stage drifts up and darkens.
       const outro = clamp01((progress - COVER_START) / (1 - COVER_START));
@@ -311,7 +338,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
     <section
       ref={containerRef}
       className="relative w-full"
-      style={{ height: `${CARD_VH}vh`, zIndex: 10 }}
+      style={{ height: `${cardVh(vehicles.length)}vh`, zIndex: 10 }}
     >
       <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[var(--mm-navy)]">
         <div

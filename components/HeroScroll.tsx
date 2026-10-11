@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -12,12 +12,62 @@ interface HeroScrollProps {
 }
 
 const VIDEO_SRC = "/videos/heronew-scrub.mp4";
-const POSTER_SRC = "/images/frames/frame_000000.webp";
 const FPS = 30;
 const MIN_STEP = 0.5 / FPS; // only seek when the target moved at least half a frame
 const SEEK_INTERVAL_MS = 1000 / 30; // throttle seek writes to ~30/s
 const SEEK_WATCHDOG_MS = 150; // never let a lost "seeked" event freeze scrubbing
 const LERP = 0.2;
+
+/* ── The hero line's exit ──────────────────────────────────────────────────
+   It pulls toward the viewer while the words burn off one after another,
+   left to right, and is gone well before the statement rectangle starts to
+   open over the video — the last tenth of the scrub is the bare film.
+   Transform and colour only — the words are inline-block spans, so nothing
+   they do moves anything else.                                           */
+
+const EXIT_FROM = 0.22;
+const EXIT_TO = 0.45;
+/** How much of that range one word owns; the remainder is the stagger. */
+const WORD_SPAN = 0.45;
+/** Where inside a word's own exit it reaches full blue, and where it starts
+ *  to go. The gap between them is the flash. */
+const FLASH_AT = 0.35;
+const FADE_FROM = 0.45;
+
+/** The line as a whole, pulling toward the viewer. */
+const HERO_SCALE_TO = 1.35;
+/** And each word collapsing away under that, against it. */
+const WORD_SCALE_TO = 0.7;
+
+const HERO_INK: [number, number, number] = [245, 245, 240]; // #F5F5F0
+const HERO_BLUE: [number, number, number] = [47, 139, 255]; // #2F8BFF
+const HERO_GLOW = "0 0 18px rgba(47,139,255,0.55)";
+const HERO_INK_CSS = `rgb(${HERO_INK[0]}, ${HERO_INK[1]}, ${HERO_INK[2]})`;
+
+const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+const mix = (a: number, b: number, t: number) => a + (b - a) * t;
+
+/** Ink to blue, reached a third of the way through the word's exit and held
+ *  from there, so the flash is what you see just before it goes. */
+function wordColor(w: number) {
+  const hot = clamp01(w / FLASH_AT);
+  const ch = (i: number) => mix(HERO_INK[i], HERO_BLUE[i], hot);
+  return `rgb(${ch(0) | 0}, ${ch(1) | 0}, ${ch(2) | 0})`;
+}
+
+/**
+ * Words with their spaces kept as their own units, so the line sets exactly
+ * as it does now. A script that does not use spaces falls back to one unit
+ * per character, which is the same cadence. `slot` is the unit's place in the
+ * sweep, -1 for the spaces, which never take a turn.
+ */
+function splitWords(text: string) {
+  const parts = text.split(/(\s+)/).filter(Boolean);
+  const units =
+    parts.filter((x) => !/^\s+$/.test(x)).length > 1 ? parts : Array.from(text);
+  let slot = 0;
+  return units.map((chars) => ({ chars, slot: /^\s+$/.test(chars) ? -1 : slot++ }));
+}
 
 type SeekableVideo = HTMLVideoElement & { fastSeek?: (time: number) => void };
 
@@ -27,8 +77,12 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
   
   // Hero refs
   const videoRef = useRef<HTMLVideoElement>(null);
-  const posterRef = useRef<HTMLImageElement>(null);
   const debugRef = useRef<HTMLPreElement>(null);
+
+  /** The hero line, and one span per word of it. */
+  const heroLineRef = useRef<HTMLHeadingElement>(null);
+  const heroWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const lastWordStyle = useRef<string[]>([]);
 
   // Statement refs
   const statementImageRef = useRef<HTMLDivElement>(null);
@@ -39,14 +93,17 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
   const tHero = useTranslations("hero");
   const tStatement = useTranslations("Statement");
 
+  const heroWords = useMemo(() => splitWords(tHero("heading")), [tHero]);
+  const heroWordCount = heroWords.reduce((n, u) => (u.slot >= 0 ? n + 1 : n), 0);
+
   useEffect(() => {
     const video = videoRef.current as SeekableVideo | null;
     const container = containerRef.current;
     const sticky = stickyRef.current;
     if (!video || !container || !sticky) return;
 
-    const poster = posterRef.current;
     const debugEl = debugRef.current;
+    const heroLine = heroLineRef.current;
 
     const sImageEl = statementImageRef.current;
     const sContentEl = statementContentRef.current;
@@ -155,12 +212,45 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         writeSeek(next, now);
       }
 
-      // Poster stays until a seek has really completed (so the hero is never blank).
-      const showPoster = !(frameShown && progress > 0.002);
-      if (poster) poster.style.opacity = showPoster ? "1" : "0";
+      // The hero line's exit: the whole line pulls toward the viewer while its
+      // words burn off left to right, done by the time the statement opens.
+      const exitRaw = clamp01((progress - EXIT_FROM) / (EXIT_TO - EXIT_FROM));
+      const exit = reduced ? (exitRaw >= 0.5 ? 1 : 0) : exitRaw;
+      if (heroLine) {
+        heroLine.style.transform = `scale(${(1 + (HERO_SCALE_TO - 1) * exit).toFixed(4)})`;
+      }
+      // One word's span, plus the stagger that walks the rest across the gap.
+      const wordSpan = (EXIT_TO - EXIT_FROM) * WORD_SPAN;
+      const stagger =
+        heroWordCount > 1
+          ? ((EXIT_TO - EXIT_FROM) - wordSpan) / (heroWordCount - 1)
+          : 0;
+      for (let i = 0; i < heroWordCount; i++) {
+        const el = heroWordRefs.current[i];
+        if (!el) continue;
+        const raw = clamp01((progress - (EXIT_FROM + i * stagger)) / wordSpan);
+        const w = reduced ? (raw >= 0.5 ? 1 : 0) : raw;
 
-      // The hero video, heading and glow are never faded out. The statement
-      // rectangle simply expands over them until it covers the screen.
+        const gone = clamp01((w - FADE_FROM) / (1 - FADE_FROM));
+        const opacity = 1 - gone;
+        const style = [
+          wordColor(w),
+          opacity.toFixed(3),
+          (1 - (1 - WORD_SCALE_TO) * gone).toFixed(4),
+          w > 0.08 && opacity > 0.02 ? HERO_GLOW : "none",
+        ].join("|");
+        if (lastWordStyle.current[i] === style) continue;
+        lastWordStyle.current[i] = style;
+
+        const [color, op, scale, glow] = style.split("|");
+        el.style.color = color;
+        el.style.opacity = op;
+        el.style.transform = `scale(${scale})`;
+        el.style.textShadow = glow;
+      }
+
+      // The hero video and glow are never faded out. The statement rectangle
+      // simply expands over them until it covers the screen.
 
       // 0.55–0.92: a centred rectangle opens to the full viewport and the
       // statement is revealed through it. The photo is always at full viewport
@@ -309,7 +399,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       history.scrollRestoration = prevRestoration;
     };
-  }, []);
+  }, [heroWordCount]);
 
   return (
     <section
@@ -386,20 +476,8 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
           muted
           playsInline
           preload="auto"
-          poster={POSTER_SRC}
           className="absolute inset-0 w-full h-full object-cover object-[30%_center] md:object-center will-change-transform"
           style={{ zIndex: 2 }}
-        />
-
-        {/* Start-frame poster: stays until a seek has really painted a frame */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          ref={posterRef}
-          src={POSTER_SRC}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-[30%_center] md:object-center pointer-events-none will-change-transform"
-          style={{ zIndex: 3, transition: "opacity 300ms ease" }}
         />
 
         <div
@@ -421,10 +499,28 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
           }}
         >
           <h1
-            className="font-heading text-center font-medium leading-none text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0]"
-            style={{ letterSpacing: "-0.02em" }}
+            aria-label={tHero("heading")}
+            className="font-heading text-center font-medium leading-none text-[clamp(2rem,5vw,4rem)] text-[#F5F5F0] will-change-transform"
+            style={{ letterSpacing: "-0.02em", transformOrigin: "center", transform: "scale(1)" }}
+            ref={heroLineRef}
           >
-            {tHero("heading")}
+            {heroWords.map(({ chars, slot }, i) =>
+              slot < 0 ? (
+                <span key={i} aria-hidden="true">{chars}</span>
+              ) : (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  ref={(el) => { heroWordRefs.current[slot] = el; }}
+                  className="inline-block will-change-transform"
+                  /* Ships in its resting state so there is no flash before
+                     the loop starts. */
+                  style={{ color: HERO_INK_CSS }}
+                >
+                  {chars}
+                </span>
+              )
+            )}
           </h1>
         </div>
 
