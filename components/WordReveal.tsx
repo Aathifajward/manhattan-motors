@@ -3,6 +3,7 @@
 import { useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
+import { easeInOut } from "./scroll/stacked";
 
 /** The photo behind the tall viewport mask. */
 const WORD_REVEAL_IMAGE = "/images/wordreveal.jpeg";
@@ -117,9 +118,13 @@ export default function WordReveal() {
       const rect = container.getBoundingClientRect();
       const scrollable = rect.height - sticky.offsetHeight;
       const progress = scrollable > 0 ? clamp01(-rect.top / scrollable) : 0;
+      // The gentlest curve on the page. This section is meant to read as the
+      // slowest and most deliberate, so the easing only takes the mechanical
+      // edge off a straight line — it does not make anything quick.
+      const paced = easeInOut(progress);
 
       // 1. Reading edge, as a floating word index. Same schedule as before.
-      const edge = ((progress - WORD_START) / (WORD_END - WORD_START)) * total;
+      const edge = ((paced - WORD_START) / (WORD_END - WORD_START)) * total;
 
       for (let i = 0; i < total; i++) {
         const el = wordsRef.current[i];
@@ -142,7 +147,7 @@ export default function WordReveal() {
       }
 
       // 2. The picture slides up behind its window. Eased for a slow, heavy feel.
-      const target = Math.min(1, progress / 0.9);
+      const target = Math.min(1, paced / 0.9);
       eased = primed ? eased + (target - eased) * LERP : target;
       primed = true;
       if (Math.abs(target - eased) < 0.0005) eased = target;

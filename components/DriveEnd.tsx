@@ -11,7 +11,7 @@ import {
   SLIDE,
   STAGE,
   coverStart,
-  easeOut,
+  easeOutCubic,
   slideEnd,
 } from "./scroll/stacked";
 
@@ -37,6 +37,16 @@ const ROAD_SRC = "/images/road2.jpeg";
  * lose the road altogether.
  */
 const ROAD_SCRIM = 0.22;
+/**
+ * The road drifts at this share of the GTR's own travel, in the same
+ * direction — slower than the car in front of it, which is the whole trick:
+ * the car reads as moving over the road rather than the road sliding with
+ * it. The layer is sized from that travel in `measure()`, so its edges stay
+ * outside the stage for the whole pass however tall the car wrapper is.
+ */
+const ROAD_PARALLAX = 0.4;
+/** A little more than the drift needs, so rounding can never bite. */
+const ROAD_SLACK_PX = 32;
 
 /** The car pass itself — this card's HOLD, and the only part that is not
  *  geometry shared with the rest of the stack. */
@@ -153,6 +163,8 @@ export default function DriveEnd() {
   const containerRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
 
+  /** The road under everything, drifting slower than the cars. */
+  const roadRef = useRef<HTMLDivElement>(null);
   const gtrWrapperRef = useRef<HTMLDivElement>(null);
   const velfireLeftRef = useRef<HTMLDivElement>(null);
   const velfireRightRef = useRef<HTMLDivElement>(null);
@@ -195,6 +207,7 @@ export default function DriveEnd() {
     let rightH = 0;
     let headH = 0;
     let endH = 0;
+    let roadTravel = 0;
     const measure = () => {
       wh = window.innerHeight || 1;
       gtrH = gtrWrapperRef.current?.offsetHeight ?? 0;
@@ -202,6 +215,15 @@ export default function DriveEnd() {
       rightH = velfireRightRef.current?.offsetHeight ?? 0;
       headH = startTextRef.current?.offsetHeight ?? 0;
       endH = endBoxRef.current?.offsetHeight ?? 0;
+
+      // The GTR covers (wh + gtrH); the road covers a share of that. The
+      // layer starts flush with the top of the stage and only ever moves up,
+      // so it has to be the stage plus the whole drift, plus slack. Sized
+      // here rather than per frame: this runs on mount and on resize only.
+      roadTravel = ROAD_PARALLAX * (wh + gtrH);
+      if (roadRef.current) {
+        roadRef.current.style.height = `${Math.ceil(wh + roadTravel + ROAD_SLACK_PX)}px`;
+      }
     };
     measure();
 
@@ -219,6 +241,13 @@ export default function DriveEnd() {
         slideRef.current.style.transform = `translate3d(0, ${rise.toFixed(3)}%, 0)`;
       }
 
+      // The road, on the same progress as the cars but a fraction of their
+      // travel, so the car outruns it.
+      if (roadRef.current) {
+        roadRef.current.style.transform =
+          `translate3d(0, ${(-roadTravel * drive).toFixed(2)}px, 0)`;
+      }
+
       // The GTR, and with it the box holding the closing line.
       const gProg = drive;
       const gtrY = wh - gProg * (wh + gtrH);
@@ -226,8 +255,12 @@ export default function DriveEnd() {
         gtrWrapperRef.current.style.transform = `translate3d(0, ${gtrY.toFixed(2)}px, 0)`;
       }
 
-      // The closing line, lit one letter at a time.
-      const reveal = span(gProg, REVEAL_FROM, REVEAL_TO);
+      // The closing line, lit one letter at a time. Eased out so the whole
+      // reveal — the slide out of the mask, the growth and the letters
+      // lighting — arrives with some impact rather than at a constant rate,
+      // which is the car finishing its run. The car pass itself, and with it
+      // the road's 0.4x ratio to it, is deliberately left linear.
+      const reveal = easeOutCubic(span(gProg, REVEAL_FROM, REVEAL_TO));
       const edge = reveal * (letterCount + FADE);
       for (let i = 0; i < letterCount; i++) {
         const el = letterRefs.current[i];
@@ -252,7 +285,9 @@ export default function DriveEnd() {
       // eased value, so both finish on the same frame as the last letter.
       // Transform only — the mask's own height, which the bumper tracking
       // reads, never changes.
-      const grow = easeOut(clamp01(reveal / litEnd));
+      // `reveal` is already eased, so this stays a straight read of it —
+      // the slide, the scale and the last letter still land together.
+      const grow = clamp01(reveal / litEnd);
       if (endRevealRef.current) {
         endRevealRef.current.style.transform =
           `translate3d(0, ${(SLIDE_FROM * (1 - grow)).toFixed(3)}%, 0)`;
@@ -355,19 +390,29 @@ export default function DriveEnd() {
           className="absolute inset-0 h-full w-full overflow-hidden bg-[var(--mm-navy)] will-change-transform"
           style={{ transform: "translate3d(0, 100%, 0)" }}
         >
-        {/* The road, held still while the cars and the copy move over it.
-            It lives inside the sliding wrapper so it arrives with the card
-            rather than showing through before it has risen. The navy on the
+        {/* The road: under every other layer, drifting up slower than the
+            cars so they read as travelling over it. It lives inside the
+            sliding wrapper so it arrives with the card rather than showing
+            through before it has risen, and the clip around it is the stage,
+            so the layer's own edges are never on screen. The navy on the
             wrapper stays as the backstop under it. */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
-          <Image
-            src={ROAD_SRC}
-            alt=""
-            fill
-            sizes="100vw"
-            quality={80}
-            className="object-cover"
-          />
+          <div
+            ref={roadRef}
+            className="absolute inset-x-0 top-0 will-change-transform"
+            /* Replaced with an exact pixel height on mount; this is only the
+               pre-measurement default. */
+            style={{ height: "200%", transform: "translate3d(0, 0, 0)" }}
+          >
+            <Image
+              src={ROAD_SRC}
+              alt=""
+              fill
+              sizes="100vw"
+              quality={80}
+              className="object-cover"
+            />
+          </div>
           <div className="absolute inset-0" style={{ background: `rgba(10,14,20,${ROAD_SCRIM})` }} />
         </div>
 

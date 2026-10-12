@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { siteConfig, telHref } from "@/lib/siteConfig";
-import { clamp01 } from "./stacked";
+import { clamp01, easeInOut } from "./stacked";
 import { revealStart, useRevealOnEnter } from "./useRevealOnEnter";
 
 const BLUE = "#2D7FF9";
@@ -73,11 +73,11 @@ const ZOOM_ORIGIN = "center bottom";
  */
 const ZOOM_TAIL_VH = 60;
 /**
- * A softer landing than the shared cubic, which spends 87% of its travel in
- * the first half of the range — that is what made the move read as a flick
- * rather than a pull-back.
+ * Ease in and out, not out alone: this section is the page's landing, and
+ * should feel deliberate at both ends — the opposite of the slide changes
+ * just before it.
  */
-const ease = (t: number) => 1 - (1 - t) * (1 - t);
+const ease = easeInOut;
 
 /**
  * A plain page section: one viewport tall, scrolling normally into and out of

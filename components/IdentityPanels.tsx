@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { easeOutQuad } from "./scroll/stacked";
 
 type Panel = {
   key: "CAR" | "SUV" | "VAN" | "TRUCK";
@@ -122,8 +123,10 @@ export default function IdentityPanels() {
       let active = 0;
       for (let i = 0; i < COUNT; i++) {
         const local = (progress - (INTRO_END + i * SLICE)) / SLICE;
+        // Eased so the wipe arrives quickly and settles, rather than
+        // crawling across its whole range at one speed.
         const e = i === 0 ? 1 : clamp01(local / REVEAL);
-        enter[i] = reduced ? step(e) : e;
+        enter[i] = reduced ? step(e) : easeOutQuad(e);
         if (enter[i] >= 0.5) active = i;
       }
 

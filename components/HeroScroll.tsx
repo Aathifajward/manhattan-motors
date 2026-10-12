@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { easeInOut } from "./scroll/stacked";
 
 interface HeroScrollProps {
   title: string;
@@ -214,8 +215,9 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
 
       // The hero line's exit: the whole line pulls toward the viewer while its
       // words burn off left to right, done by the time the statement opens.
+      // Eased, not linear: the line should ease away and ease to a stop.
       const exitRaw = clamp01((progress - EXIT_FROM) / (EXIT_TO - EXIT_FROM));
-      const exit = reduced ? (exitRaw >= 0.5 ? 1 : 0) : exitRaw;
+      const exit = reduced ? (exitRaw >= 0.5 ? 1 : 0) : easeInOut(exitRaw);
       if (heroLine) {
         heroLine.style.transform = `scale(${(1 + (HERO_SCALE_TO - 1) * exit).toFixed(4)})`;
       }
@@ -229,7 +231,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         const el = heroWordRefs.current[i];
         if (!el) continue;
         const raw = clamp01((progress - (EXIT_FROM + i * stagger)) / wordSpan);
-        const w = reduced ? (raw >= 0.5 ? 1 : 0) : raw;
+        const w = reduced ? (raw >= 0.5 ? 1 : 0) : easeInOut(raw);
 
         const gone = clamp01((w - FADE_FROM) / (1 - FADE_FROM));
         const opacity = 1 - gone;
@@ -256,7 +258,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
       // statement is revealed through it. The photo is always at full viewport
       // size — only the clip moves, so nothing ever scales.
       const revealRaw = progress <= 0.55 ? 0 : progress >= 0.92 ? 1 : (progress - 0.55) / 0.37;
-      const reveal = reduced ? (revealRaw >= 0.5 ? 1 : 0) : revealRaw;
+      const reveal = reduced ? (revealRaw >= 0.5 ? 1 : 0) : easeInOut(revealRaw);
       if (sImageEl) {
         const edge = 50 * (1 - reveal);
         sImageEl.style.clipPath = `inset(${edge}%)`;
@@ -265,7 +267,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
       // 0.80–1.00: headline, paragraph and CTA slide up into place. Translate
       // only — the opening clip above is what makes them appear.
       const contentRaw = progress <= 0.80 ? 0 : progress >= 1.00 ? 1 : (progress - 0.80) / 0.20;
-      const contentProgress = reduced ? 1 : contentRaw;
+      const contentProgress = reduced ? 1 : easeInOut(contentRaw);
       if (sContentEl) {
         sContentEl.style.transform = `translateY(${48 * (1 - contentProgress)}px)`;
       }

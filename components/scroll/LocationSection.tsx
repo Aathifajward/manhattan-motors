@@ -17,6 +17,8 @@ import {
   TEXT_DIM,
   TEXT_RISE_PX,
   clamp01,
+  easeOutCubic,
+  easeOutQuad,
   slideEnd,
   span,
   useStackProgress,
@@ -51,9 +53,10 @@ export default function LocationSection() {
   const locale = useLocale();
 
   const apply = useCallback((p: number) => {
-    // Rises over the card before it, on translate alone.
+    // Rises over the card before it, on translate alone. Eased out, so it
+    // settles quickly after DriveEnd's much bigger motion.
     if (slideRef.current) {
-      const rise = 100 * (1 - clamp01(p / SLIDE_END));
+      const rise = 100 * (1 - easeOutCubic(clamp01(p / SLIDE_END)));
       slideRef.current.style.transform = `translate3d(0, ${rise.toFixed(3)}%, 0)`;
     }
 
@@ -61,7 +64,7 @@ export default function LocationSection() {
     revealRefs.current.forEach((el, i) => {
       if (!el) return;
       const from = REVEAL_FROM + i * REVEAL_STAGGER;
-      const r = span(p, from, from + REVEAL_SPAN);
+      const r = easeOutQuad(span(p, from, from + REVEAL_SPAN));
       el.style.transform = `translate3d(0, ${(TEXT_RISE_PX * (1 - r)).toFixed(2)}px, 0)`;
       el.style.opacity = (TEXT_DIM + (1 - TEXT_DIM) * r).toFixed(4);
     });

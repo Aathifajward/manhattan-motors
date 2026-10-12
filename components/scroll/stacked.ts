@@ -54,7 +54,34 @@ export const TEXT_DIM = 0.25;
 export const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 export const span = (p: number, from: number, to: number) =>
   clamp01((p - from) / (to - from));
-export const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+
+/* ── Pacing ───────────────────────────────────────────────────────────────
+   Each of these maps a 0..1 progress to a 0..1 progress with both ends
+   pinned, so a section's first and last frames are exactly what they were —
+   only the speed between them changes. They are applied to the local
+   progress a visual reads, never to the scroll measurement itself, which
+   stays a straight line from scroll position to progress.
+
+   The point is that the page should not be evenly paced: the hero and the
+   word reveal breathe, the panels and the slide changes snap.           */
+
+/** Slow away, slow into the stop. The cinematic one. */
+export const easeInOut = (t: number) =>
+  t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+/** Quick off the mark, settling at the end. */
+export const easeOutQuad = (t: number) => 1 - (1 - t) * (1 - t);
+
+/** The same shape with more snap in it. */
+export const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+/** Front-loads the motion when `power` is below 1 — most of the travel
+ *  happens early in the range, which is what makes a change read as fast
+ *  without shortening the scroll it occupies. */
+export const easeOutPow = (t: number, power: number) => Math.pow(t, power);
+
+/** The original name, kept for call sites that already use it. */
+export const easeOut = easeOutCubic;
 
 /**
  * One rAF loop per card, refs only, no layout reads inside the frame: the
