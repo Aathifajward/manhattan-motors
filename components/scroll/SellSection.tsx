@@ -7,6 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { siteConfig, telHref } from "@/lib/siteConfig";
 import { clamp01, easeInOut } from "./stacked";
 import { revealStart, useRevealOnEnter } from "./useRevealOnEnter";
+import { useIsMobile } from "./useIsMobile";
 
 const BLUE = "#2D7FF9";
 const BLUE_GLOW = "rgba(45,127,249,0.35)";
@@ -14,45 +15,83 @@ const BLUE_GLOW = "rgba(45,127,249,0.35)";
 /** The whole stage is this; only the bottom band carries a picture. */
 const BLACK = "#000";
 
-/** The bottom band: three cars on their own black field. */
-const SELL_IMAGE = "/images/sellbg.png";
-
 /* ── Sizing from the art's content, not its frame ─────────────────────────
-   The file is 2400x1340, but the cars only live in the middle of it: rows
-   374-915 and columns 133-2291, measured off the pixels. So 10% of its width
-   and a full 60% of its height is black margin, and drawing the whole frame
-   at 100vw is what made the cars read small — they were 40% of a picture
+   The desktop file is 2400x1340, but the cars only live in the middle of it:
+   rows 374-915 and columns 133-2291, measured off the pixels. So 10% of its
+   width and a full 60% of its height is black margin, and drawing the whole
+   frame at 100vw is what made the cars read small — they were 40% of a picture
    that was itself letterboxed into the stage.
 
    So the frame is drawn deliberately oversized and its margins are spent
    rather than shown: the sides are pushed just off the viewport so the outer
    vans reach the edges, the bottom margin hangs below the stage, and the top
    margin runs up behind the copy, where it is black on black. What is left
-   on screen is the cars, as large as they can be without cutting them.    */
+   on screen is the cars, as large as they can be without cutting them.
 
-const ART_RATIO = 1340 / 2400;
-/** Fractions of the file, from the pixels. */
-const ART_CARS_TOP = 0.279;
-const ART_CARS_BOTTOM = 0.317; // margin below them
-const ART_CARS_HEIGHT = 1 - ART_CARS_TOP - ART_CARS_BOTTOM; // 0.404
+   None of which saves it on a phone. Three vehicles across 390px leaves each
+   one about 100px wide, and what reads at that size is not three cars but one
+   row of overlapping shapes. So the phone is given the middle car on its own —
+   cropped out of the same photograph by scripts/crop-sell-mobile.mjs, not
+   zoomed out of the full frame — and drawn edge to edge. The art's margins are
+   transparent in both files, so a crop edge can never show against the stage.
 
-/** Drawn this wide. The art's own 10% of side margin means the vans stop a
- *  little short of the viewport edges here — invisible, since that margin is
- *  black on black. 115 would put them exactly on the edges, and past that it
- *  starts cutting bodywork rather than black. */
-const IMG_W_VW = 104;
-const IMG_H_VW = IMG_W_VW * ART_RATIO; // 58.1
+   Everything below is stated as fractions of whichever file is drawn, so the
+   same three measurements place either one.                                */
+
+type Art = {
+  src: string;
+  /** Intrinsic pixels, for next/image. */
+  width: number;
+  height: number;
+  /** Drawn this wide, in vw. */
+  widthVw: number;
+  /** Margin below the cars, as a fraction of the file's height. */
+  belowCars: number;
+  /** And how much of that height the cars themselves take. */
+  carsHeight: number;
+};
+
+/** Drawn at 104vw: the art's own 10% of side margin means the vans stop a
+ *  little short of the viewport edges, which is invisible. 115 would put them
+ *  exactly on the edges, and past that it cuts bodywork rather than margin. */
+const DESKTOP_ART: Art = {
+  src: "/images/sellbg.png",
+  width: 2400,
+  height: 1340,
+  widthVw: 104,
+  belowCars: 0.317,
+  carsHeight: 0.404, // 1 - 0.279 above - 0.317 below
+};
+
+/** The crop is 650x450 with the car at columns 24-626 and rows 40-410, so at a
+ *  full 100vw the car itself spans 93vw — the width filled, with the black the
+ *  crop was given either side falling just inside the viewport edges. */
+const MOBILE_ART: Art = {
+  src: "/images/sellbg-mobile.png",
+  width: 650,
+  height: 450,
+  widthVw: 100,
+  belowCars: 0.089,
+  carsHeight: 0.822,
+};
 
 const vw = (n: number) => `${n.toFixed(2)}vw`;
 
 /** Black left under the cars, which is where the back-to-top arrow sits. */
 const CARS_BOTTOM_VH = 8;
-/** Hangs the art's bottom margin below the stage instead of letting it lift
- *  the cars into the copy. */
-const IMG_BOTTOM = `calc(${CARS_BOTTOM_VH}vh - ${vw(ART_CARS_BOTTOM * IMG_H_VW)})`;
-/** The roofline, measured up from the stage's bottom edge. Everything above
- *  it is clear black, and it is exactly the room the copy gets. */
-const CARS_TOP = `calc(${CARS_BOTTOM_VH}vh + ${vw(ART_CARS_HEIGHT * IMG_H_VW)})`;
+
+/** The three measurements the layout needs from whichever file is drawn. */
+function geometryOf(art: Art) {
+  const imgHVw = art.widthVw * (art.height / art.width);
+  return {
+    /** Hangs the art's bottom margin below the stage instead of letting it
+     *  lift the cars into the copy. */
+    imgBottom: `calc(${CARS_BOTTOM_VH}vh - ${vw(art.belowCars * imgHVw)})`,
+    /** The roofline, measured up from the stage's bottom edge. Everything
+     *  above it is clear black, and it is exactly the room the copy gets. */
+    carsTop: `calc(${CARS_BOTTOM_VH}vh + ${vw(art.carsHeight * imgHVw)})`,
+  };
+}
 
 /** Keeps the copy legible where it crosses the band. */
 const TEXT_SHADOW = "0 2px 20px rgba(0,0,0,0.6), 0 1px 3px rgba(0,0,0,0.45)";
@@ -89,6 +128,12 @@ export default function SellSection() {
   const imageRef = useRef<HTMLDivElement>(null);
 
   const t = useTranslations("SellSection");
+
+  // Which photograph the band carries. `null` is the frame before the client
+  // knows, and reads as desktop so the markup matches the server's.
+  const isMobile = useIsMobile();
+  const art = isMobile ? MOBILE_ART : DESKTOP_ART;
+  const { imgBottom, carsTop } = geometryOf(art);
 
   useRevealOnEnter(sectionRef);
 
@@ -187,22 +232,27 @@ export default function SellSection() {
         aria-hidden="true"
         className="absolute left-1/2 will-change-transform"
         style={{
-          width: `${IMG_W_VW}vw`,
-          bottom: IMG_BOTTOM,
+          width: `${art.widthVw}vw`,
+          bottom: imgBottom,
           zIndex: 0,
           transform: `translateX(-50%) scale(${ZOOM_FROM})`,
           transformOrigin: ZOOM_ORIGIN,
         }}
       >
-        <Image
-          src={SELL_IMAGE}
-          alt=""
-          width={2400}
-          height={1340}
-          sizes={`${IMG_W_VW}vw`}
-          quality={85}
-          className="block h-auto w-full"
-        />
+        {/* Held back until the breakpoint is known, so a phone never downloads
+            the 2400px three-car frame on its way to the crop. The band is the
+            last thing on the page — nothing is waiting on it. */}
+        {isMobile !== null && (
+          <Image
+            src={art.src}
+            alt=""
+            width={art.width}
+            height={art.height}
+            sizes={`${art.widthVw}vw`}
+            quality={85}
+            className="block h-auto w-full"
+          />
+        )}
       </div>
 
       {/* The only gradient: a short black fade at the very top */}
@@ -218,8 +268,10 @@ export default function SellSection() {
           the picture is sized the copy sits in the room left over and can
           never run into it. */}
       <div
-        className="absolute inset-x-0 top-0 z-10 flex flex-col items-center justify-center px-6 py-[1vh] text-center"
-        style={{ height: `calc(100% - ${CARS_TOP})` }}
+        /* The phone's header sits over the top of this stage, so the copy keeps
+           its own clearance under it rather than centring into it. */
+        className="absolute inset-x-0 top-0 z-10 flex flex-col items-center justify-center px-6 py-[1vh] text-center max-md:pt-[var(--mm-nav-safe)]"
+        style={{ height: `calc(100% - ${carsTop})` }}
       >
         <div data-reveal className="flex flex-col items-center" style={revealStart}>
           <h2

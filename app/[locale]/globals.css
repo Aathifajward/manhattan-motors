@@ -10,6 +10,15 @@
   --mm-cool-gray: #F0F2F5;
   --background: #0A0E14;
   --foreground: #ffffff;
+
+  /* Height of the fixed header: py-6 either side of a 40px row (see
+     components/Navbar.tsx). The ordinary pages offset their first block by it;
+     the homepage's full-bleed sections start at the very top of the viewport
+     and sit *under* it, so their copy has to clear it themselves. */
+  --mm-nav-h: 88px;
+  /* What that copy should keep above it — the header, the device's own top
+     inset, and a little air. */
+  --mm-nav-safe: calc(var(--mm-nav-h) + env(safe-area-inset-top, 0px) + 1rem);
 }
 
 @theme inline {

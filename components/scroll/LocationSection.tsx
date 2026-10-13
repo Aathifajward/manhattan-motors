@@ -124,9 +124,14 @@ export default function LocationSection() {
         style={{ background: "linear-gradient(180deg, transparent 0%, #000 100%)" }}
       />
 
-      <div className="absolute inset-0 z-10 flex items-center">
-        <div className="mx-auto w-full max-w-6xl px-6 py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      {/* Centred in the stage on a wide screen, where it fits with room to
+          spare. On a phone the same block is taller than the viewport, and
+          centring it put the eyebrow and the heading up behind the fixed
+          header — so there it is anchored under the header instead, and the
+          spacing below is tightened until the whole thing fits. */}
+      <div className="absolute inset-0 z-10 flex items-center max-md:items-start">
+        <div className="mx-auto w-full max-w-6xl px-6 py-24 max-md:pb-8 max-md:pt-[var(--mm-nav-safe)]">
+        <div className="grid items-center gap-12 max-md:gap-8 lg:grid-cols-2 lg:gap-16">
           {/* ── Left: details ── */}
           <div>
             <span data-reveal ref={(el) => { revealRefs.current[0] = el; }} className="mm-label mb-6 inline-block" style={{ opacity: TEXT_DIM, transform: `translate3d(0, ${TEXT_RISE_PX}px, 0)` }}>
@@ -134,13 +139,13 @@ export default function LocationSection() {
             </span>
 
             <h2
-              data-reveal ref={(el) => { revealRefs.current[1] = el; }} className="font-heading mb-10 font-medium leading-tight text-white text-[clamp(2rem,5vw,3.75rem)]"
+              data-reveal ref={(el) => { revealRefs.current[1] = el; }} className="font-heading mb-10 max-md:mb-6 font-medium leading-tight text-white text-[clamp(2rem,5vw,3.75rem)]"
               style={{ opacity: TEXT_DIM, transform: `translate3d(0, ${TEXT_RISE_PX}px, 0)` }}
             >
               {t("heading")}
             </h2>
 
-            <dl data-reveal ref={(el) => { revealRefs.current[2] = el; }} className="flex flex-col gap-7" style={{ opacity: TEXT_DIM, transform: `translate3d(0, ${TEXT_RISE_PX}px, 0)` }}>
+            <dl data-reveal ref={(el) => { revealRefs.current[2] = el; }} className="flex flex-col gap-7 max-md:gap-5" style={{ opacity: TEXT_DIM, transform: `translate3d(0, ${TEXT_RISE_PX}px, 0)` }}>
               <div>
                 <dt
                   className="mm-meta mb-2 text-xs uppercase tracking-widest"
@@ -188,7 +193,7 @@ export default function LocationSection() {
               data-reveal ref={(el) => { revealRefs.current[3] = el; }} href={mapsDirectionsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-10 inline-flex items-center gap-2 px-8 py-3.5 font-heading font-semibold text-xs uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/5"
+              className="mt-10 max-md:mt-8 inline-flex items-center gap-2 px-8 py-3.5 font-heading font-semibold text-xs uppercase tracking-widest text-white transition-all duration-200 hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/5"
               style={{
                                 border: "1px solid rgba(45,127,249,0.55)",
                 borderRadius: "6px",
@@ -216,7 +221,7 @@ export default function LocationSection() {
               src={mapsEmbedUrlFor(locale)}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="block h-[320px] w-full border-0 md:h-[420px] lg:h-[500px]"
+              className="block h-[320px] w-full border-0 max-md:h-[22vh] md:h-[420px] lg:h-[500px]"
               style={{ filter: "invert(90%) hue-rotate(180deg)" }}
             />
           </div>

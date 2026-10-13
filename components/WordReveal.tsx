@@ -180,7 +180,7 @@ export default function WordReveal() {
 
   return (
     <section ref={containerRef} className="relative w-full h-[300vh] sm:h-[250vh]" style={{ backgroundColor: "var(--mm-navy)" }}>
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden flex flex-col md:flex-row items-center justify-center md:justify-between px-6 py-12 md:py-20 max-w-7xl mx-auto gap-8 md:gap-12">
+      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden flex flex-col md:flex-row items-center justify-center max-md:justify-start md:justify-between px-6 py-12 md:py-20 max-md:pt-[var(--mm-nav-safe)] max-w-7xl mx-auto gap-8 md:gap-12">
 
         {/* Left: the sentence, lit word by word */}
         <div className="w-full md:w-[60%] flex flex-col justify-center">
@@ -204,7 +204,7 @@ export default function WordReveal() {
         <div className="flex w-full flex-col items-center md:w-auto md:items-end">
           <div
             ref={frameRef}
-            className="relative h-[42vh] overflow-hidden will-change-transform md:h-[68vh]"
+            className="relative h-[42vh] max-md:h-[36vh] overflow-hidden will-change-transform md:h-[68vh]"
             style={{ width: "max(220px, 26vw)", background: FALLBACK_BG }}
           >
             {/* Taller than the frame, so its top and bottom stay hidden at all

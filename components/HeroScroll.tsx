@@ -492,9 +492,15 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         />
 
         <div
-          className="absolute left-0 right-0 flex flex-col items-center pointer-events-none will-change-transform"
+          /* 15vh down the stage, but on a phone never closer to the top than
+             the header, its safe area, and another 1.5rem on top of that. The
+             extra is for the exit: the line scales to 1.35 about its own
+             centre, so a heading that wraps to two lines grows some 20px
+             upwards on its way out — which is what carried it up behind the
+             header. Only the floor changes below `md`; the 15vh a desktop
+             window actually resolves to is untouched. */
+          className="absolute left-0 right-0 flex flex-col items-center pointer-events-none will-change-transform top-[clamp(100px,15vh,200px)] max-md:top-[clamp(calc(var(--mm-nav-safe)+1.5rem),15vh,200px)]"
           style={{
-            top: "clamp(100px, 15vh, 200px)",
             paddingLeft: "1.5rem",
             paddingRight: "1.5rem",
             zIndex: 20,

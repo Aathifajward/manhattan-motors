@@ -14,17 +14,21 @@ import {
   easeOutCubic,
   slideEnd,
 } from "./scroll/stacked";
+import { useIsMobile } from "./scroll/useIsMobile";
 
 /* ── Timeline ──────────────────────────────────────────────────────────────
    This card is a stacked card at both ends: it rises over VehicleSlides on a
-   hard edge across its first 100vh, runs the car pass for 600vh, then Location
-   rises over it across the last 100vh while it stays pinned.
+   hard edge across its first 100vh, runs the car pass, then Location rises
+   over it across the last 100vh while it stays pinned.
 
-       |<- STAGE ->|<- SLIDE ->|<- 600vh car pass ->|<- COVER ->|
+       |<- STAGE ->|<- SLIDE ->|<- the car pass ->|<- COVER ->|
 
-   900vh with a 100vh stage, so 800vh of scroll. There is no idle stretch at
-   either end: the cars start the moment the card lands and the moment they
-   finish is the moment Location starts rising.                              */
+   There is no idle stretch at either end: the cars start the moment the card
+   lands and the moment they finish is the moment Location starts rising.
+
+   Only the car pass is sized per breakpoint. The three 100vh sections around
+   it are the stack's shared geometry and never move — the cards either side
+   are pulled up by a fixed -200vh, so changing them would unpick the chain. */
 
 /** The road the cars drive up: a top-down strip of asphalt with the centre
  *  line running the way they travel. */
@@ -49,13 +53,19 @@ const ROAD_PARALLAX = 0.4;
 const ROAD_SLACK_PX = 32;
 
 /** The car pass itself — this card's HOLD, and the only part that is not
- *  geometry shared with the rest of the stack. */
+ *  geometry shared with the rest of the stack.
+ *
+ *  A phone gets a little over half of it. The cars are drawn at 90vw there
+ *  against 42vw on a desktop, so the GTR's wrapper is barely taller than the
+ *  one on a 1440px screen while the scroll it had to cross was the same 600vh
+ *  — the car crawled, and most of the pass was an empty road between it and
+ *  the closing line. 320vh moves it about half again as fast as the desktop
+ *  pass does, which is what makes the gap between the car and "starts here."
+ *  read as a beat rather than as dead screen. */
 const DRIVE_VH = 600;
-const CARD_VH = STAGE + SLIDE + DRIVE_VH + COVER; // 900
-/** Where this card has finished rising over VehicleSlides. */
-const SLIDE_END = slideEnd(CARD_VH);              // 100/800
-/** Where Location begins to cover this card. */
-const COVER_START = coverStart(CARD_VH);          // 700/800
+const DRIVE_VH_MOBILE = 320;
+const cardVh = (mobile: boolean) =>
+  STAGE + SLIDE + (mobile ? DRIVE_VH_MOBILE : DRIVE_VH) + COVER; // 900 / 620
 
 /* Everything below is measured against `drive` — this card's own progress
    renormalised so 0 lands on SLIDE_END and 1.0 on COVER_START. */
@@ -159,6 +169,15 @@ const REAR_EDGE = 0.9935;
 
 export default function DriveEnd() {
   const t = useTranslations("DriveEnd");
+
+  // How long the card is, and with it where the slide ends and the cover
+  // begins. `null` reads as desktop, so the first paint matches the server's.
+  const isMobile = useIsMobile();
+  const CARD_VH = cardVh(isMobile === true);
+  /** Where this card has finished rising over VehicleSlides. */
+  const SLIDE_END = slideEnd(CARD_VH);
+  /** Where Location begins to cover this card. */
+  const COVER_START = coverStart(CARD_VH);
 
   const containerRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -373,7 +392,7 @@ export default function DriveEnd() {
       window.removeEventListener("scroll", kick);
       window.removeEventListener("resize", onResize);
     };
-  }, [letterCount, litEnd]);
+  }, [letterCount, litEnd, SLIDE_END, COVER_START]);
 
   return (
     <section

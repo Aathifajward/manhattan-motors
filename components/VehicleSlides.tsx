@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
@@ -11,6 +11,7 @@ import {
   STAGE,
   coverStart,
 } from "./scroll/stacked";
+import { useIsMobile } from "./scroll/useIsMobile";
 
 /** Only the fields this slide actually renders. */
 type SlideVehicle = {
@@ -74,6 +75,67 @@ const LABEL = "text-[0.75rem] uppercase tracking-[0.2em]";
 const BUTTON =
   "font-heading inline-block px-[28px] py-[16px] text-[0.75rem] font-semibold uppercase tracking-widest text-white transition-colors duration-300";
 
+/**
+ * One slide's copy. The scrubbed stage and the phone's plain swap move
+ * different things around it, but what they move is always this.
+ */
+function SlideCopy({
+  vehicle,
+  index,
+  total,
+}: {
+  vehicle: SlideVehicle;
+  index: number;
+  total: number;
+}) {
+  const t = useTranslations("VehicleSlides");
+  const locale = useLocale();
+
+  const price = new Intl.NumberFormat(locale === "ja" ? "ja-JP" : "en-US", {
+    style: "currency",
+    currency: "JPY",
+    maximumFractionDigits: 0,
+  }).format(vehicle.priceJpy);
+
+  const specs = [
+    vehicle.mileageKm && `${vehicle.mileageKm.toLocaleString()} km`,
+    vehicle.fuelType,
+    vehicle.transmission,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <>
+      <span className={`mm-meta text-white/40 mb-6 ${LABEL}`}>
+        {t("featured")} · {(index + 1).toString().padStart(2, "0")} / {total.toString().padStart(2, "0")}
+      </span>
+
+      <h2
+        className={`font-heading mb-5 max-w-[90%] font-medium text-white ${TITLE}`}
+        style={{ lineHeight: 1.05, letterSpacing: "-0.01em" }}
+      >
+        {vehicle.year} {vehicle.make} {vehicle.model}
+      </h2>
+
+      <p className={`mm-meta mb-5 text-white/70 ${PRICE}`}>{price}</p>
+
+      <p className={`font-body mb-7 text-white/60 ${SPECS}`}>{specs}</p>
+
+      <div className="flex flex-wrap gap-4">
+        <Link href={`/vehicles/${vehicle.slug}`} className={`${BUTTON} border border-white/20 hover:bg-white/5`}>
+          {t("viewVehicle")}
+        </Link>
+        {index === total - 1 && (
+          <Link href="/vehicles" className={`${BUTTON} border border-white/20 hover:bg-white/5`}>
+            {t("viewAllVehicles")}
+          </Link>
+        )}
+      </div>
+    </>
+  );
+}
+
 export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }) {
   const t = useTranslations("VehicleSlides");
   const locale = useLocale();
@@ -93,13 +155,58 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
   /** Darkens this card under DriveEnd. */
   const coverDimRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * A phone gets no scrubbed transition at all — see the branch below — so the
+   * only thing its stage has to know is which vehicle is current.
+   */
+  const isMobile = useIsMobile();
+  const [current, setCurrent] = useState(0);
+
   useEffect(() => {
     const container = containerRef.current;
     const sticky = stickyRef.current;
     if (!container || !sticky || vehicles.length === 0) return;
+    // Neither branch is on screen yet while the breakpoint is unknown.
+    if (isMobile === null) return;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
+
+    /**
+     * The phone's whole animation. The slides own the same scroll they always
+     * did, but instead of a frame loop scrubbing a clip, a zoom and a dim
+     * through it, the band the scroll is currently in picks a slide and the
+     * markup cross-fades to it on its own. Nothing is written per frame, so
+     * there is nothing left to go out of step with the scroll.
+     */
+    if (isMobile) {
+      const N = vehicles.length;
+      const COVER_START = coverStartOf(N);
+
+      let frame = 0;
+      const read = () => {
+        frame = 0;
+        const rect = container.getBoundingClientRect();
+        const scrollable = rect.height - sticky.offsetHeight;
+        const progress = scrollable > 0 ? clamp01(-rect.top / scrollable) : 0;
+        const i = Math.min(N - 1, Math.floor(clamp01(progress / COVER_START) * N));
+        // setState bails out on an unchanged value, so this is a no-op for
+        // every scroll event that does not actually cross a band.
+        setCurrent(i);
+      };
+      const onScrollOrResize = () => {
+        if (!frame) frame = requestAnimationFrame(read);
+      };
+
+      read();
+      window.addEventListener("scroll", onScrollOrResize, { passive: true });
+      window.addEventListener("resize", onScrollOrResize, { passive: true });
+      return () => {
+        if (frame) cancelAnimationFrame(frame);
+        window.removeEventListener("scroll", onScrollOrResize);
+        window.removeEventListener("resize", onScrollOrResize);
+      };
+    }
 
     let disposed = false;
     let rafId = 0;
@@ -270,7 +377,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [vehicles.length]);
+  }, [vehicles.length, isMobile]);
 
   if (vehicles.length === 0) return null;
 
@@ -334,6 +441,72 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
     );
   }
 
+  /* ── The phone ────────────────────────────────────────────────────────────
+     Same stage, same scroll budget, none of the motion. A scrubbed cross-over
+     on a phone is a transform, a clip-path and an opacity rewritten on every
+     one of a touch scroll's frames, against a scroll position the browser is
+     already animating itself — which is what made the change between vehicles
+     read as a glitch rather than as a transition. So there is no cross-over
+     here: the band the scroll is in picks a vehicle and the markup fades to
+     it, and the only thing that moves is an opacity CSS owns. The desktop
+     stage below is untouched.                                              */
+  if (isMobile) {
+    return (
+      <section
+        ref={containerRef}
+        className="relative w-full"
+        style={{ height: `${cardVh(vehicles.length)}vh`, zIndex: 10 }}
+      >
+        <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[var(--mm-navy)]">
+          {/* Reversed, so the picture takes the top half and the copy the
+              bottom — the same arrangement the stage has at this width. */}
+          <div className="absolute inset-0 flex flex-col-reverse">
+
+            {/* Copy — the larger half, because the last slide carries two
+                buttons and they wrap at this width. The header is nowhere near
+                it here, so it takes ordinary padding rather than the stage's
+                header gap. */}
+            <div className="relative h-[55svh] w-full bg-[var(--mm-navy)] z-20">
+              {vehicles.map((v, i) => (
+                <div
+                  key={v.id}
+                  className="absolute inset-0 flex flex-col justify-center items-start px-6 py-8 bg-[var(--mm-navy)] transition-opacity duration-300 ease-out"
+                  style={{
+                    opacity: i === current ? 1 : 0,
+                    pointerEvents: i === current ? "auto" : "none",
+                  }}
+                >
+                  <SlideCopy vehicle={v} index={i} total={vehicles.length} />
+                </div>
+              ))}
+            </div>
+
+            {/* Picture — the rest of the stage, edge to edge. No zoom, no clip. */}
+            <div className="relative h-[45svh] w-full bg-[var(--mm-navy)] z-10">
+              {vehicles.map((v, i) => (
+                <div
+                  key={v.id}
+                  className="absolute inset-0 overflow-hidden bg-[var(--mm-navy)] transition-opacity duration-300 ease-out"
+                  style={{ opacity: i === current ? 1 : 0 }}
+                >
+                  {v.images?.[0]?.url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={v.images[0].url}
+                      alt={v.model}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section
       ref={containerRef}
@@ -356,35 +529,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
               className="absolute inset-0 flex flex-col justify-center items-start px-6 pt-[120px] pb-10 md:pl-[180px] md:pr-12 will-change-transform bg-[var(--mm-navy)] md:bg-transparent"
               style={{ opacity: i === 0 ? 1 : 0, transform: i === 0 ? "translateY(0)" : "translateY(60vh)", pointerEvents: i === 0 ? "auto" : "none" }}
             >
-              <span className={`mm-meta text-white/40 mb-6 ${LABEL}`}>
-                {t("featured")} · {(i + 1).toString().padStart(2, "0")} / {vehicles.length.toString().padStart(2, "0")}
-              </span>
-
-              <h2
-                className={`font-heading mb-5 max-w-[90%] font-medium text-white ${TITLE}`}
-                style={{ lineHeight: 1.05, letterSpacing: "-0.01em" }}
-              >
-                {v.year} {v.make} {v.model}
-              </h2>
-
-              <p className={`mm-meta mb-5 text-white/70 ${PRICE}`}>
-                {priceFormatter.format(v.priceJpy)}
-              </p>
-
-              <p className={`font-body mb-7 text-white/60 ${SPECS}`}>
-                {specsOf(v)}
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <Link href={`/vehicles/${v.slug}`} className={`${BUTTON} border border-white/20 hover:bg-white/5`}>
-                  {t("viewVehicle")}
-                </Link>
-                {i === vehicles.length - 1 && (
-                  <Link href="/vehicles" className={`${BUTTON} border border-white/20 hover:bg-white/5`}>
-                    {t("viewAllVehicles")}
-                  </Link>
-                )}
-              </div>
+              <SlideCopy vehicle={v} index={i} total={vehicles.length} />
             </div>
           ))}
         </div>
