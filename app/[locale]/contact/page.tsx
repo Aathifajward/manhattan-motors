@@ -36,7 +36,7 @@ export default async function ContactPage({
   const selling = type === "sell";
 
   return (
-    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100vh" }}>
+    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100dvh" }}>
       <div className="mx-auto w-full max-w-6xl px-6 pb-32 pt-20 md:pt-28 lg:px-8">
         <Reveal>
           <span className="mm-label mb-7 inline-block">

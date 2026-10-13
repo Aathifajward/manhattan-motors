@@ -39,7 +39,7 @@ const IMAGE_HEIGHT = 136; // % of the frame
 /** It slides up by this share of its own height across the section. */
 const IMAGE_TRAVEL = 26; // %
 /** The frame drifts a little slower than the copy. */
-const FRAME_TRAVEL = 6; // vh
+const FRAME_TRAVEL = 6; // dvh, the unit the stage is in
 /** Smoothing applied to the scroll-linked position. */
 const LERP = 0.12;
 
@@ -156,7 +156,7 @@ export default function WordReveal() {
         img.style.transform = `translate3d(0, ${(-IMAGE_TRAVEL * eased).toFixed(3)}%, 0)`;
       }
       if (frame) {
-        frame.style.transform = `translate3d(0, ${(-FRAME_TRAVEL * eased).toFixed(3)}vh, 0)`;
+        frame.style.transform = `translate3d(0, ${(-FRAME_TRAVEL * eased).toFixed(3)}dvh, 0)`;
       }
 
       rafId = requestAnimationFrame(tick);
@@ -180,7 +180,7 @@ export default function WordReveal() {
 
   return (
     <section ref={containerRef} className="relative w-full h-[300vh] sm:h-[250vh]" style={{ backgroundColor: "var(--mm-navy)" }}>
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden flex flex-col md:flex-row items-center justify-center max-md:justify-start md:justify-between px-6 py-12 md:py-20 max-md:pt-[var(--mm-nav-safe)] max-w-7xl mx-auto gap-8 md:gap-12">
+      <div ref={stickyRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden flex flex-col md:flex-row items-center justify-center max-md:justify-start md:justify-between px-6 py-12 md:py-20 max-md:pt-[var(--mm-nav-safe)] max-w-7xl mx-auto gap-8 md:gap-12">
 
         {/* Left: the sentence, lit word by word */}
         <div className="w-full md:w-[60%] flex flex-col justify-center">
@@ -204,7 +204,7 @@ export default function WordReveal() {
         <div className="flex w-full flex-col items-center md:w-auto md:items-end">
           <div
             ref={frameRef}
-            className="relative h-[42vh] max-md:h-[36vh] overflow-hidden will-change-transform md:h-[68vh]"
+            className="relative h-[42dvh] max-md:h-[36dvh] overflow-hidden will-change-transform md:h-[68dvh]"
             style={{ width: "max(220px, 26vw)", background: FALLBACK_BG }}
           >
             {/* Taller than the frame, so its top and bottom stay hidden at all

@@ -78,7 +78,7 @@ export default function StatementReveal() {
 
   return (
     <section ref={containerRef} className="relative w-full h-[250vh] md:h-[300vh] bg-[#0A0E14]">
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden flex items-center justify-center">
+      <div ref={stickyRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden flex items-center justify-center">
         
         {/* Full Viewport Image Layer */}
         <div 

@@ -127,7 +127,7 @@ export default function VehicleDetailClient({
   useParallax(mainImageRef, DRIFT_PX);
 
   return (
-    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100vh" }}>
+    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100dvh" }}>
       <div
         className="mx-auto flex w-full max-w-7xl flex-col px-6 pb-28 pt-16 md:pt-20 lg:px-8"
         style={{ gap: SECTION_GAP }}

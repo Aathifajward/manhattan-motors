@@ -12,6 +12,7 @@ import {
   coverStart,
 } from "./scroll/stacked";
 import { useIsMobile } from "./scroll/useIsMobile";
+import { onViewportChange } from "./scroll/viewport";
 
 /** Only the fields this slide actually renders. */
 type SlideVehicle = {
@@ -200,11 +201,13 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
 
       read();
       window.addEventListener("scroll", onScrollOrResize, { passive: true });
-      window.addEventListener("resize", onScrollOrResize, { passive: true });
+      // `read()` divides by the stage's height, which is `dvh` — so the bands
+      // move whenever the address bar does, with no scroll to announce it.
+      const offViewport = onViewportChange(onScrollOrResize);
       return () => {
         if (frame) cancelAnimationFrame(frame);
+        offViewport();
         window.removeEventListener("scroll", onScrollOrResize);
-        window.removeEventListener("resize", onScrollOrResize);
       };
     }
 
@@ -260,7 +263,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
       const outro = clamp01((progress - COVER_START) / (1 - COVER_START));
       if (driftRef.current) {
         driftRef.current.style.transform =
-          `translate3d(0, ${(-COVER_RISE_VH * outro).toFixed(3)}vh, 0)`;
+          `translate3d(0, ${(-COVER_RISE_VH * outro).toFixed(3)}dvh, 0)`;
       }
       if (coverDimRef.current) {
         coverDimRef.current.style.opacity = (COVER_DIM * outro).toFixed(4);
@@ -288,7 +291,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
           // Still ahead: parked below, nothing shown.
           if (textEl) {
             textEl.style.opacity = "0";
-            textEl.style.transform = "translateY(60vh)";
+            textEl.style.transform = "translateY(60dvh)";
             textEl.style.pointerEvents = "none";
           }
           if (frameEl) frameEl.style.clipPath = "inset(100% 0 0 0)";
@@ -297,7 +300,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
           const tProg = (p - (i - SWITCH)) / SWITCH;
           if (textEl) {
             textEl.style.opacity = String(tProg);
-            textEl.style.transform = `translateY(${60 * (1 - tProg)}vh)`;
+            textEl.style.transform = `translateY(${60 * (1 - tProg)}dvh)`;
             textEl.style.pointerEvents = tProg === 1 ? "auto" : "none";
           }
           if (frameEl) {
@@ -329,7 +332,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
             const tProg = (p - (i + (1 - SWITCH))) / SWITCH;
             if (textEl) {
               textEl.style.opacity = String(1 - tProg);
-              textEl.style.transform = `translateY(${-60 * tProg}vh)`;
+              textEl.style.transform = `translateY(${-60 * tProg}dvh)`;
               textEl.style.pointerEvents = "none";
             }
             if (frameEl) {
@@ -349,7 +352,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
           } else {
             if (textEl) {
               textEl.style.opacity = "0";
-              textEl.style.transform = "translateY(-60vh)";
+              textEl.style.transform = "translateY(-60dvh)";
               textEl.style.pointerEvents = "none";
             }
             if (frameEl) {
@@ -428,7 +431,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
                   )}
                 </div>
               </div>
-              <div className="w-full md:w-[55%] h-[50svh] md:h-[600px] bg-[var(--mm-navy)]">
+              <div className="w-full md:w-[55%] h-[50dvh] md:h-[600px] bg-[var(--mm-navy)]">
                 {v.images?.[0]?.url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={v.images[0].url} alt={v.model} className="w-full h-full object-cover" />
@@ -457,7 +460,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
         className="relative w-full"
         style={{ height: `${cardVh(vehicles.length)}vh`, zIndex: 10 }}
       >
-        <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[var(--mm-navy)]">
+        <div ref={stickyRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[var(--mm-navy)]">
           {/* Reversed, so the picture takes the top half and the copy the
               bottom — the same arrangement the stage has at this width. */}
           <div className="absolute inset-0 flex flex-col-reverse">
@@ -466,7 +469,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
                 buttons and they wrap at this width. The header is nowhere near
                 it here, so it takes ordinary padding rather than the stage's
                 header gap. */}
-            <div className="relative h-[55svh] w-full bg-[var(--mm-navy)] z-20">
+            <div className="relative h-[55dvh] w-full bg-[var(--mm-navy)] z-20">
               {vehicles.map((v, i) => (
                 <div
                   key={v.id}
@@ -482,7 +485,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
             </div>
 
             {/* Picture — the rest of the stage, edge to edge. No zoom, no clip. */}
-            <div className="relative h-[45svh] w-full bg-[var(--mm-navy)] z-10">
+            <div className="relative h-[45dvh] w-full bg-[var(--mm-navy)] z-10">
               {vehicles.map((v, i) => (
                 <div
                   key={v.id}
@@ -513,21 +516,21 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
       className="relative w-full"
       style={{ height: `${cardVh(vehicles.length)}vh`, zIndex: 10 }}
     >
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden bg-[var(--mm-navy)]">
+      <div ref={stickyRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[var(--mm-navy)]">
         <div
           ref={driftRef}
           className="absolute inset-0 flex flex-col-reverse md:flex-row will-change-transform"
         >
 
         {/* Left Column: Text */}
-        <div className="w-full h-[50svh] md:h-[100svh] md:w-1/2 flex flex-col justify-center relative bg-[var(--mm-navy)] z-20">
+        <div className="w-full h-[50dvh] md:h-[100dvh] md:w-1/2 flex flex-col justify-center relative bg-[var(--mm-navy)] z-20">
           {vehicles.map((v, i) => (
             <div
               key={v.id}
               ref={(el) => { textRefs.current[i] = el; }}
               /* pt keeps the label clear of the fixed header. */
               className="absolute inset-0 flex flex-col justify-center items-start px-6 pt-[120px] pb-10 md:pl-[180px] md:pr-12 will-change-transform bg-[var(--mm-navy)] md:bg-transparent"
-              style={{ opacity: i === 0 ? 1 : 0, transform: i === 0 ? "translateY(0)" : "translateY(60vh)", pointerEvents: i === 0 ? "auto" : "none" }}
+              style={{ opacity: i === 0 ? 1 : 0, transform: i === 0 ? "translateY(0)" : "translateY(60dvh)", pointerEvents: i === 0 ? "auto" : "none" }}
             >
               <SlideCopy vehicle={v} index={i} total={vehicles.length} />
             </div>
@@ -535,7 +538,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
         </div>
 
         {/* Right Column: Images — edge to edge */}
-        <div className="w-full h-[50svh] md:h-[100svh] md:w-1/2 relative bg-[var(--mm-navy)] z-10">
+        <div className="w-full h-[50dvh] md:h-[100dvh] md:w-1/2 relative bg-[var(--mm-navy)] z-10">
           {vehicles.map((v, i) => (
             <div
               key={v.id}

@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+/* ── Viewport units ────────────────────────────────────────────────────────
+   Two units, and which one a value takes is decided by what it is for.
+
+   Anything that fills the screen — a sticky stage, a full-bleed section, a
+   layer or an offset measured against one — is in `dvh`. The scroll film's
+   stages were `svh`, the *small* viewport, which is the viewport with the
+   browser chrome showing: once a phone retracted its address bar the visible
+   area grew, the stages did not, and every section ended on a band of empty
+   background exactly the height of the address bar. `dvh` tracks the chrome
+   as it moves, so a stage is always exactly what is on screen.
+
+   Scroll *length* stays in `vh` — the tall containers the stages pin inside,
+   and the negative margins that chain them together. Those decide how far the
+   page is, and `dvh` would re-write the document's height mid-gesture every
+   time the address bar moved, which jumps the scroll position under the
+   reader's thumb. A stable unit is the point.
+
+   The JS loops read their heights back from the DOM rather than assuming
+   either, and re-measure on every viewport change — see
+   components/scroll/viewport.ts.                                           */
+
 :root {
   /* Manhattan Motors signature palette — v3 Navy/Electric Blue */
   --mm-navy: #0A0E14;

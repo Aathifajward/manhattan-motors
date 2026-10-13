@@ -2,13 +2,17 @@
 
 import { useEffect } from "react";
 
+import { onViewportChange } from "./viewport";
+
 /**
  * Shared geometry for the stacked cards (VehicleSlides -> DriveEnd ->
  * Location). Each card is a tall scroll container with a sticky stage; the next
  * card slides up over it while it stays pinned, then the pin releases exactly
  * as the cover completes — so there is never an idle frame between them.
  *
- * All values are vh.
+ * All the values below are vh — they are scroll *length*, and scroll length
+ * has to stay still. The stages those cards pin are `dvh` instead, so they
+ * always fill exactly what the phone is showing; see the note in globals.css.
  *
  *   |<- STAGE ->|<- SLIDE ->|<- HOLD ->|<- COVER ->|
  *                ^ rises over          ^ the next card rises over this one
@@ -85,7 +89,8 @@ export const easeOut = easeOutCubic;
 
 /**
  * One rAF loop per card, refs only, no layout reads inside the frame: the
- * section's position and scroll length are cached on mount and on resize.
+ * section's position and scroll length are cached on mount and re-taken on
+ * every viewport change, which on a phone includes the address bar moving.
  *
  * `settled` is the frame shown under prefers-reduced-motion — normally the
  * point where the card has arrived but is not yet being covered.
@@ -143,9 +148,12 @@ export function useStackProgress(
       kick();
     };
     window.addEventListener("scroll", kick, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
+    // The stage is `dvh`, so a phone's address bar retracting changes both how
+    // tall it is and how much scroll is left — and that does not always arrive
+    // as a window resize. See components/scroll/viewport.ts.
+    const offViewport = onViewportChange(onResize);
 
-    // A window resize is not the only thing that moves a card. The stack is
+    // Nor is a viewport change the only thing that moves a card. The stack is
     // built from -200vh margins, so every card's position depends on the ones
     // before it; a late font, a loaded image or any reflow shifts them all and
     // would otherwise leave the cached offsets stale and the cards out of sync.
@@ -158,8 +166,8 @@ export function useStackProgress(
       disposed = true;
       if (rafId) cancelAnimationFrame(rafId);
       ro?.disconnect();
+      offViewport();
       window.removeEventListener("scroll", kick);
-      window.removeEventListener("resize", onResize);
     };
     // `apply` is a stable closure over refs in every call site.
     // eslint-disable-next-line react-hooks/exhaustive-deps

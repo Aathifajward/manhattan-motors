@@ -271,7 +271,7 @@ export default function VehiclesClient({ initialVehicles, makes, locale }: Vehic
   );
 
   return (
-    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100vh" }}>
+    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100dvh" }}>
       <div className="mx-auto max-w-7xl px-6 pb-28 pt-20 md:pt-28 lg:px-8">
 
         {/* ═══════════════════════════════════════════

@@ -83,7 +83,7 @@ export default function LocationSection() {
       className="relative w-full"
       style={{ height: `${LAST_CARD_VH}vh`, marginTop: `${CARD_MARGIN_VH}vh`, zIndex: 30 }}
     >
-      <div ref={stageRef} className="sticky top-0 h-[100svh] w-full overflow-hidden">
+      <div ref={stageRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden">
         <div
           ref={slideRef}
           className="absolute inset-0 h-full w-full overflow-hidden will-change-transform"
@@ -221,7 +221,7 @@ export default function LocationSection() {
               src={mapsEmbedUrlFor(locale)}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="block h-[320px] w-full border-0 max-md:h-[22vh] md:h-[420px] lg:h-[500px]"
+              className="block h-[320px] w-full border-0 max-md:h-[22dvh] md:h-[420px] lg:h-[500px]"
               style={{ filter: "invert(90%) hue-rotate(180deg)" }}
             />
           </div>

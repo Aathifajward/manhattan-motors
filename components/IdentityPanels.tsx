@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { easeOutQuad } from "./scroll/stacked";
+import { onViewportChange } from "./scroll/viewport";
 
 type Panel = {
   key: "CAR" | "SUV" | "VAN" | "TRUCK";
@@ -207,13 +208,15 @@ export default function IdentityPanels() {
     };
 
     window.addEventListener("scroll", kick, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
+    // The stage's height is cached in `measure()`, and it is `dvh` — so it
+    // moves whenever the browser chrome does.
+    const offViewport = onViewportChange(onResize);
 
     return () => {
       disposed = true;
       if (rafId) cancelAnimationFrame(rafId);
+      offViewport();
       window.removeEventListener("scroll", kick);
-      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -228,7 +231,7 @@ export default function IdentityPanels() {
     >
       <div
         ref={stageRef}
-        className="sticky top-0 h-[100svh] w-full overflow-hidden pointer-events-none"
+        className="sticky top-0 h-[100dvh] w-full overflow-hidden pointer-events-none"
       >
         <div
           ref={slideRef}
@@ -271,7 +274,7 @@ export default function IdentityPanels() {
                 key={panel.key}
                 ref={(el) => { wordRefs.current[i] = el; }}
                 aria-hidden="true"
-                className="font-heading absolute left-[4vw] top-[58vh] select-none whitespace-nowrap text-[18vw] font-medium uppercase leading-none text-white will-change-transform md:left-[2vw] md:top-[32vh] md:text-[22vw]"
+                className="font-heading absolute left-[4vw] top-[58dvh] select-none whitespace-nowrap text-[18vw] font-medium uppercase leading-none text-white will-change-transform md:left-[2vw] md:top-[32dvh] md:text-[22vw]"
                 style={{ opacity: i === 0 ? WORD_OPACITY : 0 }}
               >
                 {panel.word}
@@ -284,7 +287,7 @@ export default function IdentityPanels() {
             <div
               key={panel.key}
               ref={(el) => { clipRefs.current[i] = el; }}
-              className="absolute left-0 top-0 h-[45vh] w-full overflow-hidden md:left-[40vw] md:h-full md:w-[60vw]"
+              className="absolute left-0 top-0 h-[45dvh] w-full overflow-hidden md:left-[40vw] md:h-full md:w-[60vw]"
               style={{ clipPath: clipFor(i === 0 ? 1 : 0), zIndex: 10 + i }}
             >
               <div
@@ -310,7 +313,7 @@ export default function IdentityPanels() {
             <div
               key={panel.key}
               ref={(el) => { textWrapRefs.current[i] = el; }}
-              className="absolute left-[6vw] top-[50vh] z-30 h-[40vh] w-[88vw] overflow-hidden text-left md:left-[5vw] md:top-[24vh] md:h-[40vh] md:w-[30vw]"
+              className="absolute left-[6vw] top-[50dvh] z-30 h-[40dvh] w-[88vw] overflow-hidden text-left md:left-[5vw] md:top-[24dvh] md:h-[40dvh] md:w-[30vw]"
             >
               <div
                 ref={(el) => { textRefs.current[i] = el; }}
@@ -342,8 +345,8 @@ export default function IdentityPanels() {
           ))}
 
           {/* ── 5. Vertical index, bottom-left of the text panel (desktop) ── */}
-          <div className="pointer-events-none absolute bottom-[8vh] left-[5vw] z-40 hidden md:flex md:items-center md:gap-4">
-            <div className="relative h-[14vh] w-px bg-white/15">
+          <div className="pointer-events-none absolute bottom-[8dvh] left-[5vw] z-40 hidden md:flex md:items-center md:gap-4">
+            <div className="relative h-[14dvh] w-px bg-white/15">
               <div
                 ref={indexLineRef}
                 className="absolute inset-0 origin-top bg-white will-change-transform"

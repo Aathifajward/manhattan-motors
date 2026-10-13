@@ -35,7 +35,7 @@ export default async function AboutPage() {
   const t = await getTranslations("AboutPage");
 
   return (
-    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100vh" }}>
+    <div className="-mt-[88px] w-full pt-[88px]" style={{ background: BLACK, minHeight: "100dvh" }}>
       <div className="mx-auto w-full max-w-5xl px-6 pb-32 pt-20 md:pt-28 lg:px-8">
         <Reveal>
           <h1

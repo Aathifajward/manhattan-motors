@@ -15,6 +15,7 @@ import {
   slideEnd,
 } from "./scroll/stacked";
 import { useIsMobile } from "./scroll/useIsMobile";
+import { onViewportChange } from "./scroll/viewport";
 
 /* ── Timeline ──────────────────────────────────────────────────────────────
    This card is a stacked card at both ends: it rises over VehicleSlides on a
@@ -348,7 +349,7 @@ export default function DriveEnd() {
 
       // Being covered by Location: the whole stage drifts up and darkens.
       if (driftRef.current) {
-        driftRef.current.style.transform = `translate3d(0, ${(-OUTRO_RISE_VH * outro).toFixed(3)}vh, 0)`;
+        driftRef.current.style.transform = `translate3d(0, ${(-OUTRO_RISE_VH * outro).toFixed(3)}dvh, 0)`;
       }
       if (dimRef.current) dimRef.current.style.opacity = (OUTRO_DIM * outro).toFixed(4);
     };
@@ -384,13 +385,16 @@ export default function DriveEnd() {
       kick();
     };
     window.addEventListener("scroll", kick, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
+    // `wh` above is this frame's viewport height, and the road layer is sized
+    // from it — so every way the viewport can change has to re-measure, not
+    // just a window resize.
+    const offViewport = onViewportChange(onResize);
 
     return () => {
       disposed = true;
       if (rafId) cancelAnimationFrame(rafId);
+      offViewport();
       window.removeEventListener("scroll", kick);
-      window.removeEventListener("resize", onResize);
     };
   }, [letterCount, litEnd, SLIDE_END, COVER_START]);
 
@@ -403,7 +407,7 @@ export default function DriveEnd() {
       className="relative w-full"
       style={{ height: `${CARD_VH}vh`, marginTop: `${CARD_MARGIN_VH}vh`, zIndex: 20 }}
     >
-      <div ref={stickyRef} className="sticky top-0 h-[100svh] w-full overflow-hidden">
+      <div ref={stickyRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden">
         <div
           ref={slideRef}
           className="absolute inset-0 h-full w-full overflow-hidden bg-[var(--mm-navy)] will-change-transform"

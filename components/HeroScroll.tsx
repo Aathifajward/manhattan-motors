@@ -411,7 +411,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
     >
       <div
         ref={stickyRef}
-        className="sticky top-0 h-[100svh] w-full overflow-hidden"
+        className="sticky top-0 h-[100dvh] w-full overflow-hidden"
         style={{ backgroundColor: "#0A0E14" }}
       >
         
@@ -499,7 +499,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
              upwards on its way out — which is what carried it up behind the
              header. Only the floor changes below `md`; the 15vh a desktop
              window actually resolves to is untouched. */
-          className="absolute left-0 right-0 flex flex-col items-center pointer-events-none will-change-transform top-[clamp(100px,15vh,200px)] max-md:top-[clamp(calc(var(--mm-nav-safe)+1.5rem),15vh,200px)]"
+          className="absolute left-0 right-0 flex flex-col items-center pointer-events-none will-change-transform top-[clamp(100px,15dvh,200px)] max-md:top-[clamp(calc(var(--mm-nav-safe)+1.5rem),15dvh,200px)]"
           style={{
             paddingLeft: "1.5rem",
             paddingRight: "1.5rem",
@@ -534,7 +534,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
 
         {/* Small loader over the poster; hides once the video is ready */}
         <div
-          className={`absolute inset-x-0 bottom-[14vh] flex flex-col items-center gap-3 pointer-events-none transition-opacity duration-500 ${
+          className={`absolute inset-x-0 bottom-[14dvh] flex flex-col items-center gap-3 pointer-events-none transition-opacity duration-500 ${
             ready ? "opacity-0" : "opacity-100"
           }`}
           style={{ zIndex: 30 }}
@@ -555,7 +555,7 @@ export default function HeroScroll({ title, subtitle, browseVehicles }: HeroScro
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none"
           style={{
-            height: "18vh",
+            height: "18dvh",
             background: "linear-gradient(to bottom, transparent, var(--mm-navy))",
             zIndex: 40,
           }}

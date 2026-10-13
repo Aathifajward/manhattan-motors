@@ -34,7 +34,7 @@ export default async function ServicesPage() {
   ];
 
   return (
-    <div className="flex flex-1 flex-col items-center min-h-screen">
+    <div className="flex flex-1 flex-col items-center min-h-dvh">
       <div className="mx-auto w-full max-w-5xl px-6 py-24">
         <div className="mb-16 text-center">
           <h1 className="text-4xl tracking-tight text-black dark:text-white sm:text-5xl">{t("title")}</h1>

@@ -47,9 +47,9 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col font-body" style={{ backgroundColor: "#0A0E14", color: "#fff" }}>
         {/* Page-level continuous blue glow */}
         <div aria-hidden="true" style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: -1, overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: "5vh", left: "50%", marginLeft: "-450px", width: "900px", height: "600px", background: "radial-gradient(ellipse at center, rgba(45,127,249,0.10) 0%, transparent 65%)" }} />
-          <div style={{ position: "absolute", top: "45vh", left: "30%", width: "700px", height: "500px", background: "radial-gradient(ellipse at center, rgba(45,127,249,0.07) 0%, transparent 60%)" }} />
-          <div style={{ position: "absolute", bottom: "5vh", right: "25%", width: "800px", height: "500px", background: "radial-gradient(ellipse at center, rgba(45,127,249,0.09) 0%, transparent 62%)" }} />
+          <div style={{ position: "absolute", top: "5dvh", left: "50%", marginLeft: "-450px", width: "900px", height: "600px", background: "radial-gradient(ellipse at center, rgba(45,127,249,0.10) 0%, transparent 65%)" }} />
+          <div style={{ position: "absolute", top: "45dvh", left: "30%", width: "700px", height: "500px", background: "radial-gradient(ellipse at center, rgba(45,127,249,0.07) 0%, transparent 60%)" }} />
+          <div style={{ position: "absolute", bottom: "5dvh", right: "25%", width: "800px", height: "500px", background: "radial-gradient(ellipse at center, rgba(45,127,249,0.09) 0%, transparent 62%)" }} />
         </div>
         <NextIntlClientProvider messages={messages}>
           <Navbar />

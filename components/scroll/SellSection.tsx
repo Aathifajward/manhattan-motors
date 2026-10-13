@@ -8,6 +8,7 @@ import { siteConfig, telHref } from "@/lib/siteConfig";
 import { clamp01, easeInOut } from "./stacked";
 import { revealStart, useRevealOnEnter } from "./useRevealOnEnter";
 import { useIsMobile } from "./useIsMobile";
+import { onViewportChange } from "./viewport";
 
 const BLUE = "#2D7FF9";
 const BLUE_GLOW = "rgba(45,127,249,0.35)";
@@ -77,8 +78,9 @@ const MOBILE_ART: Art = {
 
 const vw = (n: number) => `${n.toFixed(2)}vw`;
 
-/** Black left under the cars, which is where the back-to-top arrow sits. */
-const CARS_BOTTOM_VH = 8;
+/** Black left under the cars, which is where the back-to-top arrow sits.
+ *  In dvh, the unit the stage itself is in. */
+const CARS_BOTTOM_DVH = 8;
 
 /** The three measurements the layout needs from whichever file is drawn. */
 function geometryOf(art: Art) {
@@ -86,10 +88,10 @@ function geometryOf(art: Art) {
   return {
     /** Hangs the art's bottom margin below the stage instead of letting it
      *  lift the cars into the copy. */
-    imgBottom: `calc(${CARS_BOTTOM_VH}vh - ${vw(art.belowCars * imgHVw)})`,
+    imgBottom: `calc(${CARS_BOTTOM_DVH}dvh - ${vw(art.belowCars * imgHVw)})`,
     /** The roofline, measured up from the stage's bottom edge. Everything
      *  above it is clear black, and it is exactly the room the copy gets. */
-    carsTop: `calc(${CARS_BOTTOM_VH}vh + ${vw(art.carsHeight * imgHVw)})`,
+    carsTop: `calc(${CARS_BOTTOM_DVH}dvh + ${vw(art.carsHeight * imgHVw)})`,
   };
 }
 
@@ -193,7 +195,9 @@ export default function SellSection() {
       kick();
     };
     window.addEventListener("scroll", kick, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
+    // `measure()` caches the viewport height; a retracting address bar changes
+    // it without always firing a window resize.
+    const offViewport = onViewportChange(onResize);
 
     // The range is measured against the document's own height, so anything
     // that reflows the page below this section moves it. Same reason the
@@ -206,8 +210,8 @@ export default function SellSection() {
       disposed = true;
       if (rafId) cancelAnimationFrame(rafId);
       ro?.disconnect();
+      offViewport();
       window.removeEventListener("scroll", kick);
-      window.removeEventListener("resize", onResize);
     };
   }, []);
 
@@ -222,7 +226,7 @@ export default function SellSection() {
     <section
       ref={sectionRef}
       id="sell"
-      className="relative h-[100svh] w-full overflow-hidden"
+      className="relative h-[100dvh] w-full overflow-hidden"
       style={{ background: BLACK }}
     >
       {/* The cars, low on the stage. Oversized and hung off the bottom so the
@@ -258,7 +262,7 @@ export default function SellSection() {
       {/* The only gradient: a short black fade at the very top */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-[14vh]"
+        className="absolute inset-x-0 top-0 h-[14dvh]"
         style={{ background: "linear-gradient(to bottom, #000 0%, transparent 100%)", zIndex: 1 }}
       />
 
@@ -270,7 +274,7 @@ export default function SellSection() {
       <div
         /* The phone's header sits over the top of this stage, so the copy keeps
            its own clearance under it rather than centring into it. */
-        className="absolute inset-x-0 top-0 z-10 flex flex-col items-center justify-center px-6 py-[1vh] text-center max-md:pt-[var(--mm-nav-safe)]"
+        className="absolute inset-x-0 top-0 z-10 flex flex-col items-center justify-center px-6 py-[1dvh] text-center max-md:pt-[var(--mm-nav-safe)]"
         style={{ height: `calc(100% - ${carsTop})` }}
       >
         <div data-reveal className="flex flex-col items-center" style={revealStart}>
@@ -328,7 +332,7 @@ export default function SellSection() {
       </div>
 
       {/* Back to top — the small arrow at the very bottom */}
-      <div className="absolute inset-x-0 bottom-[2.5vh] z-10 flex justify-center">
+      <div className="absolute inset-x-0 bottom-[2.5dvh] z-10 flex justify-center">
         <button
           type="button"
           onClick={backToTop}
