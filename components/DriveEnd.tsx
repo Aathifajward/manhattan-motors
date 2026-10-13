@@ -56,17 +56,21 @@ const ROAD_SLACK_PX = 32;
 /** The car pass itself — this card's HOLD, and the only part that is not
  *  geometry shared with the rest of the stack.
  *
- *  A phone gets a little over half of it. The cars are drawn at 90vw there
- *  against 42vw on a desktop, so the GTR's wrapper is barely taller than the
- *  one on a 1440px screen while the scroll it had to cross was the same 600vh
- *  — the car crawled, and most of the pass was an empty road between it and
- *  the closing line. 320vh moves it about half again as fast as the desktop
- *  pass does, which is what makes the gap between the car and "starts here."
- *  read as a beat rather than as dead screen. */
+ *  A phone gets well under half of it. The GTR is drawn at 90vw there against
+ *  42vw on a desktop, so its wrapper is nearly as tall as the one on a 1440px
+ *  screen while the scroll it had to cross was the same 600vh — the car
+ *  crawled, and most of the pass was empty road between it and the closing
+ *  line. And with the Velfires gone below `md` (see the markup) the pass has
+ *  one car in it rather than three, so there is correspondingly less to watch:
+ *  260vh runs it at about twice the desktop pace, which is what keeps the gap
+ *  between the car and "starts here." a beat rather than dead screen.
+ *
+ *  This is the number to tune if the phone pass still reads long or now reads
+ *  rushed; nothing else depends on it. */
 const DRIVE_VH = 600;
-const DRIVE_VH_MOBILE = 320;
+const DRIVE_VH_MOBILE = 260;
 const cardVh = (mobile: boolean) =>
-  STAGE + SLIDE + (mobile ? DRIVE_VH_MOBILE : DRIVE_VH) + COVER; // 900 / 620
+  STAGE + SLIDE + (mobile ? DRIVE_VH_MOBILE : DRIVE_VH) + COVER; // 900 / 560
 
 /* Everything below is measured against `drive` — this card's own progress
    renormalised so 0 lands on SLIDE_END and 1.0 on COVER_START. */
@@ -458,37 +462,54 @@ export default function DriveEnd() {
         {/* Cars — in front of that headline */}
         <div className="absolute inset-0 flex justify-center overflow-hidden pointer-events-none z-20">
 
-          {/* Left Velfire */}
-          <div
-            ref={velfireLeftRef}
-            className="absolute left-0 top-0 w-[90vw] md:w-[45vw] aspect-[1/2] will-change-transform"
-            style={{ transform: "translate3d(-50%, 0, 0)" }}
-          >
-            <Image
-              src="/images/velfire-trimmed.png"
-              alt=""
-              fill
-              sizes="(max-width: 768px) 90vw, 45vw"
-              className="object-contain"
-              loading="eager"
-            />
-          </div>
+          {/* The two Velfires, on a wide screen only.
 
-          {/* Right Velfire */}
-          <div
-            ref={velfireRightRef}
-            className="absolute right-0 top-0 w-[90vw] md:w-[45vw] aspect-[1/2] will-change-transform"
-            style={{ transform: "translate3d(50%, 0, 0)" }}
-          >
-            <Image
-              src="/images/velfire-trimmed.png"
-              alt=""
-              fill
-              sizes="(max-width: 768px) 90vw, 45vw"
-              className="object-contain"
-              loading="eager"
-            />
-          </div>
+              They are drawn at 45vw there and sit beside the GTR as a column
+              of three. On a phone they are 90vw and translated half off the
+              stage, so what is actually on screen is two dark slabs pinned to
+              the left and right edges with the car between them — the same
+              "row of overlapping shapes" the Sell band had, and read as a
+              stray black van at the edge of the frame rather than as a
+              vehicle. A phone is too narrow to carry three cars abreast, so it
+              carries one.
+
+              Not rendered rather than hidden: velfire-trimmed.png is 2.3MB and
+              is marked eager, so `display: none` would still have spent 4.6MB
+              of a phone's data on two pictures nobody sees. `measure()` and
+              `apply()` already guard both refs for null. */}
+          {isMobile === false && (
+            <>
+              <div
+                ref={velfireLeftRef}
+                className="absolute left-0 top-0 w-[90vw] md:w-[45vw] aspect-[1/2] will-change-transform"
+                style={{ transform: "translate3d(-50%, 0, 0)" }}
+              >
+                <Image
+                  src="/images/velfire-trimmed.png"
+                  alt=""
+                  fill
+                  sizes="45vw"
+                  className="object-contain"
+                  loading="eager"
+                />
+              </div>
+
+              <div
+                ref={velfireRightRef}
+                className="absolute right-0 top-0 w-[90vw] md:w-[45vw] aspect-[1/2] will-change-transform"
+                style={{ transform: "translate3d(50%, 0, 0)" }}
+              >
+                <Image
+                  src="/images/velfire-trimmed.png"
+                  alt=""
+                  fill
+                  sizes="45vw"
+                  className="object-contain"
+                  loading="eager"
+                />
+              </div>
+            </>
+          )}
 
           {/* GTR, carrying the closing line along under its rear */}
           <div
