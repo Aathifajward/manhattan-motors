@@ -116,6 +116,29 @@ export default function LocationSection() {
         }}
       />
 
+      {/* Phone only: a scrim over the whole photo, because at this width the
+          copy runs the full width of the frame and crosses the castle itself.
+
+          Measured off the photo as it is actually cropped at 390x660: the
+          backdrop under the text column reaches L=0.99 on the lit walls, which
+          puts white text at 1.01:1 — not dim, invisible. A 0.82-to-0.66 ramp
+          holds it above 4.5:1 for all but the last percentile of pixels while
+          leaving roughly a fifth of the photograph showing, so the castle still
+          reads behind the copy rather than being painted out.
+
+          Desktop is deliberately left alone: there the copy sits in the left
+          column, which falls on the dark trees and sky (p95 L=0.21, ~5:1 with
+          the existing side scrim), and the lit walls are over where the map
+          goes. */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 md:hidden"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.78) 45%, rgba(0,0,0,0.66) 100%)",
+        }}
+      />
+
       {/* The only other overlay: the bottom 25% ends the section in black.
           Static, never animated. */}
       <div

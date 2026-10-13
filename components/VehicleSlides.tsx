@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
@@ -12,7 +12,6 @@ import {
   coverStart,
 } from "./scroll/stacked";
 import { useIsMobile } from "./scroll/useIsMobile";
-import { onViewportChange } from "./scroll/viewport";
 
 /** Only the fields this slide actually renders. */
 type SlideVehicle = {
@@ -156,60 +155,19 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
   /** Darkens this card under DriveEnd. */
   const coverDimRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * A phone gets no scrubbed transition at all — see the branch below — so the
-   * only thing its stage has to know is which vehicle is current.
-   */
+  /** The phone does not pin this section at all — see the branch below. */
   const isMobile = useIsMobile();
-  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     const container = containerRef.current;
     const sticky = stickyRef.current;
     if (!container || !sticky || vehicles.length === 0) return;
-    // Neither branch is on screen yet while the breakpoint is unknown.
-    if (isMobile === null) return;
+    // The phone's list is plain scrolling markup with nothing to drive, and
+    // while the breakpoint is unknown neither branch is on screen yet.
+    if (isMobile !== false) return;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
-
-    /**
-     * The phone's whole animation. The slides own the same scroll they always
-     * did, but instead of a frame loop scrubbing a clip, a zoom and a dim
-     * through it, the band the scroll is currently in picks a slide and the
-     * markup cross-fades to it on its own. Nothing is written per frame, so
-     * there is nothing left to go out of step with the scroll.
-     */
-    if (isMobile) {
-      const N = vehicles.length;
-      const COVER_START = coverStartOf(N);
-
-      let frame = 0;
-      const read = () => {
-        frame = 0;
-        const rect = container.getBoundingClientRect();
-        const scrollable = rect.height - sticky.offsetHeight;
-        const progress = scrollable > 0 ? clamp01(-rect.top / scrollable) : 0;
-        const i = Math.min(N - 1, Math.floor(clamp01(progress / COVER_START) * N));
-        // setState bails out on an unchanged value, so this is a no-op for
-        // every scroll event that does not actually cross a band.
-        setCurrent(i);
-      };
-      const onScrollOrResize = () => {
-        if (!frame) frame = requestAnimationFrame(read);
-      };
-
-      read();
-      window.addEventListener("scroll", onScrollOrResize, { passive: true });
-      // `read()` divides by the stage's height, which is `dvh` — so the bands
-      // move whenever the address bar does, with no scroll to announce it.
-      const offViewport = onViewportChange(onScrollOrResize);
-      return () => {
-        if (frame) cancelAnimationFrame(frame);
-        offViewport();
-        window.removeEventListener("scroll", onScrollOrResize);
-      };
-    }
 
     let disposed = false;
     let rafId = 0;
@@ -445,67 +403,48 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
   }
 
   /* ── The phone ────────────────────────────────────────────────────────────
-     Same stage, same scroll budget, none of the motion. A scrubbed cross-over
-     on a phone is a transform, a clip-path and an opacity rewritten on every
-     one of a touch scroll's frames, against a scroll position the browser is
-     already animating itself — which is what made the change between vehicles
-     read as a glitch rather than as a transition. So there is no cross-over
-     here: the band the scroll is in picks a vehicle and the markup fades to
-     it, and the only thing that moves is an opacity CSS owns. The desktop
-     stage below is untouched.                                              */
+     Not a stage at all: a plain list. Each vehicle is its own viewport-tall
+     entry in normal document flow, so one scrolls up and off while the next
+     comes up behind it on nothing but the browser's own scrolling — no pin, no
+     progress, no opacity, no JS. A hairline rule on every entry after the
+     first marks where one ends and the next begins as it passes, the way a
+     list of entries is divided rather than the way a film cuts.
+
+     `marginBottom` gives back what DriveEnd's -200vh will eat. With no pinned
+     stage here there is no cover pass for it to rise through, so without this
+     it would swallow the last two entries — the same reason the
+     reduced-motion branch above carries it. */
   if (isMobile) {
     return (
       <section
-        ref={containerRef}
-        className="relative w-full"
-        style={{ height: `${cardVh(vehicles.length)}vh`, zIndex: 10 }}
+        className="relative w-full bg-[var(--mm-navy)]"
+        style={{ zIndex: 10, marginBottom: `${-CARD_MARGIN_VH}vh` }}
       >
-        <div ref={stickyRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden bg-[var(--mm-navy)]">
-          {/* Reversed, so the picture takes the top half and the copy the
-              bottom — the same arrangement the stage has at this width. */}
-          <div className="absolute inset-0 flex flex-col-reverse">
-
-            {/* Copy — the larger half, because the last slide carries two
-                buttons and they wrap at this width. The header is nowhere near
-                it here, so it takes ordinary padding rather than the stage's
-                header gap. */}
-            <div className="relative h-[55dvh] w-full bg-[var(--mm-navy)] z-20">
-              {vehicles.map((v, i) => (
-                <div
-                  key={v.id}
-                  className="absolute inset-0 flex flex-col justify-center items-start px-6 py-8 bg-[var(--mm-navy)] transition-opacity duration-300 ease-out"
-                  style={{
-                    opacity: i === current ? 1 : 0,
-                    pointerEvents: i === current ? "auto" : "none",
-                  }}
-                >
-                  <SlideCopy vehicle={v} index={i} total={vehicles.length} />
-                </div>
-              ))}
+        {vehicles.map((v, i) => (
+          <article
+            key={v.id}
+            className={`flex min-h-[100dvh] w-full flex-col ${
+              i > 0 ? "border-t border-white/15" : ""
+            }`}
+          >
+            {/* Picture on top, copy under it — the arrangement the stage has
+                at this width. */}
+            <div className="relative h-[45dvh] w-full shrink-0 overflow-hidden bg-[var(--mm-navy)]">
+              {v.images?.[0]?.url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={v.images[0].url}
+                  alt={v.model}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              )}
             </div>
 
-            {/* Picture — the rest of the stage, edge to edge. No zoom, no clip. */}
-            <div className="relative h-[45dvh] w-full bg-[var(--mm-navy)] z-10">
-              {vehicles.map((v, i) => (
-                <div
-                  key={v.id}
-                  className="absolute inset-0 overflow-hidden bg-[var(--mm-navy)] transition-opacity duration-300 ease-out"
-                  style={{ opacity: i === current ? 1 : 0 }}
-                >
-                  {v.images?.[0]?.url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={v.images[0].url}
-                      alt={v.model}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                  )}
-                </div>
-              ))}
+            <div className="flex flex-1 flex-col items-start justify-center px-6 py-10">
+              <SlideCopy vehicle={v} index={i} total={vehicles.length} />
             </div>
-
-          </div>
-        </div>
+          </article>
+        ))}
       </section>
     );
   }

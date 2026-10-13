@@ -61,16 +61,21 @@ const ROAD_SLACK_PX = 32;
  *  screen while the scroll it had to cross was the same 600vh — the car
  *  crawled, and most of the pass was empty road between it and the closing
  *  line. And with the Velfires gone below `md` (see the markup) the pass has
- *  one car in it rather than three, so there is correspondingly less to watch:
- *  260vh runs it at about twice the desktop pace, which is what keeps the gap
- *  between the car and "starts here." a beat rather than dead screen.
+ *  one car in it rather than three, so there is correspondingly less to watch.
  *
- *  This is the number to tune if the phone pass still reads long or now reads
- *  rushed; nothing else depends on it. */
+ *  600 -> 320 -> 260 -> 220. At 220 the car crosses the stage at very close to
+ *  scroll speed on a phone — a touch under a pixel of travel per pixel of
+ *  scroll, against 0.39 on a desktop — so the pass now reads as the car moving
+ *  with your thumb rather than as a slow cinematic push. That is about as far
+ *  as this can go before the letter-by-letter reveal, which owns the last
+ *  third of the pass, gets too little scroll to land on.
+ *
+ *  This is the number to tune if it still reads long, or now reads rushed;
+ *  nothing else depends on it. */
 const DRIVE_VH = 600;
-const DRIVE_VH_MOBILE = 260;
+const DRIVE_VH_MOBILE = 220;
 const cardVh = (mobile: boolean) =>
-  STAGE + SLIDE + (mobile ? DRIVE_VH_MOBILE : DRIVE_VH) + COVER; // 900 / 560
+  STAGE + SLIDE + (mobile ? DRIVE_VH_MOBILE : DRIVE_VH) + COVER; // 900 / 520
 
 /* Everything below is measured against `drive` — this card's own progress
    renormalised so 0 lands on SLIDE_END and 1.0 on COVER_START. */
