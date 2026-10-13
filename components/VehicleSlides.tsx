@@ -158,6 +158,21 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
   /** The phone does not pin this section at all — see the branch below. */
   const isMobile = useIsMobile();
 
+  /**
+   * What the branches that do *not* pin a stage have to give back to the page.
+   *
+   * DriveEnd is pulled up by -200vh so its slide can start before the card
+   * before it unpins. With no pinned stage here there is no cover pass for it
+   * to rise through, so that pull-up would simply swallow the last two entries
+   * unless this hands the same 200vh back.
+   *
+   * On a phone DriveEnd drops both the slide and the pull-up — there is
+   * nothing behind it to rise over — so there is nothing to give back either,
+   * and handing it 200vh anyway is a two-viewport hole. The two numbers are a
+   * pair: see the note on SLIDE_VH in components/DriveEnd.tsx.
+   */
+  const unpinnedMarginBottomVh = isMobile === true ? 0 : -CARD_MARGIN_VH;
+
   useEffect(() => {
     const container = containerRef.current;
     const sticky = stickyRef.current;
@@ -359,9 +374,7 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
     return (
       <section
         className="w-full bg-[var(--mm-navy)] py-20 px-6"
-        /* No stage to cover, so DriveEnd's -200vh pull-up has nothing to eat
-           into here — give it back, or it would swallow the last two slides. */
-        style={{ marginBottom: `${-CARD_MARGIN_VH}vh` }}
+        style={{ marginBottom: `${unpinnedMarginBottomVh}vh` }}
       >
         <div className="max-w-7xl mx-auto flex flex-col gap-20">
           {vehicles.map((v, i) => (
@@ -410,15 +423,14 @@ export default function VehicleSlides({ vehicles }: { vehicles: SlideVehicle[] }
      first marks where one ends and the next begins as it passes, the way a
      list of entries is divided rather than the way a film cuts.
 
-     `marginBottom` gives back what DriveEnd's -200vh will eat. With no pinned
-     stage here there is no cover pass for it to rise through, so without this
-     it would swallow the last two entries — the same reason the
-     reduced-motion branch above carries it. */
+     The section ends where its last entry ends: DriveEnd drops its pull-up at
+     this breakpoint, so there is nothing to give back and nothing reserved.
+     See `unpinnedMarginBottomVh` above. */
   if (isMobile) {
     return (
       <section
         className="relative w-full bg-[var(--mm-navy)]"
-        style={{ zIndex: 10, marginBottom: `${-CARD_MARGIN_VH}vh` }}
+        style={{ zIndex: 10, marginBottom: `${unpinnedMarginBottomVh}vh` }}
       >
         {vehicles.map((v, i) => (
           <article

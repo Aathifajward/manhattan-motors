@@ -10,9 +10,7 @@ import {
   OUTRO_RISE_VH,
   SLIDE,
   STAGE,
-  coverStart,
   easeOutCubic,
-  slideEnd,
 } from "./scroll/stacked";
 import { useIsMobile } from "./scroll/useIsMobile";
 import { onViewportChange } from "./scroll/viewport";
@@ -63,19 +61,29 @@ const ROAD_SLACK_PX = 32;
  *  line. And with the Velfires gone below `md` (see the markup) the pass has
  *  one car in it rather than three, so there is correspondingly less to watch.
  *
- *  600 -> 320 -> 260 -> 220. At 220 the car crosses the stage at very close to
- *  scroll speed on a phone — a touch under a pixel of travel per pixel of
- *  scroll, against 0.39 on a desktop — so the pass now reads as the car moving
- *  with your thumb rather than as a slow cinematic push. That is about as far
- *  as this can go before the letter-by-letter reveal, which owns the last
- *  third of the pass, gets too little scroll to land on.
+ *  600 -> 320 -> 260 -> 220 -> 150, which with the slide dropped (see below)
+ *  puts the whole card at 350vh against the desktop's 900 — a stage, the pass,
+ *  and the cover, with nothing else in it.
  *
- *  This is the number to tune if it still reads long, or now reads rushed;
- *  nothing else depends on it. */
+ *  Everything inside the pass is expressed as a fraction of `drive`, which is
+ *  renormalised to whatever this number is, so the car, the road's parallax
+ *  and the letter-by-letter reveal all still start and finish on the same
+ *  frames of the pass that they do on a desktop — they simply get there in
+ *  less scroll. What does change is the rate, and the honest limit on that is
+ *  how far the car has to travel: see GTR_W_MOBILE. */
 const DRIVE_VH = 600;
-const DRIVE_VH_MOBILE = 220;
-const cardVh = (mobile: boolean) =>
-  STAGE + SLIDE + (mobile ? DRIVE_VH_MOBILE : DRIVE_VH) + COVER; // 900 / 520
+const DRIVE_VH_MOBILE = 150;
+
+/** How wide the GTR is drawn on a phone.
+ *
+ *  It was 90vw, which at 390px made the wrapper 702px tall inside a ~630px
+ *  viewport: the whole car never fit on screen at once, and it had to cross
+ *  viewport + wrapper = 1332px for the pass to complete. That distance is what
+ *  made the pass expensive in scroll — at 150vh it would be moving 1.4px for
+ *  every pixel of thumb. At 75vw the car is 585px tall, so it fits on screen
+ *  whole for the first time and the crossing is 1215px: close enough to the
+ *  945px of scroll the pass now owns that it reads as travelling with you. */
+const GTR_W_MOBILE = "w-[75vw]";
 
 /* Everything below is measured against `drive` — this card's own progress
    renormalised so 0 lands on SLIDE_END and 1.0 on COVER_START. */
@@ -180,14 +188,28 @@ const REAR_EDGE = 0.9935;
 export default function DriveEnd() {
   const t = useTranslations("DriveEnd");
 
-  // How long the card is, and with it where the slide ends and the cover
-  // begins. `null` reads as desktop, so the first paint matches the server's.
+  // `null` reads as desktop, so the first paint matches the server's.
   const isMobile = useIsMobile();
-  const CARD_VH = cardVh(isMobile === true);
-  /** Where this card has finished rising over VehicleSlides. */
-  const SLIDE_END = slideEnd(CARD_VH);
+  const mobile = isMobile === true;
+
+  /* On a phone the card before this one is a plain scrolling list, not a
+     pinned stage — so there is nothing left behind this card for it to rise
+     *over*. The slide spent a full viewport of scroll drawing a navy panel up
+     an empty navy screen, which is exactly the black stretch that sat between
+     the last vehicle and the road. So the phone has no slide: the card is
+     simply there when you reach it. The -200vh pull-up that paid for the slide
+     goes with it, and VehicleSlides drops the matching +200vh it was giving
+     back — the two are a pair, change one and you must change the other. */
+  const SLIDE_VH = mobile ? 0 : SLIDE;
+  const DRIVE = mobile ? DRIVE_VH_MOBILE : DRIVE_VH;
+  const CARD_VH = STAGE + SLIDE_VH + DRIVE + COVER; // 900 desktop / 350 phone
+  const CARD_MARGIN = mobile ? 0 : CARD_MARGIN_VH;
+
+  const SCROLLABLE_VH = CARD_VH - STAGE;
+  /** Where this card has finished rising; 0 on a phone, which has no rise. */
+  const SLIDE_END = SLIDE_VH / SCROLLABLE_VH;
   /** Where Location begins to cover this card. */
-  const COVER_START = coverStart(CARD_VH);
+  const COVER_START = (SCROLLABLE_VH - COVER) / SCROLLABLE_VH;
 
   const containerRef = useRef<HTMLElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -264,9 +286,10 @@ export default function DriveEnd() {
       const drive = span(progress, SLIDE_END, COVER_START);
       const outro = span(progress, COVER_START, 1);
 
-      // Rises over VehicleSlides, on translate alone.
+      // Rises over VehicleSlides, on translate alone. With no slide to run —
+      // a phone — it is simply in place from the first frame.
       if (slideRef.current) {
-        const rise = 100 * (1 - clamp01(progress / SLIDE_END));
+        const rise = SLIDE_END > 0 ? 100 * (1 - clamp01(progress / SLIDE_END)) : 0;
         slideRef.current.style.transform = `translate3d(0, ${rise.toFixed(3)}%, 0)`;
       }
 
@@ -414,13 +437,17 @@ export default function DriveEnd() {
          it, so VehicleSlides stays visible underneath until this card covers
          it. */
       className="relative w-full"
-      style={{ height: `${CARD_VH}vh`, marginTop: `${CARD_MARGIN_VH}vh`, zIndex: 20 }}
+      style={{ height: `${CARD_VH}vh`, marginTop: `${CARD_MARGIN}vh`, zIndex: 20 }}
     >
       <div ref={stickyRef} className="sticky top-0 h-[100dvh] w-full overflow-hidden">
         <div
           ref={slideRef}
           className="absolute inset-0 h-full w-full overflow-hidden bg-[var(--mm-navy)] will-change-transform"
-          style={{ transform: "translate3d(0, 100%, 0)" }}
+          /* Ships where the first frame will put it: parked below on a desktop,
+             already in place on a phone, which has no slide to run. Otherwise
+             the card shows a viewport of bare background until the loop's
+             first tick. */
+          style={{ transform: mobile ? "translate3d(0, 0, 0)" : "translate3d(0, 100%, 0)" }}
         >
         {/* The road: under every other layer, drifting up slower than the
             cars so they read as travelling over it. It lives inside the
@@ -519,7 +546,7 @@ export default function DriveEnd() {
           {/* GTR, carrying the closing line along under its rear */}
           <div
             ref={gtrWrapperRef}
-            className="absolute top-0 w-[90vw] md:w-[42vw] aspect-[1/2] will-change-transform"
+            className={`absolute top-0 ${GTR_W_MOBILE} md:w-[42vw] aspect-[1/2] will-change-transform`}
           >
             {/* The mask: its top edge IS the rear bumper line, in the car's
                 own transform space, so it tracks the car. Everything above
@@ -573,7 +600,7 @@ export default function DriveEnd() {
                 src="/images/gtr-trimmed.png"
                 alt=""
                 fill
-                sizes="(max-width: 768px) 90vw, 42vw"
+                sizes="(max-width: 768px) 75vw, 42vw"
                 className="object-contain"
                 loading="eager"
               />
